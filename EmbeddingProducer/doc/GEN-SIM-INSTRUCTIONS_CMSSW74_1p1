@@ -1,0 +1,109 @@
+cmsDriver.py step1 --filein file:step0.root --fileout file:step1.root --pileup_input "dbs:/MinBias_TuneCUETP8M1_13TeV-pythia8/RunIIWinter15GS-MCRUN2_71_V1-v1/GEN-SIM" --mc --eventcontent RAWSIM --pileup 2015_25ns_Startup_PoissonOOTPU --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring --datatier GEN-SIM-RAW --conditions MCRUN2_74_V9 --step DIGI,L1,DIGI2RAW,HLT:@frozen25ns --magField 38T_PostLS1 --python_filename step1.py --no_exec -n -1 
+
+
+cmsDriver.py step1 --filein file:step0.root --fileout file:step1.root --pileup_input "/store/mc/RunIIWinter15GS/MinBias_TuneCUETP8M1_13TeV-pythia8/GEN-SIM/MCRUN2_71_V1-v1/00000/0028ABCB-74B0-E411-B596-0025904C4F50.root, /store/mc/RunIIWinter15GS/MinBias_TuneCUETP8M1_13TeV-pythia8/GEN-SIM/MCRUN2_71_V1-v1/00000/007FD3D8-74B0-E411-AC02-782BCB67826E.root, /store/mc/RunIIWinter15GS/MinBias_TuneCUETP8M1_13TeV-pythia8/GEN-SIM/MCRUN2_71_V1-v1/00000/00AAE11D-74B0-E411-BCF8-DF448471F33D.root, /store/mc/RunIIWinter15GS/MinBias_TuneCUETP8M1_13TeV-pythia8/GEN-SIM/MCRUN2_71_V1-v1/00000/00BC66B7-6CAF-E411-86B6-20CF3056171F.root, /store/mc/RunIIWinter15GS/MinBias_TuneCUETP8M1_13TeV-pythia8/GEN-SIM/MCRUN2_71_V1-v1/00000/00C59C87-75B0-E411-918F-63BFB108B170.root, /store/mc/RunIIWinter15GS/MinBias_TuneCUETP8M1_13TeV-pythia8/GEN-SIM/MCRUN2_71_V1-v1/00000/02052468-72AF-E411-9F90-002590D9D990.root, /store/mc/RunIIWinter15GS/MinBias_TuneCUETP8M1_13TeV-pythia8/GEN-SIM/MCRUN2_71_V1-v1/00000/022D9B0E-6EAF-E411-90AA-0022195E66A7.root, /store/mc/RunIIWinter15GS/MinBias_TuneCUETP8M1_13TeV-pythia8/GEN-SIM/MCRUN2_71_V1-v1/00000/027B2D2C-74B0-E411-8DF1-001E682F8C7C.root, /store/mc/RunIIWinter15GS/MinBias_TuneCUETP8M1_13TeV-pythia8/GEN-SIM/MCRUN2_71_V1-v1/00000/02B9B6A5-74B0-E411-A287-002590491B22.root, /store/mc/RunIIWinter15GS/MinBias_TuneCUETP8M1_13TeV-pythia8/GEN-SIM/MCRUN2_71_V1-v1/00000/02C48802-6EAF-E411-96A0-001E67248688.root" --mc --eventcontent RAWSIM --pileup 2015_25ns_Startup_PoissonOOTPU --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring --datatier GEN-SIM-RAW --conditions MCRUN2_74_V9 --step DIGI,L1,DIGI2RAW,HLT:@frozen25ns --magField 38T_PostLS1 --python_filename step1.py --no_exec -n -1 
+
+
+
+cmsDriver.py step2 --filein file:step1.root --fileout file:step2.root --mc --eventcontent RECOSIM --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring --datatier GEN-SIM-RECO --conditions MCRUN2_74_V9 --step RAW2DIGI,L1Reco,RECO  --magField 38T_PostLS1 --python_filename step2.py --no_exec -n -1
+
+
+cmsDriver.py TauAnalysis/MCEmbeddingTools/python/PFEmbeddingSource_cff --filein file:step2.root --fileout file:embedded.root --mc --eventcontent RECOSIM  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring,TauAnalysis/MCEmbeddingTools/setDefaults.setDefaults,TauAnalysis/MCEmbeddingTools/embeddingCustomizeAll --datatier GEN-SIM-RECO  --conditions MCRUN2_74_V9 --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns,RAW2DIGI,L1Reco,RECO,EI  --magField 38T_PostLS1 --python_filename step2.py --no_exec -n -1
+
+
+
+cmsDriver.py TauAnalysis/MCEmbeddingTools/python/PFEmbeddingSource_cff \
+  --filein=file:skimmed.root \
+  --fileout=embedded.root --python_filename=embed.py \
+  --conditions MCRUN2_74_V9A --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns,RAW2DIGI,L1Reco,RECO,EI --magField 38T_PostLS1 \
+  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring  \
+  --customise TauAnalysis/MCEmbeddingTools/setDefaults.setDefaults \
+  --customise TauAnalysis/MCEmbeddingTools/embeddingCustomizeAll \
+  --no_exec -n -1
+
+
+
+
+
+
+# STEP1 Standalone Better to use a GEN filter as step 0 before e.g. TauAnalysis/MCEmbeddingTools/test/working_configs/step0_cfg.py) ## TODO add a cmsDriver command for step0
+cmsDriver.py step1 \
+  --filein dbs:/DYJetsToLL_M-50_13TeV-madgraph-pythia8-tauola_v2/Fall13-POSTLS162_V1-v2/GEN-SIM --fileout file:step1.root --python_filename step1.py  \
+  --pileup Flat_20_50 --pileup_input dbs:/MinBias_TuneA2MB_13TeV-pythia8/Fall13-POSTLS162_V1-v1/GEN-SIM \
+  --mc --eventcontent FEVTDEBUGHLT --datatier GEN-SIM-DIGI-RAW-HLTDEBUG \
+  --conditions MCRUN2_74_V9A --step DIGI,L1,DIGI2RAW,HLT:@frozen25ns,RAW2DIGI,L1Reco --magField 38T_PostLS1  \
+  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring \
+  --no_exec -n 1000
+
+## From here assume that the input file is produces by step0.py e.g. TauAnalysis/MCEmbeddingTools/test/working_configs/step0_cfg.py
+# STEP1: mixing with pileup flat
+cmsDriver.py step1 \
+  --filein file:step0.root  --fileout file:step1.root --python_filename step1_cfg_flatPU.py  \
+  --pileup Flat_20_50 --pileup_input dbs:/MinBias_TuneA2MB_13TeV-pythia8/Fall13-POSTLS162_V1-v1/GEN-SIM \
+  --mc --eventcontent FEVTDEBUGHLT --datatier GEN-SIM-DIGI-RAW-HLTDEBUG \
+  --conditions MCRUN2_74_V9A --step DIGI,L1,DIGI2RAW,HLT:@frozen25ns,RAW2DIGI,L1Reco --magField 38T_PostLS1  \
+  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring \
+  --no_exec -n -1
+
+# STEP1: mixing with pileup standard 
+cmsDriver.py step1 \
+  --filein file:step0.root  --fileout file:step1.root --python_filename step1_cfg_25nsPU.py  \
+  --pileup 2015_25ns_Startup_PoissonOOTPU --pileup_input dbs:/MinBias_TuneCUETP8M1_13TeV-pythia8/RunIIWinter15GS-MCRUN2_71_V1-v1/GEN-SIM \ 
+  --mc --eventcontent FEVTDEBUGHLT --datatier GEN-SIM-DIGI-RAW-HLTDEBUG \
+  --conditions MCRUN2_74_V9A --step DIGI,L1,DIGI2RAW,HLT:@frozen25ns,RAW2DIGI,L1Reco --magField 38T_PostLS1  \
+  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring \ 
+  --no_exec -n -1
+
+
+# STEP1: without pileup 
+cmsDriver.py step1 \
+  --filein file:step0.root  --fileout file:step1.root --python_filename step1_cfg_noPU.py  \
+  --mc --eventcontent FEVTDEBUGHLT --datatier GEN-SIM-DIGI-RAW-HLTDEBUG \
+  --conditions MCRUN2_74_V9A --step DIGI,L1,DIGI2RAW,HLT:@frozen25ns,RAW2DIGI,L1Reco --magField 38T_PostLS1  \
+  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring \
+  --no_exec -n -1
+
+
+# STEP 2: reco
+cmsDriver.py step2 \
+  --filein file:step1.root \
+  --fileout file:step2.root --python_filename step2_cfg.py \
+  --mc --eventcontent RECOSIM --datatier GEN-SIM-RECO \
+  --conditions MCRUN2_74_V9A --step RAW2DIGI,L1Reco,RECO --magField 38T_PostLS1 \ 
+  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring \
+  --no_exec -n -1
+
+
+# STEP 3: skimming
+# Allow 1 second per event (note, only expect ~8% of input events to pass this stage)
+cmsDriver.py TauAnalysis/MCEmbeddingTools/python/ZmumuStandaloneSelection_cff \
+  --filein=file:step2.root \
+  --fileout=skimmed.root --python_filename=skim.py \
+  --eventcontent=RECOSIM \
+  --conditions MCRUN2_74_V9A --step NONE --magField 38T_PostLS1 \
+  --customise TauAnalysis/MCEmbeddingTools/setDefaults.setDefaults \
+  --customise TauAnalysis/MCEmbeddingTools/ZmumuStandaloneSelectionAll \
+  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring \
+  --no_exec -n -1
+
+
+
+# STEP 4: embedding
+# Warning: must change inputProcessSIM to "SIM" in TauAnalysis/MCEmbeddingTools/python/setDefaults.py 
+# Warning: must comment out 'drop *_genParticles_*_*' in the input module
+cmsDriver.py TauAnalysis/MCEmbeddingTools/python/PFEmbeddingSource_cff \
+  --filein=file:skimmed.root \
+  --fileout=embedded.root --python_filename=embed.py \
+  --conditions MCRUN2_74_V9A --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns,RAW2DIGI,L1Reco,RECO,EI --magField 38T_PostLS1 \
+  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring  \
+  --customise TauAnalysis/MCEmbeddingTools/setDefaults.setDefaults \
+  --customise TauAnalysis/MCEmbeddingTools/embeddingCustomizeAll \
+  --no_exec -n -1
+
+# STEP 5: miniAOD
+cmsDriver.py miniAODstep  \
+  --filein=file:embedded.root \
+  --fileout=embedded_miniaod.root --python_filename=miniaod.py \
+  --conditions 74X_mcRun2_asymptotic_v2 --step PAT --magField 38T_PostLS1  --datatier MINIAODSIM --runUnscheduled \
+  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring  \
+  --no_exec -n -1
