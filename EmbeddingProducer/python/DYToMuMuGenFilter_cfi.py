@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
 
 
-dYToMuMuFilter = cms.EDFilter("DYToMuMuFilter", 
+dYToMuMuGenFilter = cms.EDFilter("DYToMuMuGenFilter", 
                               inputTag = cms.InputTag("genParticles"))

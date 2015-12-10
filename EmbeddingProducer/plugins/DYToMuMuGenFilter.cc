@@ -1,18 +1,43 @@
-#include "DYToMuMuFilter.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/Candidate/interface/LeafCandidate.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+
+class DYToMuMuGenFilter: public edm::EDFilter {
+public:
+  explicit DYToMuMuGenFilter(const edm::ParameterSet&);
+  ~DYToMuMuGenFilter();
+
+  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 
-DYToMuMuFilter::DYToMuMuFilter(const edm::ParameterSet& iConfig):
+private:
+  virtual void beginJob() override;
+  virtual bool filter(edm::Event&, const edm::EventSetup&)override;
+  virtual void endJob() override;
+  edm::InputTag inputTag_;
+  
+  //virtual bool beginRun(edm::Run&, edm::EventSetup const&)override;
+  // virtual bool endRun(edm::Run&, edm::EventSetup const&)override;
+  //virtual bool beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&)override;
+  //virtual bool endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&)override;
+
+};
+
+
+DYToMuMuGenFilter::DYToMuMuGenFilter(const edm::ParameterSet& iConfig):
     inputTag_(iConfig.getParameter<edm::InputTag>("inputTag"))
 {
 }
 
 
-DYToMuMuFilter::~DYToMuMuFilter() {
+DYToMuMuGenFilter::~DYToMuMuGenFilter() {
  
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
@@ -20,7 +45,7 @@ DYToMuMuFilter::~DYToMuMuFilter() {
 }
 
 
-bool DYToMuMuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+bool DYToMuMuGenFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
 
     edm::Handle<reco::GenParticleCollection> gen_handle;
@@ -66,36 +91,36 @@ bool DYToMuMuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 }
 
 // ------------ method called once each job just before starting event loop  ------------
-void DYToMuMuFilter::beginJob() {
+void DYToMuMuGenFilter::beginJob() {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
-void DYToMuMuFilter::endJob() {
+void DYToMuMuGenFilter::endJob() {
 }
-
+/*
 // ------------ method called when starting to processes a run  ------------
-bool DYToMuMuFilter::beginRun(edm::Run&, edm::EventSetup const&) { 
+bool DYToMuMuGenFilter::beginRun(edm::Run&, edm::EventSetup const&) { 
   return true;
 }
 
 // ------------ method called when ending the processing of a run  ------------
-bool DYToMuMuFilter::endRun(edm::Run&, edm::EventSetup const&) {
+bool DYToMuMuGenFilter::endRun(edm::Run&, edm::EventSetup const&) {
   return true;
 }
 
 // ------------ method called when starting to processes a luminosity block  ------------
 bool 
-DYToMuMuFilter::beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&) {
+DYToMuMuGenFilter::beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&) {
   return true;
 }
 
 // ------------ method called when ending the processing of a luminosity block  ------------
-bool DYToMuMuFilter::endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&) {
+bool DYToMuMuGenFilter::endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&) {
   return true;
 }
-
+*/
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
-void DYToMuMuFilter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+void DYToMuMuGenFilter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -103,4 +128,4 @@ void DYToMuMuFilter::fillDescriptions(edm::ConfigurationDescriptions& descriptio
   descriptions.addDefault(desc);
 }
 //define this as a plug-in
-DEFINE_FWK_MODULE(DYToMuMuFilter);
+DEFINE_FWK_MODULE(DYToMuMuGenFilter);
