@@ -77,8 +77,8 @@ process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector
 #process.schedule.insert(0, process.producemumuSelection)
 process.p *= process.producemumuSelection
 process.RECOSIMoutput.outputCommands.extend(
-    cms.untracked.vstring("keep *_goodMuonsFormumuSelection_*_*"
-                          +"keep *_patMuonstobereplaced_*_*"
+    cms.untracked.vstring("keep *_goodMuonsFormumuSelection_*_*",
+                          "keep *_patMuonstobereplaced_*_*"
       ))
 
 
