@@ -30,6 +30,15 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenFilterInfo.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+
+#include "GeneratorInterface/Pythia8Interface/interface/Py8InterfaceBase.h"
+//#include "GeneratorInterface/Pythia8Interface/interface/P8RndmEngine.h"
+//#include "CLHEP/Random/RandomEngine.h"
+
 //
 // class declaration
 //
@@ -46,12 +55,31 @@ class EmbeddingProducer : public edm::EDProducer {
       virtual void produce(edm::Event&, const edm::EventSetup&) override;
       virtual void endJob() override;
       
+      void reset_event_content();
+      void add_to_event(edm::Event& iEvent);
+      
       //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
       //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
       //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
       //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
       // ----------member data ---------------------------
+      edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
+      edm::InputTag srcHepMC_;
+      bool mixHepMC_;
+
+
+      // the "fake" MC event from the embeded source
+      //HepMC::GenEvent* genEvt_output;
+      std::auto_ptr<HepMC::GenEvent> genEvent_;
+      std::auto_ptr<GenEventInfoProduct> genEventInfo_;
+      
+      
+      // How often does the embedded event pass the kinematic requirments (pt and eta)
+      unsigned int numEvents_tried;
+      unsigned int numEvents_passed;
+     
+      
 };
 
 //
@@ -66,20 +94,14 @@ class EmbeddingProducer : public edm::EDProducer {
 //
 // constructors and destructor
 //
-EmbeddingProducer::EmbeddingProducer(const edm::ParameterSet& iConfig)
-{
-   //register your products
-/* Examples
-   produces<ExampleData2>();
-
-   //if do put with a label
-   produces<ExampleData2>("label");
- 
-   //if you want to put into the Run
-   produces<ExampleData2,InRun>();
-*/
-   //now do what ever other initialization is needed
+EmbeddingProducer::EmbeddingProducer(const edm::ParameterSet& iConfig){   
   
+  muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
+  mixHepMC_ = iConfig.getParameter<bool>("mixHepMc");
+  if (mixHepMC_) srcHepMC_ = iConfig.getParameter<edm::InputTag>("hepMcSrc");
+  
+   produces<GenFilterInfo>("minVisPtFilter");
+   produces<GenEventInfoProduct>("");
 }
 
 
@@ -100,23 +122,21 @@ EmbeddingProducer::~EmbeddingProducer()
 void
 EmbeddingProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+  reset_event_content();
+  
    using namespace edm;
-/* This is an event example
-   //Read 'ExampleData' from the Event
-   Handle<ExampleData> pIn;
-   iEvent.getByLabel("example",pIn);
-
-   //Use the ExampleData to create an ExampleData2 which 
-   // is put into the Event
-   std::unique_ptr<ExampleData2> pOut(new ExampleData2(*pIn));
-   iEvent.put(std::move(pOut));
-*/
-
-/* this is an EventSetup example
-   //Read SetupData from the SetupRecord in the EventSetup
-   ESHandle<SetupData> pSetup;
-   iSetup.get<SetupRecord>().get(pSetup);
-*/
+   Handle<std::vector<pat::Muon>> coll_muons;
+   iEvent.getByToken(muonsCollection_ , coll_muons);
+   
+   unsigned key=0;  
+   for (std::vector<pat::Muon>::const_iterator muon=  coll_muons->begin(); muon!= coll_muons->end();  ++muon,  ++key){ 
+     std::cout<<"aaa"<<std::endl; 
+     
+  }
+  std::cout<<"----------------------------------------------------"<<std::endl;
+   
+   
+  add_to_event(iEvent);
  
 }
 
@@ -172,6 +192,48 @@ EmbeddingProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions
   desc.setUnknown();
   descriptions.addDefault(desc);
 }
+
+
+
+// user functions 
+void 
+EmbeddingProducer::reset_event_content(){
+  
+  numEvents_tried  = 0;
+  numEvents_passed = 0;
+  genEvent_.reset(new HepMC::GenEvent);
+  //genEvt_output = new HepMC::GenEvent();
+  
+}
+
+void
+EmbeddingProducer::add_to_event(edm::Event& iEvent){
+  
+    std::auto_ptr<GenFilterInfo> kinfilter(new GenFilterInfo(numEvents_tried, numEvents_passed));
+    iEvent.put(kinfilter, std::string("minVisPtFilter"));
+  
+  
+    std::auto_ptr<GenEventInfoProduct> generator(new GenEventInfoProduct());
+    iEvent.put(generator, std::string(""));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(EmbeddingProducer);

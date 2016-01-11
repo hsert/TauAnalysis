@@ -62,7 +62,8 @@ patMuonstobereplaced = cms.EDProducer("CandViewShallowCloneCombiner",
 
 patMuonstobereplacedFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("patMuonstobereplaced"),                             
-    minNumber = cms.uint32(1)
+    minNumber = cms.uint32(1),
+    filter = cms.bool(True)
 )
 
 
