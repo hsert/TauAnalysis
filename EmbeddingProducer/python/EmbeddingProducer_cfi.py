@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 
 pregenerator = cms.EDProducer("EmbeddingProducer",
-				   src = cms.InputTag("goodMuonsFormumuSelection"),
-				   mixHepMc = cms.bool(False)
+				   src = cms.InputTag("patMuonsAfterKinCuts"),
+				   mixHepMc = cms.bool(False),
+				   histFileName = cms.string("hist.root")
 				  )

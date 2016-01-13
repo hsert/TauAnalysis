@@ -67,8 +67,10 @@ bool DYToMuMuGenFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup
 			
 			// Check if daugther particles are muons
 		  if (abs(gen_handle->at(i).daughter(0)->pdgId()) == 13  
-		      && fabs(gen_handle->at(i).daughter(0)->eta())<2.8  
-		      && fabs(gen_handle->at(i).daughter(1)->eta())<2.8)
+		      && fabs(gen_handle->at(i).daughter(0)->eta())<2.5  
+		      && fabs(gen_handle->at(i).daughter(1)->eta())<2.5
+		      && gen_handle->at(i).daughter(0)->pt()>8
+		      && gen_handle->at(i).daughter(1)->pt()>8)
 			{
 			  //std::cout << "pdgId" << gen_handle->at(i).pdgId() << std::endl;
 			  //std::cout << "nDau" << gen_handle->at(i).numberOfDaughters() << std::endl;

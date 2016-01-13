@@ -70,16 +70,13 @@ process.schedule = cms.Schedule(process.p,process.RECOSIMoutput_step)
 
 # Other statements
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9', '')
 
 
 process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff")
-#process.schedule.insert(0, process.producemumuSelection)
-process.p *= process.producemumuSelection
-process.RECOSIMoutput.outputCommands.extend(
-    cms.untracked.vstring("keep *_goodMuonsFormumuSelection_*_*",
-                          "keep *_patMuonstobereplaced_*_*"
-      ))
+process.p *= process.makePatMuonsZmumu
+process.load("TauAnalysis.EmbeddingProducer.EmbeddingProducer_cfi")
+process.p *= process.pregenerator
 
 
 
