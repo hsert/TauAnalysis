@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: TauAnalysis/EmbeddingProducer/python/cmsDriver_fragments/DYToMuMuGenFilter_cff.py --filein /store/mc/Fall13/DYJetsToLL_M-50_13TeV-madgraph-pythia8-tauola_v2/GEN-SIM/POSTLS162_V1-v2/10000/002DE29C-80E3-E311-B666-003048CF66D4.root --fileout file:step0.root --mc --eventcontent RAWSIM --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring --conditions MCRUN2_74_V9A --step GEN:genmuonFilterSequence --magField 38T_PostLS1 --python_filename step0_cfg.py --no_exec -n 300
+# with command line options: TauAnalysis/EmbeddingProducer/python/cmsDriver_fragments/DYToMuMuGenFilter_cff.py --filein /store/mc/Fall13/DYJetsToLL_M-50_13TeV-madgraph-pythia8-tauola_v2/GEN-SIM/POSTLS162_V1-v2/10000/002DE29C-80E3-E311-B666-003048CF66D4.root --fileout file:step0.root --mc --eventcontent RAWSIM --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring --conditions 74X_mcRun2_asymptotic_AllChannelsGood_v0 --step GEN:genmuonFilterSequence --magField 38T_PostLS1 --python_filename step0_cfg.py --no_exec -n 300
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('GEN')
@@ -63,7 +63,7 @@ process.RAWSIMoutput = cms.OutputModule("PoolOutputModule",
 # Other statements
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9A', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
 
 process.dYToMuMuGenFilter = cms.EDFilter("DYToMuMuGenFilter",
     inputTag = cms.InputTag("genParticles")

@@ -21,8 +21,12 @@ patMuonsEmbedding.addGenMatch = cms.bool(True)
 patMuonsEmbedding.embedCaloMETMuonCorrs = cms.bool(False)
 patMuonsEmbedding.embedTcMETMuonCorrs = cms.bool(False)
 
+
 patMuonsAfterKinCuts = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag("patMuonsEmbedding"),
+    src = cms.InputTag(
+    "slimmedMuons"
+    #"patMuonsEmbedding"
+    ),
     cut = cms.string("pt > 8 && abs(eta) < 2.5"),
     filter = cms.bool(True)
 )
@@ -45,8 +49,8 @@ ZmumuCandidatesFilter = cms.EDFilter("CandViewCountFilter",
 ## Sequence for Z->mumu selection
 makePatMuonsZmumu = cms.Sequence(
     doubleMuonTrigger
-    + makePatMuons
-    + patMuonsEmbedding
+#    + makePatMuons
+#    + patMuonsEmbedding
     + patMuonsAfterKinCuts
     + ZmumuCandidates
     + ZmumuCandidatesFilter

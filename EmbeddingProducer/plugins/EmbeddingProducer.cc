@@ -35,7 +35,10 @@
 
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
+
+#include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenFilterInfo.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
@@ -72,8 +75,6 @@ class EmbeddingProducer : public edm::EDProducer {
       edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
       
       edm::EDGetTokenT<reco::VertexCollection> vtxCollection_;
-      edm::InputTag vtx_ = edm::InputTag("offlinePrimaryVertices");
-      
       edm::InputTag srcHepMC_;
       bool mixHepMC_;
 
@@ -122,8 +123,11 @@ EmbeddingProducer::EmbeddingProducer(const edm::ParameterSet& iConfig){
   ptHist = new TH1F("ptHist","ptHist",50,0,200);
   etaHist = new TH1F("etaHist","etaHist",50,-6,6);
   
+  ptHist->SetDirectory(histFile);
+  etaHist->SetDirectory(histFile);
+  
   muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
-  vtxCollection_ = consumes<reco::VertexCollection>(vtx_);
+  vtxCollection_ = consumes<reco::VertexCollection>(iConfig.getParameter< edm::InputTag >("vtxSrc"));
   mixHepMC_ = iConfig.getParameter<bool>("mixHepMc");
   if (mixHepMC_) srcHepMC_ = iConfig.getParameter<edm::InputTag>("hepMcSrc");
   
@@ -165,6 +169,8 @@ EmbeddingProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     if ( muon->isTightMuon(*offlinePrimaryVertices->begin()) )
     {
       ++nMuonsAfterId;
+      ptHist->Fill(muon->p4().pt());
+      etaHist->Fill(muon->p4().eta());
     }
   }
   numberMuonsAfterID->Fill(nMuonsAfterId);
