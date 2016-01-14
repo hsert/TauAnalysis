@@ -33,6 +33,8 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
@@ -65,6 +67,7 @@ class EmbeddingProducer : public edm::EDProducer {
       
       void reset_event_content();
       void add_to_event(edm::Event& iEvent);
+      void count_and_fill_by_matching(TString, std::vector<pat::Muon>::const_iterator);
       
       //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
       //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
@@ -73,8 +76,8 @@ class EmbeddingProducer : public edm::EDProducer {
 
       // ----------member data ---------------------------
       edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
-      
       edm::EDGetTokenT<reco::VertexCollection> vtxCollection_;
+      edm::EDGetTokenT<edm::TriggerResults> triggerResults_;
       edm::InputTag srcHepMC_;
       bool mixHepMC_;
 
@@ -92,10 +95,13 @@ class EmbeddingProducer : public edm::EDProducer {
       // Histograms and root output files
       TFile* histFile;
       TString histFileName;
-      TH1F* numberMuonsAfterID;
-      TH1F* numberMuonsBeforeID;
-      TH1F* ptHist;
-      TH1F* etaHist;
+      std::vector<TString> selection = {"baseline","id","id_and_trigger"};
+      std::vector<TString> matchingMC = {"all","MC_matched","not_MC_matched"};
+      std::vector<TString> string_keys;
+      std::map<TString,TH1F*> nMuons;
+      std::map<TString,int> nMuonsNumbers;
+      std::map<TString,TH1F*> ptMuons;
+      std::map<TString,TH1F*> etaMuons; 
 };
 
 //
@@ -114,20 +120,30 @@ EmbeddingProducer::EmbeddingProducer(const edm::ParameterSet& iConfig){
   
   histFileName = TString(iConfig.getParameter<std::string>("histFileName"));
   histFile = new TFile(histFileName,"RECREATE");
-  numberMuonsBeforeID = new TH1F("numberMuonsBeforeID","numberMuonsBeforeID",5,0,5);
-  numberMuonsAfterID = new TH1F("numberMuonsAfterID","numberMuonsAfterID",5,0,5);
-  
-  numberMuonsBeforeID->SetDirectory(histFile);
-  numberMuonsAfterID->SetDirectory(histFile);
-  
-  ptHist = new TH1F("ptHist","ptHist",50,0,200);
-  etaHist = new TH1F("etaHist","etaHist",50,-6,6);
-  
-  ptHist->SetDirectory(histFile);
-  etaHist->SetDirectory(histFile);
+  for (unsigned int i=0;i<selection.size();++i)
+  {
+    TDirectory* selection_dir = histFile->mkdir(selection[i]);
+    for (unsigned int j=0;j<matchingMC.size();++j)
+    {
+      TDirectory* full_dir = selection_dir->mkdir(matchingMC[j]);
+      TString string_key = selection[i]+TString("_")+matchingMC[j];
+      string_keys.push_back(string_key);
+      
+      nMuons[string_key] = new TH1F("nMuons","nMuons",5,0,5);
+      nMuons[string_key]->SetDirectory(full_dir);
+      nMuonsNumbers[string_key] = 0;
+      
+      ptMuons[string_key] = new TH1F("ptMuons","ptMuons",50,0,200);
+      ptMuons[string_key]->SetDirectory(full_dir);
+      
+      etaMuons[string_key] = new TH1F("etaMuons","etaMuons",50,-3,3);
+      etaMuons[string_key]->SetDirectory(full_dir);
+    }
+  }
   
   muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
   vtxCollection_ = consumes<reco::VertexCollection>(iConfig.getParameter< edm::InputTag >("vtxSrc"));
+  triggerResults_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","HLT"));
   mixHepMC_ = iConfig.getParameter<bool>("mixHepMc");
   if (mixHepMC_) srcHepMC_ = iConfig.getParameter<edm::InputTag>("hepMcSrc");
   
@@ -162,20 +178,32 @@ EmbeddingProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   Handle<reco::VertexCollection> offlinePrimaryVertices;
   iEvent.getByToken(vtxCollection_,offlinePrimaryVertices);
   
+  Handle<TriggerResults> trigResults;
+  iEvent.getByToken(triggerResults_,trigResults);
+  const TriggerNames& trigNames = iEvent.triggerNames(*trigResults);   
+  std::string pathName1 = "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v1";
+  std::string pathName2 = "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v1";
+  bool passedTrigger1  = trigResults->accept(trigNames.triggerIndex(pathName1));  
+  bool passedTrigger2  = trigResults->accept(trigNames.triggerIndex(pathName2));
   unsigned key=0;
-  numberMuonsBeforeID->Fill(coll_muons->size());
-  int nMuonsAfterId = 0;
-  for (std::vector<pat::Muon>::const_iterator muon=  coll_muons->begin(); muon!= coll_muons->end();  ++muon,  ++key){ 
+  for (std::vector<pat::Muon>::const_iterator muon=  coll_muons->begin(); muon!= coll_muons->end();  ++muon,  ++key){
+    
+    count_and_fill_by_matching(selection[0],muon); // choosing "baseline" selection
     if ( muon->isTightMuon(*offlinePrimaryVertices->begin()) )
     {
-      ++nMuonsAfterId;
-      ptHist->Fill(muon->p4().pt());
-      etaHist->Fill(muon->p4().eta());
+      count_and_fill_by_matching(selection[1],muon); // choosing "id" selection
+      if (passedTrigger1 || passedTrigger2)
+      {
+        count_and_fill_by_matching(selection[2],muon); // choosing "id_and_trigger" selection
+      }
     }
   }
-  numberMuonsAfterID->Fill(nMuonsAfterId);
   
-  std::cout<<"------------Finished muon loop--------------"<<std::endl;
+  for (unsigned int i=0;i<string_keys.size();++i)
+  { 
+    nMuons[string_keys[i]]->Fill(nMuonsNumbers[string_keys[i]]);
+    nMuonsNumbers[string_keys[i]] = 0;
+  }
   
   
   add_to_event(iEvent);
@@ -260,6 +288,30 @@ EmbeddingProducer::add_to_event(edm::Event& iEvent){
   
     std::auto_ptr<GenEventInfoProduct> generator(new GenEventInfoProduct());
     iEvent.put(generator, std::string(""));
+}
+
+void
+EmbeddingProducer::count_and_fill_by_matching(TString selection_string, std::vector<pat::Muon>::const_iterator muon)
+{
+  TString string_key = selection_string + TString("_") + matchingMC[0]; // choosing "all" muons
+  ++nMuonsNumbers[string_key];
+  ptMuons[string_key]->Fill(muon->p4().pt());
+  etaMuons[string_key]->Fill(muon->p4().eta());
+  
+  if (muon->genParticleRefs().size()>0)
+  {
+    string_key = selection_string + TString("_") + matchingMC[1]; // choosing "MC matched" muons
+    ++nMuonsNumbers[string_key];
+    ptMuons[string_key]->Fill(muon->p4().pt());
+    etaMuons[string_key]->Fill(muon->p4().eta());
+  }
+  else
+  {
+    string_key = selection_string + TString("_") + matchingMC[2]; // choosing "not MC matched" muons
+    ++nMuonsNumbers[string_key];
+    ptMuons[string_key]->Fill(muon->p4().pt());
+    etaMuons[string_key]->Fill(muon->p4().eta());
+  }
 }
 
 
