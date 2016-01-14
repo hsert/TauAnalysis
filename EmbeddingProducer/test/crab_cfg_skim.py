@@ -29,7 +29,7 @@ config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 2
 
 ##-- If you want to run test jobs set totalUnits to a small number and publication to false
-config.Data.totalUnits = 4
+#config.Data.totalUnits = 4
 config.Data.publication = False
 
 ##-- the output strorage element

@@ -25,6 +25,8 @@
 #include "TFile.h"
 #include "TString.h"
 
+#include "DataFormats/Math/interface/LorentzVector.h"
+
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 
@@ -297,8 +299,17 @@ EmbeddingProducer::count_and_fill_by_matching(TString selection_string, std::vec
   ++nMuonsNumbers[string_key];
   ptMuons[string_key]->Fill(muon->p4().pt());
   etaMuons[string_key]->Fill(muon->p4().eta());
+  bool mc_matched = false;
   
-  if (muon->genParticleRefs().size()>0)
+  if(muon->genParticleRefs().size()>0 && muon->genParticle(0) != 0)
+  {
+    double phi_diff = std::abs(muon->genParticle(0)->p4().phi() - muon->p4().phi());
+    double eta_diff = std::abs(muon->genParticle(0)->p4().eta() - muon->p4().eta());
+    double Delta_R = std::sqrt(phi_diff*phi_diff + eta_diff*eta_diff);
+    std::cout << "DeltaR = " << Delta_R << std::endl;
+    if (Delta_R < 0.1) mc_matched = true;
+  }
+  if (mc_matched)
   {
     string_key = selection_string + TString("_") + matchingMC[1]; // choosing "MC matched" muons
     ++nMuonsNumbers[string_key];
