@@ -8,8 +8,8 @@ cmsDriver.py TauAnalysis/EmbeddingProducer/python/cmsDriver_fragments/DYToMuMuGe
   --fileout file:step0.root \
   --mc --eventcontent RAWSIM \
   --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring \
-  --conditions MCRUN2_74_V9A --step GEN:genmuonFilterSequence\
-  --magField 38T_PostLS1 --python_filename step0_cfg.py --no_exec -n 300 
+  --conditions 74X_mcRun2_asymptotic_AllChannelsGood_v0 --step GEN:genmuonFilterSequence\
+  --magField 38T_PostLS1 --python_filename step0_cfg.py --no_exec -n 300
 
 
 ############### Step 1 -> SIM and Pile Up mixing state #############
@@ -21,7 +21,7 @@ cmsDriver.py step1 --filein file:step0.root \
  --pileup 2015_25ns_Startup_PoissonOOTPU \
  --mc --eventcontent RAWSIM \
  --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring \
- --datatier GEN-SIM-RAW --conditions MCRUN2_74_V9 --step DIGI,L1,DIGI2RAW,HLT:@frozen25ns \ 
+ --datatier GEN-SIM-RAW --conditions 74X_mcRun2_asymptotic_AllChannelsGood_v0 --step DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
  --magField 38T_PostLS1 --python_filename step1_cfg.py --no_exec -n -1 
 
 
@@ -29,8 +29,16 @@ cmsDriver.py step1 --filein file:step0.root \
 cmsDriver.py step2 --filein file:step1.root --fileout file:step2.root \
   --mc --eventcontent RECOSIM \
   --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring \
-  --datatier GEN-SIM-RECO --conditions MCRUN2_74_V9 --step RAW2DIGI,L1Reco,RECO  \
+  --datatier GEN-SIM-RECO --conditions 74X_mcRun2_asymptotic_AllChannelsGood_v0 --step RAW2DIGI,L1Reco,RECO  \
   --magField 38T_PostLS1 --python_filename step2_cfg.py --no_exec -n -1
+
+######### RECO -> Skimmed ##################
+cmsDriver.py standard \
+--filein file:step2.root --fileout file:skimmed.root \
+--customise TauAnalysis/EmbeddingProducer/EmbeddingCustomisers.skimCustomisation,SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring \
+--conditions 74X_mcRun2_asymptotic_AllChannelsGood_v0 --magField 38T_PostLS1 \
+--python_filename skimmed_cfg.py --no_exec -n -1 --step POSTRECO
+
 
 
 

@@ -42,7 +42,9 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:step2.root'),
+    fileNames = cms.untracked.vstring('file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/A8586143-EB6E-E511-8546-0025905B85B2.root'
+    #"file:step2.root"
+    ),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -74,12 +76,9 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChann
 
 
 process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff")
-#process.schedule.insert(0, process.producemumuSelection)
-process.p *= process.producemumuSelection
-process.RECOSIMoutput.outputCommands.extend(
-    cms.untracked.vstring("keep *_goodMuonsFormumuSelection_*_*",
-                          "keep *_patMuonstobereplaced_*_*"
-      ))
+process.p *= process.makePatMuonsZmumu
+process.load("TauAnalysis.EmbeddingProducer.EmbeddingProducer_cfi")
+process.p *= process.pregenerator
 
 
 
