@@ -18,7 +18,10 @@ class Py8EmbeddingGun : public Py8GunBase {
       
     Py8EmbeddingGun( edm::ParameterSet const& );
     ~Py8EmbeddingGun() {}
-	 
+
+//    void analyze(const edm::Event&, const edm::EventSetup&) override;
+ //   virtual bool filter(edm::Event& e, edm::EventSetup const& es);
+//    void beginEvent(edm::Event& e, edm::EventSetup const& es);
     bool generatePartonsAndHadronize() override;
     const char* classname() const override;
 	 
@@ -49,9 +52,17 @@ Py8EmbeddingGun::Py8EmbeddingGun( edm::ParameterSet const& ps )
 }
 
 
+//void
+//Py8EmbeddingGun::analyze(edm::Event& e, edm::EventSetup const& es){
+    
+//  std::cout<<"ccc"<<std::endl;
+  //return true;
+//}
+
 
 bool Py8EmbeddingGun::generatePartonsAndHadronize(){
   
+   std::cout<<"bbb"<<std::endl;
   fMasterGen->event.reset();
   double mass = 91;
   double px = 100;
@@ -72,9 +83,6 @@ bool Py8EmbeddingGun::generatePartonsAndHadronize(){
 
 
 
-
-
-  
 const char* Py8EmbeddingGun::classname() const
 {
    return "Py8EmbeddingGun"; 

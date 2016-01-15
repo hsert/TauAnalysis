@@ -25,15 +25,15 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 process.p = cms.Path()
 
 
-#process.load('HLTrigger.HLTanalyzers.hltTrigReport_cfi')
-#process.embedTrigReport = process.hltTrigReport.clone()
-#process.p *= process.embedTrigReport
+process.load('HLTrigger.HLTanalyzers.hltTrigReport_cfi')
+process.embedTrigReport = process.hltTrigReport.clone()
+process.p *= process.embedTrigReport
 
-#process.MessageLogger = cms.Service("MessageLogger",
-#                                    destinations   = cms.untracked.vstring('trigger_messages.txt'),
-#                                    statistics     = cms.untracked.vstring('statistics1'),   
-#                                    statistics1 = cms.untracked.PSet(threshold = cms.untracked.string('DEBUG')                                                                     ),
-#                                    )
+process.MessageLogger = cms.Service("MessageLogger",
+                                    destinations   = cms.untracked.vstring('trigger_messages.txt'),
+                                    statistics     = cms.untracked.vstring('statistics1'),   
+                                    statistics1 = cms.untracked.PSet(threshold = cms.untracked.string('DEBUG')                                                                     ),
+                                    )
 
 
 process.maxEvents = cms.untracked.PSet(
@@ -43,7 +43,11 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('file:step2.root'),
-    secondaryFileNames = cms.untracked.vstring()
+    secondaryFileNames = cms.untracked.vstring(),
+    dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
+    inputCommands = cms.untracked.vstring('keep *', 
+     'drop *_*_*_LHE',
+        )
 )
 
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
@@ -93,25 +97,77 @@ process.load("TauAnalysis.EmbeddingProducer.EmbeddingProducer_cfi")
 process.p *=process.pregenerator
 
 
-process.generator = cms.EDFilter("Pythia8EmbeddingGun",
-				  PythiaParameters = cms.PSet(
-				      py8Settings = cms.vstring(''),
-				      parameterSets = cms.vstring('py8Settings')
-				    ),
-				      PGunParameters = cms.PSet(
-					ParticleID = cms.vint32(521),
-                                        AddAntiParticle = cms.bool(False),
-                                        MinPhi = cms.double(-3.14159265359),
-                                        MaxPhi = cms.double(3.14159265359),
-                                        MinE = cms.double(100.0),
-                                        MaxE = cms.double(200.0),
-                                        MinEta = cms.double(0.0),
-                                        MaxEta = cms.double(2.4)
-				      ),
+#process.generator = cms.EDFilter("Pythia8EmbeddingGun",
+#				  PythiaParameters = cms.PSet(
+#				      py8Settings = cms.vstring(''),
+#				      parameterSets = cms.vstring('py8Settings')
+#				    ),
+#				      PGunParameters = cms.PSet(
+#					ParticleID = cms.vint32(521),
+ #                                       AddAntiParticle = cms.bool(False),
+#                                        MinPhi = cms.double(-3.14159265359),
+#                                        MaxPhi = cms.double(3.14159265359),
+#                                        MinE = cms.double(100.0),
+#                                        MaxE = cms.double(200.0),
+#                                        MinEta = cms.double(0.0),
+#                                        MaxEta = cms.double(2.4)
+#				      ),
 				  
 			#	   src = cms.InputTag("goodMuonsFormumuSelection"),
 			#	   mixHepMc = cms.bool(False)
+#)
+
+from Configuration.Generator.Pythia8CommonSettings_cfi import *
+from Configuration.Generator.Pythia8CUEP8M1Settings_cfi import *
+
+
+#process.load("GeneratorInterface/LHEInterface/ExternalLHEProducer_cfi")
+
+
+process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
+				 #  src = cms.InputTag("goodMuonsFormumuSelection"),
+				 #  mixHepMc = cms.bool(False)
 				  )
+
+
+process.p *= process.externalLHEProducer
+
+
+process.generator = cms.EDFilter("Pythia8HadronizerFilter",
+  maxEventsToPrint = cms.untracked.int32(0),
+  nAttempts = cms.uint32(1),
+  pythiaPylistVerbosity = cms.untracked.int32(0),
+  filterEfficiency = cms.untracked.double(1.0),
+  pythiaHepMCVerbosity = cms.untracked.bool(False),
+  comEnergy = cms.double(13000.),
+  PythiaParameters = cms.PSet(
+    pythia8CommonSettingsBlock,
+    pythia8CUEP8M1SettingsBlock,
+    processParameters = cms.vstring(
+#      'JetMatching:setMad = off',
+#      'JetMatching:scheme = 1',
+      'JetMatching:merge = off',
+#      'JetMatching:jetAlgorithm = 2',
+#      'JetMatching:etaJetMax = 5.',
+#      'JetMatching:coneRadius = 1.',
+#      'JetMatching:slowJetPower = 1',
+#      'JetMatching:qCut = 30.', #this is the actual merging scale
+#      'JetMatching:nQmatch = 5', #4 corresponds to 4-flavour scheme (no matching of b-quarks), 5 for 5-flavour scheme
+#      'JetMatching:nJetMax = 2', #number of partons in born matrix element for highest multiplicity
+#      'JetMatching:doShowerKt = off', #off for MLM matching, turn on for shower-kT matching
+    ),
+    parameterSets = cms.vstring('pythia8CommonSettings',
+                                'pythia8CUEP8M1Settings',
+                                'processParameters',
+    )
+  )
+)
+
+
+
+
+
+
 
 process.p *=process.generator
 

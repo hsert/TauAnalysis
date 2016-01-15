@@ -4,6 +4,7 @@
 <use name="DataFormats/PatCandidates"/>
 <use name="pythia8"/> 
 <use name="GeneratorInterface/Pythia8Interface"/>
-<use   name="GeneratorInterface/ExternalDecays"/>
+<use name="GeneratorInterface/ExternalDecays"/>
+<use name="GeneratorInterface/Herwig6Interface"/>
 <flags EDM_PLUGIN="1"/>
 
