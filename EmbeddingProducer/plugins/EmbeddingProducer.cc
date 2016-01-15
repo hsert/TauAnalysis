@@ -24,8 +24,7 @@
 #include "TH1F.h"
 #include "TFile.h"
 #include "TString.h"
-
-#include "DataFormats/Math/interface/LorentzVector.h"
+#include "TVector2.h" 
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -39,6 +38,7 @@
 #include "FWCore/Common/interface/TriggerNames.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "CommonTools/CandAlgos/interface/CandCombiner.h"
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -69,7 +69,8 @@ class EmbeddingProducer : public edm::EDProducer {
       
       void reset_event_content();
       void add_to_event(edm::Event& iEvent);
-      void count_and_fill_by_matching(TString, std::vector<pat::Muon>::const_iterator);
+      void match_count_and_fill(TString, std::vector<pat::Muon>::const_iterator);
+      void count_and_fill(TString, TString, std::vector<pat::Muon>::const_iterator);
       
       //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
       //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
@@ -97,7 +98,7 @@ class EmbeddingProducer : public edm::EDProducer {
       // Histograms and root output files
       TFile* histFile;
       TString histFileName;
-      std::vector<TString> selection = {"baseline","id","id_and_trigger"};
+      std::vector<TString> selection = {"genfilter","baseline","id","id_and_trigger"};
       std::vector<TString> matchingMC = {"all","MC_matched","not_MC_matched"};
       std::vector<TString> string_keys;
       std::map<TString,TH1F*> nMuons;
@@ -174,12 +175,24 @@ EmbeddingProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   reset_event_content();
   
   using namespace edm;
+  
+  // reading out baseline selection results with corresponding collections
+  Handle<pat::MuonCollection> patMuonsAfterKinCuts;
+  iEvent.getByLabel("patMuonsAfterKinCuts",patMuonsAfterKinCuts);
+  bool passed_kin_cuts = (patMuonsAfterKinCuts->size() > 0);
+  
+  Handle<reco::CompositeCandidateCollection> ZmumuCandidates;
+  iEvent.getByLabel("ZmumuCandidates",ZmumuCandidates);
+  bool is_z_candidate = (ZmumuCandidates->size() > 0);
+  
+  // reading out necessary collections for analysis
   Handle<std::vector<pat::Muon>> coll_muons;
   iEvent.getByToken(muonsCollection_ , coll_muons);
   
   Handle<reco::VertexCollection> offlinePrimaryVertices;
   iEvent.getByToken(vtxCollection_,offlinePrimaryVertices);
   
+  // reading out trigger results
   Handle<TriggerResults> trigResults;
   iEvent.getByToken(triggerResults_,trigResults);
   const TriggerNames& trigNames = iEvent.triggerNames(*trigResults);   
@@ -190,13 +203,18 @@ EmbeddingProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   unsigned key=0;
   for (std::vector<pat::Muon>::const_iterator muon=  coll_muons->begin(); muon!= coll_muons->end();  ++muon,  ++key){
     
-    count_and_fill_by_matching(selection[0],muon); // choosing "baseline" selection
-    if ( muon->isTightMuon(*offlinePrimaryVertices->begin()) )
+    match_count_and_fill(selection[0],muon); // choosing "genfilter" selection
+    
+    if (passed_kin_cuts && is_z_candidate)
     {
-      count_and_fill_by_matching(selection[1],muon); // choosing "id" selection
-      if (passedTrigger1 || passedTrigger2)
+      match_count_and_fill(selection[1],muon); // choosing "baseline" selection
+      if ( muon->isTightMuon(*offlinePrimaryVertices->begin()) )
       {
-        count_and_fill_by_matching(selection[2],muon); // choosing "id_and_trigger" selection
+        match_count_and_fill(selection[2],muon); // choosing "id" selection
+        if (passedTrigger1 || passedTrigger2)
+        {
+          match_count_and_fill(selection[3],muon); // choosing "id_and_trigger" selection
+        }
       }
     }
   }
@@ -293,49 +311,36 @@ EmbeddingProducer::add_to_event(edm::Event& iEvent){
 }
 
 void
-EmbeddingProducer::count_and_fill_by_matching(TString selection_string, std::vector<pat::Muon>::const_iterator muon)
+EmbeddingProducer::match_count_and_fill(TString selection_string, std::vector<pat::Muon>::const_iterator muon)
 {
-  TString string_key = selection_string + TString("_") + matchingMC[0]; // choosing "all" muons
-  ++nMuonsNumbers[string_key];
-  ptMuons[string_key]->Fill(muon->p4().pt());
-  etaMuons[string_key]->Fill(muon->p4().eta());
+  count_and_fill(selection_string,matchingMC[0],muon); // choosing "all" muons
   bool mc_matched = false;
   
   if(muon->genParticleRefs().size()>0 && muon->genParticle(0) != 0)
   {
-    double phi_diff = std::abs(muon->genParticle(0)->p4().phi() - muon->p4().phi());
+    double phi_diff = std::abs(TVector2::Phi_mpi_pi(muon->genParticle(0)->p4().phi() - muon->p4().phi()));
     double eta_diff = std::abs(muon->genParticle(0)->p4().eta() - muon->p4().eta());
     double Delta_R = std::sqrt(phi_diff*phi_diff + eta_diff*eta_diff);
-    std::cout << "DeltaR = " << Delta_R << std::endl;
     if (Delta_R < 0.1) mc_matched = true;
   }
   if (mc_matched)
   {
-    string_key = selection_string + TString("_") + matchingMC[1]; // choosing "MC matched" muons
-    ++nMuonsNumbers[string_key];
-    ptMuons[string_key]->Fill(muon->p4().pt());
-    etaMuons[string_key]->Fill(muon->p4().eta());
+    count_and_fill(selection_string,matchingMC[1],muon); // choosing "MC matched" muons
   }
   else
   {
-    string_key = selection_string + TString("_") + matchingMC[2]; // choosing "not MC matched" muons
-    ++nMuonsNumbers[string_key];
-    ptMuons[string_key]->Fill(muon->p4().pt());
-    etaMuons[string_key]->Fill(muon->p4().eta());
+    count_and_fill(selection_string,matchingMC[2],muon); // choosing "not MC matched" muons
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
+void
+EmbeddingProducer::count_and_fill(TString selection_string, TString matching_string, std::vector<pat::Muon>::const_iterator muon)
+{
+  TString string_key = selection_string + TString("_") + matching_string;
+  ++nMuonsNumbers[string_key];
+  ptMuons[string_key]->Fill(muon->p4().pt());
+  etaMuons[string_key]->Fill(muon->p4().eta());
+}
 
 
 
