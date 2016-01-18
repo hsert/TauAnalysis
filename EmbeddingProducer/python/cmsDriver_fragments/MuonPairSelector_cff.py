@@ -28,7 +28,7 @@ patMuonsAfterKinCuts = cms.EDFilter("PATMuonSelector",
     #"patMuonsEmbedding"
     ),
     cut = cms.string("pt > 8 && abs(eta) < 2.5"),
-    filter = cms.bool(True)
+    filter = cms.bool(False)
 )
 
 ZmumuCandidates = cms.EDProducer("CandViewShallowCloneCombiner",
@@ -41,8 +41,8 @@ ZmumuCandidates = cms.EDProducer("CandViewShallowCloneCombiner",
 
 ZmumuCandidatesFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("ZmumuCandidates"),
-    minNumber = cms.uint32(1),
-    filter = cms.bool(True)
+    minNumber = cms.uint32(0),
+    filter = cms.bool(False)
 )
 
 
@@ -53,7 +53,7 @@ makePatMuonsZmumu = cms.Sequence(
 #    + patMuonsEmbedding
     patMuonsAfterKinCuts
     + ZmumuCandidates
-    + ZmumuCandidatesFilter
+#    + ZmumuCandidatesFilter
 )
 
 

@@ -74,11 +74,10 @@ process.schedule = cms.Schedule(process.p,process.RECOSIMoutput_step)
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
 
-
+process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.DYToMuMuGenFilter_cff")
 process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff")
-process.p *= process.makePatMuonsZmumu
 process.load("TauAnalysis.EmbeddingProducer.EmbeddingProducer_cfi")
-process.p *= process.pregenerator
+process.p *= (process.dYToMuMuGenFilter * process.makePatMuonsZmumu * process.pregenerator)
 
 
 
