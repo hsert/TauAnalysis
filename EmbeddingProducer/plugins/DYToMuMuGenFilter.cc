@@ -22,6 +22,7 @@ private:
   virtual bool filter(edm::Event&, const edm::EventSetup&)override;
   virtual void endJob() override;
   edm::InputTag inputTag_;
+  edm::EDGetTokenT<reco::GenParticleCollection> genParticleCollection_;
   
   //virtual bool beginRun(edm::Run&, edm::EventSetup const&)override;
   // virtual bool endRun(edm::Run&, edm::EventSetup const&)override;
@@ -31,9 +32,10 @@ private:
 };
 
 
-DYToMuMuGenFilter::DYToMuMuGenFilter(const edm::ParameterSet& iConfig):
-    inputTag_(iConfig.getParameter<edm::InputTag>("inputTag"))
+DYToMuMuGenFilter::DYToMuMuGenFilter(const edm::ParameterSet& iConfig)
 {
+  inputTag_= iConfig.getParameter<edm::InputTag>("inputTag");
+  genParticleCollection_ = consumes<reco::GenParticleCollection>(inputTag_);
 }
 
 
@@ -49,7 +51,7 @@ bool DYToMuMuGenFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup
 
 
     edm::Handle<reco::GenParticleCollection> gen_handle;
-    iEvent.getByLabel(inputTag_, gen_handle);
+    iEvent.getByToken(genParticleCollection_, gen_handle);
     
     for(unsigned int i = 0; i < gen_handle->size(); i++)
     {

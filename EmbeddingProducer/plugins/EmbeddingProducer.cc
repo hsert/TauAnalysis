@@ -81,6 +81,8 @@ class EmbeddingProducer : public edm::EDProducer {
       edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
       edm::EDGetTokenT<reco::VertexCollection> vtxCollection_;
       edm::EDGetTokenT<edm::TriggerResults> triggerResults_;
+      edm::EDGetTokenT<pat::MuonCollection> patMuonsAfterKinCuts_;
+      edm::EDGetTokenT<reco::CompositeCandidateCollection> ZmumuCandidates_;
       edm::InputTag srcHepMC_;
       bool mixHepMC_;
 
@@ -132,11 +134,12 @@ EmbeddingProducer::EmbeddingProducer(const edm::ParameterSet& iConfig){
       TString string_key = selection[i]+TString("_")+matchingMC[j];
       string_keys.push_back(string_key);
       
-      nMuons[string_key] = new TH1F("nMuons","nMuons",5,0,5);
+      Double_t n[5] = {0.,2.,3.,4.,5.};
+      nMuons[string_key] = new TH1F("nMuons","nMuons",4,n);
       nMuons[string_key]->SetDirectory(full_dir);
       nMuonsNumbers[string_key] = 0;
       
-      ptMuons[string_key] = new TH1F("ptMuons","ptMuons",50,0,200);
+      ptMuons[string_key] = new TH1F("ptMuons","ptMuons",50,0,150);
       ptMuons[string_key]->SetDirectory(full_dir);
       
       etaMuons[string_key] = new TH1F("etaMuons","etaMuons",50,-3,3);
@@ -147,6 +150,8 @@ EmbeddingProducer::EmbeddingProducer(const edm::ParameterSet& iConfig){
   muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
   vtxCollection_ = consumes<reco::VertexCollection>(iConfig.getParameter< edm::InputTag >("vtxSrc"));
   triggerResults_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","HLT"));
+  patMuonsAfterKinCuts_ = consumes<pat::MuonCollection>(edm::InputTag("patMuonsAfterKinCuts","","EMBS"));
+  ZmumuCandidates_ = consumes<reco::CompositeCandidateCollection>(edm::InputTag("ZmumuCandidates","","EMBS"));
   mixHepMC_ = iConfig.getParameter<bool>("mixHepMc");
   if (mixHepMC_) srcHepMC_ = iConfig.getParameter<edm::InputTag>("hepMcSrc");
   
@@ -178,11 +183,11 @@ EmbeddingProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   // reading out baseline selection results with corresponding collections
   Handle<pat::MuonCollection> patMuonsAfterKinCuts;
-  iEvent.getByLabel("patMuonsAfterKinCuts",patMuonsAfterKinCuts);
+  iEvent.getByToken(patMuonsAfterKinCuts_, patMuonsAfterKinCuts);
   bool passed_kin_cuts = (patMuonsAfterKinCuts->size() > 0);
   
   Handle<reco::CompositeCandidateCollection> ZmumuCandidates;
-  iEvent.getByLabel("ZmumuCandidates",ZmumuCandidates);
+  iEvent.getByToken(ZmumuCandidates_,ZmumuCandidates);
   bool is_z_candidate = (ZmumuCandidates->size() > 0);
   
   // reading out necessary collections for analysis
@@ -321,7 +326,7 @@ EmbeddingProducer::match_count_and_fill(TString selection_string, std::vector<pa
     double phi_diff = std::abs(TVector2::Phi_mpi_pi(muon->genParticle(0)->p4().phi() - muon->p4().phi()));
     double eta_diff = std::abs(muon->genParticle(0)->p4().eta() - muon->p4().eta());
     double Delta_R = std::sqrt(phi_diff*phi_diff + eta_diff*eta_diff);
-    if (Delta_R < 0.1) mc_matched = true;
+    if (Delta_R < 0.05) mc_matched = true;
   }
   if (mc_matched)
   {

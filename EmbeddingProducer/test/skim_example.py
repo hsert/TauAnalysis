@@ -4,8 +4,9 @@
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options: TauAnalysis/MCEmbeddingTools/python/ZmumuStandaloneSelection_cff --filein=file:step2.root --fileout=skimmed.root --python_filename=skim.py --eventcontent=RECOSIM --conditions MCRUN2_74_V9A --step NONE --magField 38T_PostLS1 --customise TauAnalysis/MCEmbeddingTools/setDefaults.setDefaults --customise TauAnalysis/MCEmbeddingTools/ZmumuStandaloneSelectionAll --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring --no_exec -n -1
 import FWCore.ParameterSet.Config as cms
+from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('EMBS')
+process = cms.Process('EMBS',eras.Run2_25ns)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -85,9 +86,6 @@ process.p *= (process.dYToMuMuGenFilter * process.makePatMuonsZmumu * process.pr
 
 # Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.postLS1Customs
 from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
-
-#call to customisation function customisePostLS1 imported from SLHCUpgradeSimulations.Configuration.postLS1Customs
-process = customisePostLS1(process)
 
 # Automatic addition of the customisation function from Configuration.DataProcessing.Utils
 from Configuration.DataProcessing.Utils import addMonitoring 
