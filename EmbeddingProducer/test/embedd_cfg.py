@@ -25,15 +25,15 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 process.p = cms.Path()
 
 
-process.load('HLTrigger.HLTanalyzers.hltTrigReport_cfi')
-process.embedTrigReport = process.hltTrigReport.clone()
-process.p *= process.embedTrigReport
+#process.load('HLTrigger.HLTanalyzers.hltTrigReport_cfi')
+#process.embedTrigReport = process.hltTrigReport.clone()
+#process.p *= process.embedTrigReport
 
-process.MessageLogger = cms.Service("MessageLogger",
-                                    destinations   = cms.untracked.vstring('trigger_messages.txt'),
-                                    statistics     = cms.untracked.vstring('statistics1'),   
-                                    statistics1 = cms.untracked.PSet(threshold = cms.untracked.string('DEBUG')                                                                     ),
-                                    )
+#process.MessageLogger = cms.Service("MessageLogger",
+#                                    destinations   = cms.untracked.vstring('trigger_messages.txt'),
+#                                    statistics     = cms.untracked.vstring('statistics1'),   
+#                                    statistics1 = cms.untracked.PSet(threshold = cms.untracked.string('DEBUG')                                                                     ),
+#                                    )
 
 
 process.maxEvents = cms.untracked.PSet(
@@ -77,9 +77,9 @@ from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
 
 
-process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff")
+#process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff")
 #process.schedule.insert(0, process.producemumuSelection)
-process.p *= process.producemumuSelection
+#process.p *= process.producemumuSelection
 #process.RECOSIMoutput.outputCommands.extend(
 #    cms.untracked.vstring("keep *_goodMuonsFormumuSelection_*_*",
 #                          "keep *_patMuonstobereplaced_*_*"
@@ -91,10 +91,10 @@ process.RECOSIMoutput.outputCommands.extend(
       ))
 
 
-process.load("TauAnalysis.EmbeddingProducer.EmbeddingProducer_cfi")
+#process.load("TauAnalysis.EmbeddingProducer.EmbeddingProducer_cfi")
 
 
-process.p *=process.pregenerator
+#process.p *=process.pregenerator
 
 
 #process.generator = cms.EDFilter("Pythia8EmbeddingGun",
@@ -132,29 +132,33 @@ process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
 
 process.p *= process.externalLHEProducer
 
+from GeneratorInterface.ExternalDecays.TauolaSettings_cff import *
+
+
+pythia8CommonSettingsBlock.pythia8CommonSettings.extend(cms.untracked.vstring('Init:showChangedSettings = off', 'Init:showChangedParticleData = off', 'Next:numberCount = 0'))
 
 process.generator = cms.EDFilter("Pythia8HadronizerFilter",
-  maxEventsToPrint = cms.untracked.int32(0),
-  nAttempts = cms.uint32(1),
+ #  ExternalDecays = cms.PSet(
+ #       Tauola = cms.untracked.PSet(
+ #           TauolaPolar,
+ #           TauolaDefaultInputCards
+ #           ),
+#	 parameterSets = cms.vstring('Tauola')
+#    ),				 
+  maxEventsToPrint = cms.untracked.int32(1),
+  nAttempts = cms.uint32(1000),
   pythiaPylistVerbosity = cms.untracked.int32(0),
   filterEfficiency = cms.untracked.double(1.0),
   pythiaHepMCVerbosity = cms.untracked.bool(False),
   comEnergy = cms.double(13000.),
+  crossSection = cms.untracked.double(1.0),
   PythiaParameters = cms.PSet(
     pythia8CommonSettingsBlock,
     pythia8CUEP8M1SettingsBlock,
     processParameters = cms.vstring(
-#      'JetMatching:setMad = off',
-#      'JetMatching:scheme = 1',
-      'JetMatching:merge = off',
-#      'JetMatching:jetAlgorithm = 2',
-#      'JetMatching:etaJetMax = 5.',
-#      'JetMatching:coneRadius = 1.',
-#      'JetMatching:slowJetPower = 1',
-#      'JetMatching:qCut = 30.', #this is the actual merging scale
-#      'JetMatching:nQmatch = 5', #4 corresponds to 4-flavour scheme (no matching of b-quarks), 5 for 5-flavour scheme
-#      'JetMatching:nJetMax = 2', #number of partons in born matrix element for highest multiplicity
-#      'JetMatching:doShowerKt = off', #off for MLM matching, turn on for shower-kT matching
+        'JetMatching:merge = off',
+        'Init:showChangedSettings = off', 
+        'Init:showChangedParticleData = off'
     ),
     parameterSets = cms.vstring('pythia8CommonSettings',
                                 'pythia8CUEP8M1Settings',

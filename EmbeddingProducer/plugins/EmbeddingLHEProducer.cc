@@ -52,6 +52,10 @@
 // class declaration
 //
 
+
+
+
+
 class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
                                                         edm::EndRunProducer> {
    public:
@@ -152,11 +156,13 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
    
    
    lhef::HEPEUP hepeup;
-   double mass_mu = 0.1056584;
+   //double mass = 0.1056584; //mu 
+   double mass = 1.77682;  //tau 
+   
    TLorentzVector mu_plus;
-   mu_plus.SetXYZM(-44.6966686,1.7242644,65.7211490,mass_mu);
+   mu_plus.SetXYZM(-44.6966686,1.7242644,65.7211490,mass);
    TLorentzVector mu_minus;
-   mu_minus.SetXYZM(44.6966686,-1.7242644,98.3669058,mass_mu);
+   mu_minus.SetXYZM(44.6966686,-1.7242644,98.3669058,mass);
    fill_lhe_from_mumu(mu_plus,mu_minus,hepeup);
    
     
@@ -261,7 +267,8 @@ EmbeddingLHEProducer::fill_lhe_from_mumu(TLorentzVector &mu_plus, TLorentzVector
     outlhe.SPINUP[0]=0.0;
     
     
-    outlhe.IDUP[1]=-13;
+    outlhe.IDUP[1]=-15;
+   // outlhe.VTIMUP[1]=0.08711;
     outlhe.ISTUP[1]=1;
     outlhe.ICOLUP[1].first=0;
     outlhe.ICOLUP[1].second=0;
@@ -275,10 +282,11 @@ EmbeddingLHEProducer::fill_lhe_from_mumu(TLorentzVector &mu_plus, TLorentzVector
     outlhe.SPINUP[1]=1.0;
     
     
-    outlhe.IDUP[2]=13;
-   outlhe.ISTUP[2]=1;
-   outlhe.ICOLUP[2].first=0;
-   outlhe.ICOLUP[2].second=0;
+    outlhe.IDUP[2]=15;
+   // outlhe.VTIMUP[2]=0.08711; 
+    outlhe.ISTUP[2]=1;
+    outlhe.ICOLUP[2].first=0;
+    outlhe.ICOLUP[2].second=0;
     outlhe.MOTHUP[2].first=1;
     outlhe.MOTHUP[2].second=1;
     outlhe.PUP[2][0]=mu_minus.Px();
