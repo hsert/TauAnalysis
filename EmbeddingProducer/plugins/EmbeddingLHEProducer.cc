@@ -85,7 +85,7 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       boost::shared_ptr<lhef::LHEEvent>	partonLevel;
       boost::ptr_deque<LHERunInfoProduct>	runInfoProducts;
       edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
-      bool switchToTaus_;
+      bool switchToMuonEmbedding_;
       double leptonMass;
       
       
@@ -118,8 +118,8 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
 */
    //now do what ever other initialization is needed
    muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
-   switchToTaus_ = iConfig.getParameter<bool>("switchToTaus");
-   leptonMass = 1.77682 ? switchToTaus_ : 0.1056584;
+   switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
+   leptonMass = 0.1056584 ? switchToMuonEmbedding_ : 1.77682;
 }
 
 

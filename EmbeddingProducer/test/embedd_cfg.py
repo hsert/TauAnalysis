@@ -38,7 +38,7 @@ process.p = cms.Path()
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(30)
+    input = cms.untracked.int32(300)
 )
 
 # Input source
@@ -125,8 +125,8 @@ from Configuration.Generator.Pythia8CUEP8M1Settings_cfi import *
 
 
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
-				src = cms.InputTag("patMuonsAfterTightID"),
-				switchToTaus = cms.bool(True)
+				src = cms.InputTag("patMuonsAfterMediumID"),
+				switchToMuonEmbedding = cms.bool(True)
 				#mixHepMc = cms.bool(False)
 				)
 
@@ -147,7 +147,7 @@ process.generator = cms.EDFilter("Pythia8HadronizerFilter",
 #	 parameterSets = cms.vstring('Tauola')
 #    ),				 
   maxEventsToPrint = cms.untracked.int32(1),
-  nAttempts = cms.uint32(1000),
+  nAttempts = cms.uint32(10),
   pythiaPylistVerbosity = cms.untracked.int32(0),
   filterEfficiency = cms.untracked.double(1.0),
   pythiaHepMCVerbosity = cms.untracked.bool(False),
