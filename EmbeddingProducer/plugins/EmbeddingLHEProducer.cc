@@ -87,6 +87,7 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
       bool switchToMuonEmbedding_;
       double leptonMass;
+      int particleID;
       
       
 };
@@ -119,7 +120,8 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    //now do what ever other initialization is needed
    muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
    switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
-   leptonMass = 0.1056584 ? switchToMuonEmbedding_ : 1.77682;
+   leptonMass = switchToMuonEmbedding_ ? 0.1056584 : 1.77682;
+   particleID = switchToMuonEmbedding_ ? 13 : 15;
 }
 
 
@@ -159,7 +161,6 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     bool mu_minus_found = false;
 
     lhef::HEPEUP hepeup;
-
     // Assuming Pt-Order
     for (std::vector<pat::Muon>::const_iterator muon=  coll_muons->begin(); muon!= coll_muons->end();  ++muon)
     {
@@ -278,7 +279,7 @@ EmbeddingLHEProducer::fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorent
     outlhe.SPINUP[0]=9.0;
     
     
-    outlhe.IDUP[1]=-15;
+    outlhe.IDUP[1]= -1*particleID;
     outlhe.ISTUP[1]=1;
     outlhe.ICOLUP[1].first=0;
     outlhe.ICOLUP[1].second=0;
@@ -292,7 +293,7 @@ EmbeddingLHEProducer::fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorent
     outlhe.SPINUP[1]=1.0;
     
     
-    outlhe.IDUP[2]=15;
+    outlhe.IDUP[2]= particleID;
     outlhe.ISTUP[2]=1;
     outlhe.ICOLUP[2].first=0;
     outlhe.ICOLUP[2].second=0;

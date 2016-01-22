@@ -77,15 +77,6 @@ process.schedule = cms.Schedule(process.p,process.RECOSIMoutput_step)
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
 
-
-#process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff")
-#process.schedule.insert(0, process.producemumuSelection)
-#process.p *= process.producemumuSelection
-#process.RECOSIMoutput.outputCommands.extend(
-#    cms.untracked.vstring("keep *_goodMuonsFormumuSelection_*_*",
-#                          "keep *_patMuonstobereplaced_*_*"
-#      ))
-
 process.RECOSIMoutput.outputCommands.extend(
     cms.untracked.vstring("drop * ",
                           "keep *_*_*_EMBS"
@@ -126,8 +117,7 @@ from Configuration.Generator.Pythia8CUEP8M1Settings_cfi import *
 
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
 				src = cms.InputTag("patMuonsAfterMediumID"),
-				switchToMuonEmbedding = cms.bool(True)
-				#mixHepMc = cms.bool(False)
+				switchToMuonEmbedding = cms.bool(False)
 				)
 
 
@@ -145,7 +135,7 @@ process.generator = cms.EDFilter("Pythia8HadronizerFilter",
  #           TauolaDefaultInputCards
  #           ),
 #	 parameterSets = cms.vstring('Tauola')
-#    ),				 
+#    ),
   maxEventsToPrint = cms.untracked.int32(1),
   nAttempts = cms.uint32(10),
   pythiaPylistVerbosity = cms.untracked.int32(0),
