@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 
 pregenerator = cms.EDProducer("EmbeddingProducer",
-				   src = cms.InputTag("patMuonsAfterKinCuts"),
+				   src = cms.InputTag("patMuonsAfterMediumID"),
 				   vtxSrc = cms.InputTag(
 				   "offlineSlimmedPrimaryVertices"
 				   #"offlinePrimaryVertices"

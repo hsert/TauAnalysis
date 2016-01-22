@@ -213,7 +213,8 @@ EmbeddingProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     if (passed_kin_cuts && is_z_candidate)
     {
       match_count_and_fill(selection[1],muon); // choosing "baseline" selection
-      if ( muon->isTightMuon(*offlinePrimaryVertices->begin()) )
+//      if ( muon->isTightMuon(*offlinePrimaryVertices->begin()) )
+      if ( muon->isMediumMuon())
       {
         match_count_and_fill(selection[2],muon); // choosing "id" selection
         if (passedTrigger1 || passedTrigger2)

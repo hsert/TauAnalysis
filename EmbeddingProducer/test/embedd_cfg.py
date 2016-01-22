@@ -4,8 +4,9 @@
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
 # with command line options: TauAnalysis/MCEmbeddingTools/python/ZmumuStandaloneSelection_cff --filein=file:step2.root --fileout=skimmed.root --python_filename=skim.py --eventcontent=RECOSIM --conditions MCRUN2_74_V9A --step NONE --magField 38T_PostLS1 --customise TauAnalysis/MCEmbeddingTools/setDefaults.setDefaults --customise TauAnalysis/MCEmbeddingTools/ZmumuStandaloneSelectionAll --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1,Configuration/DataProcessing/Utils.addMonitoring --no_exec -n -1
 import FWCore.ParameterSet.Config as cms
+from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('EMBS')
+process = cms.Process('EMBS',eras.Run2_25ns)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -37,17 +38,17 @@ process.p = cms.Path()
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(30)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:step2.root'),
+    fileNames = cms.untracked.vstring('file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/A8586143-EB6E-E511-8546-0025905B85B2.root'),
     secondaryFileNames = cms.untracked.vstring(),
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
     inputCommands = cms.untracked.vstring('keep *', 
-     'drop *_*_*_LHE',
-        )
+       'drop *_*_*_LHE',
+       )
 )
 
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
@@ -60,7 +61,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('test.root'),
+    fileName = cms.untracked.string('embedding.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -91,11 +92,10 @@ process.RECOSIMoutput.outputCommands.extend(
       ))
 
 
-#process.load("TauAnalysis.EmbeddingProducer.EmbeddingProducer_cfi")
+process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.DYToMuMuGenFilter_cff")
+process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff")
 
-
-#process.p *=process.pregenerator
-
+process.p *= (process.dYToMuMuGenFilter * process.makePatMuonsZmumu)
 
 #process.generator = cms.EDFilter("Pythia8EmbeddingGun",
 #				  PythiaParameters = cms.PSet(
@@ -125,9 +125,10 @@ from Configuration.Generator.Pythia8CUEP8M1Settings_cfi import *
 
 
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
-				 #  src = cms.InputTag("goodMuonsFormumuSelection"),
-				 #  mixHepMc = cms.bool(False)
-				  )
+				src = cms.InputTag("patMuonsAfterTightID"),
+				switchToTaus = cms.bool(True)
+				#mixHepMc = cms.bool(False)
+				)
 
 
 process.p *= process.externalLHEProducer
@@ -177,12 +178,6 @@ process.p *=process.generator
 
 
 # customisation of the process.
-
-# Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.postLS1Customs
-from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
-
-#call to customisation function customisePostLS1 imported from SLHCUpgradeSimulations.Configuration.postLS1Customs
-process = customisePostLS1(process)
 
 # Automatic addition of the customisation function from Configuration.DataProcessing.Utils
 #from Configuration.DataProcessing.Utils import addMonitoring 
