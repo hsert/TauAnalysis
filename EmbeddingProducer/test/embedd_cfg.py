@@ -117,8 +117,8 @@ from Configuration.Generator.Pythia8CUEP8M1Settings_cfi import *
 
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
 				src = cms.InputTag("patMuonsAfterMediumID"),
-				switchToMuonEmbedding = cms.bool(True),
-				mirroring = cms.bool(True)
+				switchToMuonEmbedding = cms.bool(False),
+				mirroring = cms.bool(False)
 				)
 
 
