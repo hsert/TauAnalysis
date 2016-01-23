@@ -78,7 +78,7 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
 
       void fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton, lhef::HEPEUP &outlhe);
       void transform_mumu_to_tautau(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton);
-      
+      void mirror(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton);
       
       // ----------member data ---------------------------
       boost::shared_ptr<lhef::LHERunInfo>	runInfoLast;
@@ -87,8 +87,9 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       boost::ptr_deque<LHERunInfoProduct>	runInfoProducts;
       edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
       bool switchToMuonEmbedding_;
+      bool mirroring_;
       const double tauMass_ = 1.77682;
-      int particleID_;
+      int leptonID_;
       
       
 };
@@ -121,7 +122,8 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    //now do what ever other initialization is needed
    muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
    switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
-   particleID_ = switchToMuonEmbedding_ ? 13 : 15;
+   mirroring_ = iConfig.getParameter<bool>("mirroring");
+   leptonID_ = switchToMuonEmbedding_ ? 13 : 15;
 }
 
 
@@ -169,6 +171,7 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     
     transform_mumu_to_tautau(positiveLepton,negativeLepton); // if MuonEmbedding, function does nothing.
+    mirror(positiveLepton,negativeLepton); // if no mirroring, function does nothing.
     fill_lhe_from_mumu(positiveLepton,negativeLepton,hepeup);
     
     double originalXWGTUP_ = 0.1;
@@ -245,7 +248,7 @@ EmbeddingLHEProducer::endRunProduce(edm::Run& run, edm::EventSetup const& es)
 void 
 EmbeddingLHEProducer::fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton, lhef::HEPEUP &outlhe){
   
-    TLorentzVector Z_vec =  positiveLepton + negativeLepton;
+    TLorentzVector Z = positiveLepton + negativeLepton;
     outlhe.resize(3);
     
     outlhe.IDUP[0] = 23;
@@ -254,15 +257,15 @@ EmbeddingLHEProducer::fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorent
     outlhe.ICOLUP[0].second = 0;
     outlhe.MOTHUP[0].first = 0;
     outlhe.MOTHUP[0].second = 0;
-    outlhe.PUP[0][0] = Z_vec.Px();
-    outlhe.PUP[0][1] = Z_vec.Py();
-    outlhe.PUP[0][2] = Z_vec.Pz();
-    outlhe.PUP[0][3] = Z_vec.E();
-    outlhe.PUP[0][4] = Z_vec.M();
+    outlhe.PUP[0][0] = Z.Px();
+    outlhe.PUP[0][1] = Z.Py();
+    outlhe.PUP[0][2] = Z.Pz();
+    outlhe.PUP[0][3] = Z.E();
+    outlhe.PUP[0][4] = Z.M();
     outlhe.SPINUP[0] = 9.0;
     
     
-    outlhe.IDUP[1] = -particleID_;
+    outlhe.IDUP[1] = -leptonID_;
     outlhe.ISTUP[1] = 1;
     outlhe.ICOLUP[1].first = 0;
     outlhe.ICOLUP[1].second = 0;
@@ -276,7 +279,7 @@ EmbeddingLHEProducer::fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorent
     outlhe.SPINUP[1] = 1.0;
     
     
-    outlhe.IDUP[2] = particleID_;
+    outlhe.IDUP[2] = leptonID_;
     outlhe.ISTUP[2] = 1;
     outlhe.ICOLUP[2].first = 0;
     outlhe.ICOLUP[2].second = 0;
@@ -329,7 +332,29 @@ void EmbeddingLHEProducer::transform_mumu_to_tautau(TLorentzVector &positiveLept
     return;
 }
 
+void EmbeddingLHEProducer::mirror(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton)
+{
+    if (!mirroring_) return;
 
+    // By construction, the 3-momenta of mu-, mu+ and Z are in one plane. 
+    // That means, one vector for perpendicular projection can be used for both leptons.
+    TLorentzVector Z = positiveLepton + negativeLepton;
+
+    TVector3 Z3 = Z.Vect();
+    TVector3 positiveLepton3 = positiveLepton.Vect();
+    TVector3 negativeLepton3 = negativeLepton.Vect();
+
+    TVector3 p3_perp = positiveLepton3 - positiveLepton3.Dot(Z3)/Z3.Dot(Z3)*Z3;
+    p3_perp = p3_perp.Unit();
+
+    positiveLepton3 -= 2*positiveLepton3.Dot(p3_perp)*p3_perp;
+    negativeLepton3 -= 2*negativeLepton3.Dot(p3_perp)*p3_perp;
+
+    positiveLepton.SetVect(positiveLepton3);
+    negativeLepton.SetVect(negativeLepton3);
+
+    return;
+}
 
 // ------------ method called when ending the processing of a run  ------------
 /*
