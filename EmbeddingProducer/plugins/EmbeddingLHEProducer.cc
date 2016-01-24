@@ -233,9 +233,6 @@ EmbeddingLHEProducer::beginRunProduce(edm::Run &run, edm::EventSetup const&)
 }
 
 
- 
-
-
 void 
 EmbeddingLHEProducer::endRunProduce(edm::Run& run, edm::EventSetup const& es)
 {

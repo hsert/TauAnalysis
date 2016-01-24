@@ -130,15 +130,23 @@ from GeneratorInterface.ExternalDecays.TauolaSettings_cff import *
 pythia8CommonSettingsBlock.pythia8CommonSettings.extend(cms.untracked.vstring('Init:showChangedSettings = off', 'Init:showChangedParticleData = off', 'Next:numberCount = 0'))
 
 process.generator = cms.EDFilter("Pythia8HadronizerFilter",
- #  ExternalDecays = cms.PSet(
- #       Tauola = cms.untracked.PSet(
- #           TauolaPolar,
- #           TauolaDefaultInputCards
- #           ),
-#	 parameterSets = cms.vstring('Tauola')
+#  ExternalDecays = cms.PSet(
+#    Tauola = cms.untracked.PSet(
+#      TauolaPolar,
+#      TauolaDefaultInputCards
 #    ),
+#    parameterSets = cms.vstring('Tauola')
+#  ),
   maxEventsToPrint = cms.untracked.int32(1),
-  nAttempts = cms.uint32(10),
+  nAttempts = cms.uint32(8),
+  HepMCFilter = cms.PSet(
+    filterName = cms.string('EmbeddingHepMCFilter'),
+    filterParameters = cms.PSet(
+      ptCut = cms.double(8.0),
+      absEtaCut = cms.double(2.5),
+      switchToMuonEmbedding = cms.bool(False)
+    )
+  ),
   pythiaPylistVerbosity = cms.untracked.int32(0),
   filterEfficiency = cms.untracked.double(1.0),
   pythiaHepMCVerbosity = cms.untracked.bool(False),
