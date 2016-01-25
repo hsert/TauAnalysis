@@ -84,9 +84,6 @@ process.p *= (process.dYToMuMuGenFilter * process.makePatMuonsZmumu * process.pr
 
 # customisation of the process.
 
-# Automatic addition of the customisation function from SLHCUpgradeSimulations.Configuration.postLS1Customs
-from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
-
 # Automatic addition of the customisation function from Configuration.DataProcessing.Utils
 from Configuration.DataProcessing.Utils import addMonitoring 
 

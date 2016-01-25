@@ -33,7 +33,7 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-
+#include "DataFormats/PatCandidates/interface/Muon.h"
 
 
 #include "SimDataFormats/GeneratorProducts/interface/LesHouches.h"
@@ -76,17 +76,22 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
       //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
-      void fill_lhe_from_mumu(TLorentzVector &mu_plus, TLorentzVector &mu_minus, lhef::HEPEUP &outlhe);
+      void fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton, lhef::HEPEUP &outlhe);
+      void fill_lhe_with_particle(TLorentzVector &particle, double spin, int particleindex , int motherindex, int pdgid, int status, lhef::HEPEUP &outlhe);
       
+      void transform_mumu_to_tautau(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton);
+      void mirror(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton);
       
       // ----------member data ---------------------------
       boost::shared_ptr<lhef::LHERunInfo>	runInfoLast;
       boost::shared_ptr<lhef::LHERunInfo>	runInfo;
       boost::shared_ptr<lhef::LHEEvent>	partonLevel;
       boost::ptr_deque<LHERunInfoProduct>	runInfoProducts;
-      
-      
-      
+      edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
+      bool switchToMuonEmbedding_;
+      bool mirroring_;
+      const double tauMass_ = 1.77682;
+      int leptonPDGID_;
       
       
 };
@@ -94,7 +99,6 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
 //
 // constants, enums and typedefs
 //
-
 
 //
 // static data member definitions
@@ -108,7 +112,6 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    //register your products
    produces<LHEEventProduct>();
    produces<LHERunInfoProduct, edm::InRun>();
-  
 /* Examples
    produces<ExampleData2>();
 
@@ -119,7 +122,10 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    produces<ExampleData2,InRun>();
 */
    //now do what ever other initialization is needed
-  
+   muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
+   switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
+   mirroring_ = iConfig.getParameter<bool>("mirroring");
+   leptonPDGID_ = switchToMuonEmbedding_ ? 13 : 15;
 }
 
 
@@ -140,40 +146,40 @@ EmbeddingLHEProducer::~EmbeddingLHEProducer()
 void
 EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-   using namespace edm;
-   
-  // boost::shared_ptr<lhef::LHEEvent> partonLevel;
-    // std::auto_ptr<LHEEventProduct> product(
-//	       new LHEEventProduct(*partonLevel->getHEPEUP(),
-//				   partonLevel->originalXWGTUP())
-//	       );
-   
-   
-//-13   1       col 1: 0        col 2: 0       f mom: 3        l mom: 3     -44.6966686     1.7242644       65.7211490      79.4987161      0.1056584   l time: 0.0000000  spin: 1.0000000
-//13    1       col 1: 0        col 2: 0       f mom: 3        l mom: 3     44.6966686      -1.7242644      98.3669058      108.0593568     0.1056584   l time: 0.0000000  spin: -1.0000000  
-   
-   
-   
-   
-   lhef::HEPEUP hepeup;
-   //double mass = 0.1056584; //mu 
-   double mass = 1.77682;  //tau 
-   
-   TLorentzVector mu_plus;
-   mu_plus.SetXYZM(-44.6966686,1.7242644,65.7211490,mass);
-   TLorentzVector mu_minus;
-   mu_minus.SetXYZM(44.6966686,-1.7242644,98.3669058,mass);
-   fill_lhe_from_mumu(mu_plus,mu_minus,hepeup);
-   
+    using namespace edm;
     
-    double originalXWGTUP_=0.1;
-     std::auto_ptr<LHEEventProduct> product(
-	       new LHEEventProduct(hepeup,originalXWGTUP_)
-	       );
-     iEvent.put(product);
-   
-   
-   
+    
+    Handle<std::vector<pat::Muon>> coll_muons;
+    iEvent.getByToken(muonsCollection_ , coll_muons);
+    TLorentzVector positiveLepton, negativeLepton;
+    bool mu_plus_found = false;
+    bool mu_minus_found = false;
+
+    lhef::HEPEUP hepeup;
+    // Assuming Pt-Order
+    for (std::vector<pat::Muon>::const_iterator muon=  coll_muons->begin(); muon!= coll_muons->end();  ++muon)
+    {
+      if (muon->charge() == 1 && !mu_plus_found)
+      {
+        positiveLepton.SetPxPyPzE(muon->p4().px(),muon->p4().py(),muon->p4().pz(), muon->p4().e());
+        mu_plus_found = true;
+      }
+      else if (muon->charge() == -1 && !mu_minus_found)
+      {
+        negativeLepton.SetPxPyPzE(muon->p4().px(),muon->p4().py(),muon->p4().pz(), muon->p4().e());
+        mu_minus_found = true;
+      }
+      else if (mu_minus_found && mu_plus_found) break;
+    }
+    
+    transform_mumu_to_tautau(positiveLepton,negativeLepton); // if MuonEmbedding, function does nothing.
+    mirror(positiveLepton,negativeLepton); // if no mirroring, function does nothing.
+    fill_lhe_from_mumu(positiveLepton,negativeLepton,hepeup);
+    
+    double originalXWGTUP_ = 0.1;
+    std::auto_ptr<LHEEventProduct> product( new LHEEventProduct(hepeup,originalXWGTUP_) );
+    iEvent.put(product);
+
 /* This is an event example
    //Read 'ExampleData' from the Event
    Handle<ExampleData> pIn;
@@ -222,14 +228,9 @@ EmbeddingLHEProducer::beginRunProduce(edm::Run &run, edm::EventSetup const&)
 
     std::auto_ptr<LHERunInfoProduct> runInfo(new LHERunInfoProduct(heprup));
   
-   run.put(runInfo);
- 
- // std::cout<<"vvv"<<std::endl;
+    run.put(runInfo);
   
 }
-
-
- 
 
 
 void 
@@ -244,199 +245,103 @@ EmbeddingLHEProducer::endRunProduce(edm::Run& run, edm::EventSetup const& es)
 }
 
 void 
-EmbeddingLHEProducer::fill_lhe_from_mumu(TLorentzVector &mu_plus, TLorentzVector &mu_minus, lhef::HEPEUP &outlhe){
-  
-    TLorentzVector Z_vec =  mu_plus+mu_minus;
+EmbeddingLHEProducer::fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton, lhef::HEPEUP &outlhe)
+{
+    TLorentzVector Z = positiveLepton + negativeLepton;
     outlhe.resize(3);
     
-//    double pz2 = -0.5*(Z_vec.E()-Z_vec.P());
- 
-
+    fill_lhe_with_particle(Z,9.0,0,0,23,2,outlhe);
+    fill_lhe_with_particle(positiveLepton,1.0,1,1,-leptonPDGID_,1,outlhe);
+    fill_lhe_with_particle(negativeLepton,-1.0,2,1,leptonPDGID_,1,outlhe);
     
-    outlhe.IDUP[0]=23;
-    outlhe.ISTUP[0]=2;
-    outlhe.ICOLUP[0].first=0;
-    outlhe.ICOLUP[0].second=0;
-    outlhe.MOTHUP[0].first=0;
-    outlhe.MOTHUP[0].second=0;
-    outlhe.PUP[0][0]=0.0;
-    outlhe.PUP[0][1]=0.0;
-    outlhe.PUP[0][2]=Z_vec.P();
-    outlhe.PUP[0][3]=Z_vec.E();
-    outlhe.PUP[0][4]=Z_vec.M();
-    outlhe.SPINUP[0]=0.0;
+    return;
+}
+
+void EmbeddingLHEProducer::fill_lhe_with_particle(TLorentzVector &particle, double spin, int particleindex, int motherindex, int pdgid, int status, lhef::HEPEUP &outlhe)
+{
+    // Pay attention to different index conventions:
+    // 'particleindex' follows usual C++ index conventions starting at 0 for a list.
+    // 'motherindex' follows the LHE index conventions: 0 is for 'not defined', so the listing starts at 1.
+    // That means: LHE index 1 == C++ index 0.
+    outlhe.PUP[particleindex][0] = particle.Px();
+    outlhe.PUP[particleindex][1] = particle.Py();
+    outlhe.PUP[particleindex][2] = particle.Pz();
+    outlhe.PUP[particleindex][3] = particle.E();
+    outlhe.PUP[particleindex][4] = particle.M();
+    outlhe.SPINUP[particleindex] = spin;
     
+    outlhe.MOTHUP[particleindex].first = motherindex;
+    outlhe.MOTHUP[particleindex].second = motherindex;
+    outlhe.IDUP[particleindex] = pdgid;
+    outlhe.ISTUP[particleindex] = status;
+    outlhe.ICOLUP[particleindex].first = 0;
+    outlhe.ICOLUP[particleindex].second = 0;
     
-    outlhe.IDUP[1]=-15;
-   // outlhe.VTIMUP[1]=0.08711;
-    outlhe.ISTUP[1]=1;
-    outlhe.ICOLUP[1].first=0;
-    outlhe.ICOLUP[1].second=0;
-    outlhe.MOTHUP[1].first=1;
-    outlhe.MOTHUP[1].second=1;
-    outlhe.PUP[1][0]=mu_plus.Px();
-    outlhe.PUP[1][1]=mu_plus.Py();
-    outlhe.PUP[1][2]=mu_plus.Pz();
-    outlhe.PUP[1][3]=mu_plus.E();
-    outlhe.PUP[1][4]=mu_plus.M();
-    outlhe.SPINUP[1]=1.0;
+    return;
+}
+
+
+
+
+void EmbeddingLHEProducer::transform_mumu_to_tautau(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton)
+{
+    // No corrections applied for muon embedding
+    if (switchToMuonEmbedding_) return;
+
+    TLorentzVector Z = positiveLepton + negativeLepton;
+
+    TVector3 boost_from_Z_to_LAB = Z.BoostVector();
+    TVector3 boost_from_LAB_to_Z = -Z.BoostVector();
+
+    // Boosting the two leptons to Z restframe, then both are back to back. This means, same 3-momentum squared
+    positiveLepton.Boost(boost_from_LAB_to_Z);
+    negativeLepton.Boost(boost_from_LAB_to_Z);
+
+    // Energy of tau = 0.5*Z-mass
+    double tau_mass_squared = tauMass_*tauMass_;
+    double tau_energy_squared = 0.25*Z.M2();
+    double tau_3momentum_squared = tau_energy_squared - tau_mass_squared;
+    if (tau_3momentum_squared < 0)
+    {
+        std::cout << "3-Momentum squared is negative" << std::endl;
+        return;
+    }
     
-    
-    outlhe.IDUP[2]=15;
-   // outlhe.VTIMUP[2]=0.08711; 
-    outlhe.ISTUP[2]=1;
-    outlhe.ICOLUP[2].first=0;
-    outlhe.ICOLUP[2].second=0;
-    outlhe.MOTHUP[2].first=1;
-    outlhe.MOTHUP[2].second=1;
-    outlhe.PUP[2][0]=mu_minus.Px();
-    outlhe.PUP[2][1]=mu_minus.Py();
-    outlhe.PUP[2][2]=mu_minus.Pz();
-    outlhe.PUP[2][3]=mu_minus.E();
-    outlhe.PUP[2][4]=mu_minus.M();
-    outlhe.SPINUP[2]=-1.0;
-    
-   // hepeup.IDUP[1]=-13;
-    
-// 2   -1      col 1: 501      col 2: 0        f mom: 0        l mom: 0    0.0000000       0.0000000       175.8230639     175.8230639     0.0000000  l time: 0.0000000   spin: -1.0000000
-//-2   -1      col 1: 0        col 2: 501      f mom: 0        l mom: 0     0.0000000       0.0000000       -11.7350091     11.7350091      0.0000000   l time: 0.0000000  spin: 1.0000000
-//23    2       col 1: 0        col 2: 0       f mom: 1        l mom: 2     0.0000000       0.0000000       164.0880548     187.5580730     90.8467996  l time: 0.0000000  spin: 9.0000000
-//-13   1       col 1: 0        col 2: 0       f mom: 3        l mom: 3     -44.6966686     1.7242644       65.7211490      79.4987161      0.1056584   l time: 0.0000000  spin: 1.0000000
-//13    1       col 1: 0        col 2: 0       f mom: 3        l mom: 3     44.6966686      -1.7242644      98.3669058      108.0593568     0.1056584   l time: 0.0000000  spin: -1.0000000  
-    
+    //Computing scale, applying it on the 3-momenta and building new 4 momenta of the taus
+    double scale = std::sqrt(tau_3momentum_squared/positiveLepton.Vect().Mag2());
+    positiveLepton.SetPxPyPzE(scale*positiveLepton.Px(),scale*positiveLepton.Py(),scale*positiveLepton.Pz(),std::sqrt(tau_energy_squared));
+    negativeLepton.SetPxPyPzE(scale*negativeLepton.Px(),scale*negativeLepton.Py(),scale*negativeLepton.Pz(),std::sqrt(tau_energy_squared));
 
-   
+    //Boosting the new taus back to LAB frame
+    positiveLepton.Boost(boost_from_Z_to_LAB);
+    negativeLepton.Boost(boost_from_Z_to_LAB);
 
+    return;
+}
 
-//    -3      -1      col 1: 0        col 2: 501      0.0000000       0.0000000       23.2430806      23.2430806      0.0000000
-//3       -1      col 1: 501      col 2: 0        0.0000000       0.0000000       -88.2875737     88.2875737      0.0000000
-//23      2       col 1: 0        col 2: 0        0.0000000       0.0000000       -65.0444930     111.5306543     90.5996731
-//-13     1       col 1: 0        col 2: 0        -36.2418089     1.5554354       0.8786733       36.2859660      0.1056584
-//13      1       col 1: 0        col 2: 0        36.2418089      -1.5554354      -65.9231664     75.2446883      0.1056584
+void EmbeddingLHEProducer::mirror(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton)
+{
+    if (!mirroring_) return;
 
-    
-  
-  
-  
-  
-  
- return; 
-} 
+    // By construction, the 3-momenta of mu-, mu+ and Z are in one plane. 
+    // That means, one vector for perpendicular projection can be used for both leptons.
+    TLorentzVector Z = positiveLepton + negativeLepton;
 
+    TVector3 Z3 = Z.Vect();
+    TVector3 positiveLepton3 = positiveLepton.Vect();
+    TVector3 negativeLepton3 = negativeLepton.Vect();
 
-void 
-aaaaafill_lhe_from_mumu(TLorentzVector &mu_plus, TLorentzVector &mu_minus, lhef::HEPEUP &outlhe){
-  
-    TLorentzVector Z_vec =  mu_plus+mu_minus;
-    outlhe.resize(5);
-    
-    double pz2 = -0.5*(Z_vec.E()-Z_vec.P());
- 
-    outlhe.IDUP[0]=2;
-    outlhe.ISTUP[0]=-1;
-    outlhe.ICOLUP[0].first=501;
-    outlhe.ICOLUP[0].second=0;
-    outlhe.MOTHUP[0].first=0;
-    outlhe.MOTHUP[0].second=0;    
-    outlhe.PUP[0][0]=0.0;
-    outlhe.PUP[0][1]=0.0;
-    outlhe.PUP[0][2]=Z_vec.P()-pz2;
-    outlhe.PUP[0][3]=Z_vec.P()-pz2;
-    outlhe.PUP[0][4]=0.0;
-    outlhe.SPINUP[0]=-1.0;
-    
-    outlhe.IDUP[1]=-2;
-    outlhe.ISTUP[1]=-1;
-    outlhe.ICOLUP[1].first=0;
-    outlhe.ICOLUP[1].second=501;
-    outlhe.MOTHUP[1].first=0;
-    outlhe.MOTHUP[1].second=0;
-    outlhe.PUP[1][0]=0.0;
-    outlhe.PUP[1][1]=0.0;
-     outlhe.PUP[1][2]=pz2;
-     outlhe.PUP[1][3]=-pz2;
-     outlhe.PUP[1][4]=0;
-     outlhe.SPINUP[1]=1.0;
-    
-    outlhe.IDUP[2]=23;
-    outlhe.ISTUP[2]=2;
-    outlhe.ICOLUP[2].first=0;
-    outlhe.ICOLUP[2].second=0;
-    outlhe.MOTHUP[2].first=1;
-    outlhe.MOTHUP[2].second=2;
-    outlhe.PUP[2][0]=0.0;
-    outlhe.PUP[2][1]=0.0;
-    outlhe.PUP[2][2]=Z_vec.P();
-    outlhe.PUP[2][3]=Z_vec.E();
-    outlhe.PUP[2][4]=Z_vec.M();
-    outlhe.SPINUP[2]=0.0;
-    
-    
-    outlhe.IDUP[3]=-13;
-    outlhe.ISTUP[3]=1;
-    outlhe.ICOLUP[3].first=0;
-    outlhe.ICOLUP[3].second=0;
-    outlhe.MOTHUP[3].first=3;
-    outlhe.MOTHUP[3].second=3;
-    outlhe.PUP[3][0]=mu_plus.Px();
-    outlhe.PUP[3][1]=mu_plus.Py();
-    outlhe.PUP[3][2]=mu_plus.Pz();
-    outlhe.PUP[3][3]=mu_plus.E();
-    outlhe.PUP[3][4]=mu_plus.M();
-    outlhe.SPINUP[3]=1.0;
-    
-    
-    outlhe.IDUP[4]=13;
-   outlhe.ISTUP[4]=1;
-   outlhe.ICOLUP[4].first=0;
-   outlhe.ICOLUP[4].second=0;
-    outlhe.MOTHUP[4].first=3;
-    outlhe.MOTHUP[4].second=3;
-    outlhe.PUP[4][0]=mu_minus.Px();
-    outlhe.PUP[4][1]=mu_minus.Py();
-    outlhe.PUP[4][2]=mu_minus.Pz();
-    outlhe.PUP[4][3]=mu_minus.E();
-    outlhe.PUP[4][4]=mu_minus.M();
-    outlhe.SPINUP[4]=-1.0;
-    
-   // hepeup.IDUP[1]=-13;
-    
-// 2   -1      col 1: 501      col 2: 0        f mom: 0        l mom: 0    0.0000000       0.0000000       175.8230639     175.8230639     0.0000000  l time: 0.0000000   spin: -1.0000000
-//-2   -1      col 1: 0        col 2: 501      f mom: 0        l mom: 0     0.0000000       0.0000000       -11.7350091     11.7350091      0.0000000   l time: 0.0000000  spin: 1.0000000
-//23    2       col 1: 0        col 2: 0       f mom: 1        l mom: 2     0.0000000       0.0000000       164.0880548     187.5580730     90.8467996  l time: 0.0000000  spin: 9.0000000
-//-13   1       col 1: 0        col 2: 0       f mom: 3        l mom: 3     -44.6966686     1.7242644       65.7211490      79.4987161      0.1056584   l time: 0.0000000  spin: 1.0000000
-//13    1       col 1: 0        col 2: 0       f mom: 3        l mom: 3     44.6966686      -1.7242644      98.3669058      108.0593568     0.1056584   l time: 0.0000000  spin: -1.0000000  
-    
+    TVector3 p3_perp = positiveLepton3 - positiveLepton3.Dot(Z3)/Z3.Dot(Z3)*Z3;
+    p3_perp = p3_perp.Unit();
 
-   
+    positiveLepton3 -= 2*positiveLepton3.Dot(p3_perp)*p3_perp;
+    negativeLepton3 -= 2*negativeLepton3.Dot(p3_perp)*p3_perp;
 
+    positiveLepton.SetVect(positiveLepton3);
+    negativeLepton.SetVect(negativeLepton3);
 
-//    -3      -1      col 1: 0        col 2: 501      0.0000000       0.0000000       23.2430806      23.2430806      0.0000000
-//3       -1      col 1: 501      col 2: 0        0.0000000       0.0000000       -88.2875737     88.2875737      0.0000000
-//23      2       col 1: 0        col 2: 0        0.0000000       0.0000000       -65.0444930     111.5306543     90.5996731
-//-13     1       col 1: 0        col 2: 0        -36.2418089     1.5554354       0.8786733       36.2859660      0.1056584
-//13      1       col 1: 0        col 2: 0        36.2418089      -1.5554354      -65.9231664     75.2446883      0.1056584
-
-    
-  
-  
-  
-  
-  
- return; 
-} 
-
-
-
-
-
-
-
-
-
-
-
-
+    return;
+}
 
 // ------------ method called when ending the processing of a run  ------------
 /*

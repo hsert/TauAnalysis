@@ -25,36 +25,63 @@ patMuonsEmbedding.embedTcMETMuonCorrs = cms.bool(False)
 patMuonsAfterKinCuts = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag(
     "slimmedMuons"
-    #"patMuonsEmbedding"
+#    "patMuonsEmbedding"
     ),
     cut = cms.string("pt > 8 && abs(eta) < 2.5"),
-    filter = cms.bool(False)
+    filter = cms.bool(True)
+)
+
+
+# For impact parameter (w.r.t. to PV) requirements, a vector collection is needed, therefore only dB < 0.2 required.
+# The default requirements (in C++):
+# 1) fabs(recoMu.muonBestTrack()->dxy(vertex->position())) < 0.2 ----> similar to dB < 0.2
+# 2) fabs(recoMu.muonBestTrack()->dz(vertex->position())) < 0.5
+patMuonsAfterTightID = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag("patMuonsAfterKinCuts"),
+    cut = cms.string(
+    "isPFMuon && isGlobalMuon"
+    " && muonID('GlobalMuonPromptTight')"
+    " && numberOfMatchedStations > 1"
+    " && innerTrack.hitPattern.trackerLayersWithMeasurement > 5"
+    " && innerTrack.hitPattern.numberOfValidPixelHits > 0"
+    " && dB < 0.2"
+    ),
+    filter = cms.bool(True)
+)
+
+patMuonsAfterMediumID = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag("patMuonsAfterKinCuts"),
+    cut = cms.string("isMediumMuon"),
+    filter = cms.bool(True)
 )
 
 ZmumuCandidates = cms.EDProducer("CandViewShallowCloneCombiner",
     checkCharge = cms.bool(True),
     # require one of the muons with pT > 17 GeV, and an invariant mass > 20 GeV
     cut = cms.string('charge = 0 & max(daughter(0).pt, daughter(1).pt) > 17 & mass > 20'),
-    decay = cms.string("patMuonsAfterKinCuts@+ patMuonsAfterKinCuts@-")
+    decay = cms.string(
+#    "patMuonsAfterKinCuts@+ patMuonsAfterKinCuts@-"
+#    "patMuonsAfterTightID@+ patMuonsAfterTightID@-"
+    "patMuonsAfterMediumID@+ patMuonsAfterMediumID@-"
+    )
 )
 
 
 ZmumuCandidatesFilter = cms.EDFilter("CandViewCountFilter",
     src = cms.InputTag("ZmumuCandidates"),
-    minNumber = cms.uint32(0),
-    filter = cms.bool(False)
+    minNumber = cms.uint32(1),
+    filter = cms.bool(True)
 )
 
 
 ## Sequence for Z->mumu selection
 makePatMuonsZmumu = cms.Sequence(
-#    doubleMuonTrigger
+    doubleMuonTrigger
 #    + makePatMuons
 #    + patMuonsEmbedding
-    patMuonsAfterKinCuts
+    + patMuonsAfterKinCuts
+#    + patMuonsAfterTightID
+    + patMuonsAfterMediumID
     + ZmumuCandidates
-#    + ZmumuCandidatesFilter
+    + ZmumuCandidatesFilter
 )
-
-
-
