@@ -138,12 +138,16 @@ process.generator = cms.EDFilter("Pythia8HadronizerFilter",
 #    parameterSets = cms.vstring('Tauola')
 #  ),
   maxEventsToPrint = cms.untracked.int32(1),
-  nAttempts = cms.uint32(8),
+  nAttempts = cms.uint32(10),
   HepMCFilter = cms.PSet(
     filterName = cms.string('EmbeddingHepMCFilter'),
     filterParameters = cms.PSet(
-      ptCut = cms.double(8.0),
-      absEtaCut = cms.double(2.5),
+      ElElCut = cms.string("El1.Pt > 22 && El2.Pt > 10"),
+      MuMuCut = cms.string("Mu1.Pt > 17 && Mu2.Pt > 8"),
+      HadHadCut = cms.string("Had1.Pt > 35 && Had2.Pt > 30"),
+      ElMuCut = cms.string("(El.Pt > 21 && Mu.Pt > 10) || (El.Pt > 10 && Mu.Pt > 21)"),
+      ElHadCut = cms.string("El.Pt > 28 && Had.Pt > 25"),
+      MuHadCut = cms.string("Mu.Pt > 18 && Had.Pt > 25 && Mu.Eta < 2.1"),
       switchToMuonEmbedding = cms.bool(False)
     )
   ),

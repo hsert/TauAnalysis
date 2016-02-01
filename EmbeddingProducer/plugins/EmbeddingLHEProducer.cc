@@ -77,7 +77,7 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
       void fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton, lhef::HEPEUP &outlhe);
-      void fill_lhe_with_particle(TLorentzVector &particle, double spin, int particleindex , int motherindex, int pdgid, int status, lhef::HEPEUP &outlhe);
+      void fill_lhe_with_particle(TLorentzVector &particle, double spin, int motherindex, int pdgid, int status, lhef::HEPEUP &outlhe);
       
       void transform_mumu_to_tautau(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton);
       void mirror(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton);
@@ -91,7 +91,6 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       bool switchToMuonEmbedding_;
       bool mirroring_;
       const double tauMass_ = 1.77682;
-      int leptonPDGID_;
       
       
 };
@@ -125,7 +124,6 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
    switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
    mirroring_ = iConfig.getParameter<bool>("mirroring");
-   leptonPDGID_ = switchToMuonEmbedding_ ? 13 : 15;
 }
 
 
@@ -248,34 +246,39 @@ void
 EmbeddingLHEProducer::fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton, lhef::HEPEUP &outlhe)
 {
     TLorentzVector Z = positiveLepton + negativeLepton;
-    outlhe.resize(3);
-    
-    fill_lhe_with_particle(Z,9.0,0,0,23,2,outlhe);
-    fill_lhe_with_particle(positiveLepton,1.0,1,1,-leptonPDGID_,1,outlhe);
-    fill_lhe_with_particle(negativeLepton,-1.0,2,1,leptonPDGID_,1,outlhe);
+    int leptonPDGID = switchToMuonEmbedding_ ? 13 : 15;
+    fill_lhe_with_particle(Z,9.0,0,23,2,outlhe);
+    fill_lhe_with_particle(positiveLepton,1.0,1,-leptonPDGID,1,outlhe);
+    fill_lhe_with_particle(negativeLepton,-1.0,1,leptonPDGID,1,outlhe);
     
     return;
 }
 
-void EmbeddingLHEProducer::fill_lhe_with_particle(TLorentzVector &particle, double spin, int particleindex, int motherindex, int pdgid, int status, lhef::HEPEUP &outlhe)
+void EmbeddingLHEProducer::fill_lhe_with_particle(TLorentzVector &particle, double spin, int motherindex, int pdgid, int status, lhef::HEPEUP &outlhe)
 {
     // Pay attention to different index conventions:
     // 'particleindex' follows usual C++ index conventions starting at 0 for a list.
     // 'motherindex' follows the LHE index conventions: 0 is for 'not defined', so the listing starts at 1.
     // That means: LHE index 1 == C++ index 0.
+    //std::cout << "old NUP: " << outlhe.NUP << std::endl;
+    int particleindex = outlhe.NUP;
+    outlhe.resize(outlhe.NUP+1);
+    //std::cout << "new NUP: " << outlhe.NUP << std::endl;
+    //std::cout << "particle index C++: " << particleindex << std::endl;
+    
     outlhe.PUP[particleindex][0] = particle.Px();
     outlhe.PUP[particleindex][1] = particle.Py();
     outlhe.PUP[particleindex][2] = particle.Pz();
     outlhe.PUP[particleindex][3] = particle.E();
     outlhe.PUP[particleindex][4] = particle.M();
     outlhe.SPINUP[particleindex] = spin;
+    outlhe.ICOLUP[particleindex].first = 0;
+    outlhe.ICOLUP[particleindex].second = 0;
     
     outlhe.MOTHUP[particleindex].first = motherindex;
     outlhe.MOTHUP[particleindex].second = motherindex;
     outlhe.IDUP[particleindex] = pdgid;
     outlhe.ISTUP[particleindex] = status;
-    outlhe.ICOLUP[particleindex].first = 0;
-    outlhe.ICOLUP[particleindex].second = 0;
     
     return;
 }
