@@ -6,7 +6,7 @@ from HLTrigger.HLTfilters.triggerResultsFilter_cfi import *
 
 
 ## Trigger requirements
-doubleMuonTrigger = cms.EDFilter("TriggerResultsFilter",
+doubleMuonHLTTrigger = cms.EDFilter("TriggerResultsFilter",
     hltResults = cms.InputTag("TriggerResults","","HLT"),
     l1tResults = cms.InputTag(""),
     throw = cms.bool(False),
@@ -16,17 +16,8 @@ doubleMuonTrigger = cms.EDFilter("TriggerResultsFilter",
 
 
 ## Muon selection
-patMuonsEmbedding = patMuons.clone()
-patMuonsEmbedding.addGenMatch = cms.bool(True)
-patMuonsEmbedding.embedCaloMETMuonCorrs = cms.bool(False)
-patMuonsEmbedding.embedTcMETMuonCorrs = cms.bool(False)
-
-
 patMuonsAfterKinCuts = cms.EDFilter("PATMuonSelector",
-    src = cms.InputTag(
-    "slimmedMuons"
-#    "patMuonsEmbedding"
-    ),
+    src = cms.InputTag("slimmedMuons"),
     cut = cms.string("pt > 8 && abs(eta) < 2.5"),
     filter = cms.bool(True)
 )
@@ -55,15 +46,17 @@ patMuonsAfterMediumID = cms.EDFilter("PATMuonSelector",
     filter = cms.bool(True)
 )
 
+patMuonsAfterID = cms.EDFilter("PATMuonSelector",
+    src = cms.InputTag("patMuonsAfterKinCuts"),
+    cut = cms.string("isLooseMuon"),
+    filter = cms.bool(True)
+)
+
 ZmumuCandidates = cms.EDProducer("CandViewShallowCloneCombiner",
     checkCharge = cms.bool(True),
     # require one of the muons with pT > 17 GeV, and an invariant mass > 20 GeV
     cut = cms.string('charge = 0 & max(daughter(0).pt, daughter(1).pt) > 17 & mass > 20'),
-    decay = cms.string(
-#    "patMuonsAfterKinCuts@+ patMuonsAfterKinCuts@-"
-#    "patMuonsAfterTightID@+ patMuonsAfterTightID@-"
-    "patMuonsAfterMediumID@+ patMuonsAfterMediumID@-"
-    )
+    decay = cms.string("patMuonsAfterID@+ patMuonsAfterID@-")
 )
 
 
@@ -74,14 +67,15 @@ ZmumuCandidatesFilter = cms.EDFilter("CandViewCountFilter",
 )
 
 
-## Sequence for Z->mumu selection
-makePatMuonsZmumu = cms.Sequence(
-    doubleMuonTrigger
-#    + makePatMuons
-#    + patMuonsEmbedding
+## Sequence for baseline Z->mumu selection
+makePatMuonsZmumuBaseline = cms.Sequence(
+    doubleMuonHLTTrigger
     + patMuonsAfterKinCuts
-#    + patMuonsAfterTightID
-    + patMuonsAfterMediumID
-    + ZmumuCandidates
+)
+
+## Sequence to choose Z candidates
+
+makeZmumuCandidates = cms.Sequence(
+    ZmumuCandidates
     + ZmumuCandidatesFilter
 )
