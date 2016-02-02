@@ -221,7 +221,7 @@ EmbeddingHepMCFilter::filter(const HepMC::GenEvent* evt)
     //std::cout << "DecayChannel: " << return_mode(DecayChannel_.first) << return_mode(DecayChannel_.second) << std::endl;
     sort_by_convention(DecayChannel_, p4VisPair_);
     //std::cout << "DecayChannel: " << return_mode(DecayChannel_.first) << return_mode(DecayChannel_.second) << std::endl;
-    std::cout << "Pt's: " << p4VisPair_[0].Pt() << " " << p4VisPair_[1].Pt() << std::endl;
+   // std::cout << "Pt's: " << p4VisPair_[0].Pt() << " " << p4VisPair_[1].Pt() << std::endl;
     return apply_cuts(DecayChannel_, p4VisPair_, cuts_);
 }
 
@@ -298,10 +298,10 @@ EmbeddingHepMCFilter::apply_cuts(DecayChannel &dc, std::vector<reco::Candidate::
         bool all_cuts_passed = false;
         if(dc.first == cuts[i].decaychannel.first && dc.second ==  cuts[i].decaychannel.second)
         {
-            std::cout << "Cut number " << i << " pt1 = " << cuts[i].pt1 << " pt2 = " << cuts[i].pt2;
-            std::cout << " eta1 = " << cuts[i].eta1 << " eta2 = " << cuts[i].eta2;
-            std::cout << " decay channel: " << return_mode(cuts[i].decaychannel.first);
-            std::cout << return_mode(cuts[i].decaychannel.second) << std::endl;
+          //  std::cout << "Cut number " << i << " pt1 = " << cuts[i].pt1 << " pt2 = " << cuts[i].pt2;
+         //   std::cout << " eta1 = " << cuts[i].eta1 << " eta2 = " << cuts[i].eta2;
+         //   std::cout << " decay channel: " << return_mode(cuts[i].decaychannel.first);
+         //   std::cout << return_mode(cuts[i].decaychannel.second) << std::endl;
             
             if(cuts[i].pt1 != -1. && !(p4VisPair[0].Pt() > cuts[i].pt1)) all_cuts_passed = false;
             else if (cuts[i].pt2 != -1. && !(p4VisPair[1].Pt() > cuts[i].pt2)) all_cuts_passed = false;
@@ -311,7 +311,7 @@ EmbeddingHepMCFilter::apply_cuts(DecayChannel &dc, std::vector<reco::Candidate::
         }
         if (all_cuts_passed)
         {
-            std::cout << "All cuts of one path passed!!!!" << std::endl;
+           // std::cout << "All cuts of one path passed!!!!" << std::endl;
             return true;
         }
     }
