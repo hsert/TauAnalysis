@@ -46,11 +46,13 @@ patMuonsAfterMediumID = cms.EDFilter("PATMuonSelector",
     filter = cms.bool(True)
 )
 
-patMuonsAfterID = cms.EDFilter("PATMuonSelector",
+patMuonsAfterLooseID = cms.EDFilter("PATMuonSelector",
     src = cms.InputTag("patMuonsAfterKinCuts"),
     cut = cms.string("isLooseMuon"),
     filter = cms.bool(True)
 )
+
+patMuonsAfterID = patMuonsAfterLooseID.clone()
 
 ZmumuCandidates = cms.EDProducer("CandViewShallowCloneCombiner",
     checkCharge = cms.bool(True),
@@ -66,16 +68,25 @@ ZmumuCandidatesFilter = cms.EDFilter("CandViewCountFilter",
     filter = cms.bool(True)
 )
 
-
-## Sequence for baseline Z->mumu selection
-makePatMuonsZmumuBaseline = cms.Sequence(
+makePatMuonsZmumuSelection = cms.Sequence(
     doubleMuonHLTTrigger
     + patMuonsAfterKinCuts
+    + patMuonsAfterID
+    + ZmumuCandidates
+    + ZmumuCandidatesFilter
 )
+
+
+
+## Sequence for baseline Z->mumu selection
+#makePatMuonsZmumuBaseline = cms.Sequence(
+#    doubleMuonHLTTrigger
+#    patMuonsAfterKinCuts
+#)
 
 ## Sequence to choose Z candidates
 
-makeZmumuCandidates = cms.Sequence(
-    ZmumuCandidates
-    + ZmumuCandidatesFilter
-)
+#makeZmumuCandidates = cms.Sequence(
+#    ZmumuCandidates
+#    + ZmumuCandidatesFilter
+#)

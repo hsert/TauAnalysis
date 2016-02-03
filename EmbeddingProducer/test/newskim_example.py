@@ -70,21 +70,6 @@ process.RECOSIMoutput.outputCommands.extend(
 
 # Path and EndPath definitions
 
-#Path declaration, the proper definition is done in the customise functions
-process.muonsLooseID = cms.Path()
-process.muonsMediumID = cms.Path()
-process.muonsTightID = cms.Path()
-
-#Needed as formalism to define paths as trigger paths 
-process.hltTriggerType = cms.EDFilter("HLTTriggerTypeFilter",
-    SelectedTriggerType = cms.int32(1)
-)
-
-process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff")
-
-process.hltBoolEnd = cms.EDFilter( "HLTBool",
-        result = cms.bool( True )
-    )
 
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
 				src = cms.InputTag("patMuonsAfterID","","EMBS"),
@@ -112,9 +97,11 @@ from Configuration.DataProcessing.Utils import addMonitoring
 #call to customisation function addMonitoring imported from Configuration.DataProcessing.Utils
 process = addMonitoring(process)
 
-from TauAnalysis.EmbeddingProducer.customisers import customiseMuonInputForMiniAOD, customiseMuonInputForRECO
-
+#from TauAnalysis.EmbeddingProducer.customisers import customiseMuonInputForMiniAOD
 #process = customiseMuonInputForMiniAOD(process)
+
+
+from TauAnalysis.EmbeddingProducer.customisers import customiseMuonInputForRECO
 process = customiseMuonInputForRECO(process)
 
 # End of customisation functions

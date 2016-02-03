@@ -5,55 +5,35 @@
 import FWCore.ParameterSet.Config as cms
 
 
-# Muon selection
+def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='loose'):
 
-def muonSelectionPath(process, ID = "loose"):
-    from TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff import patMuonsAfterID
-    path = cms.Path()
-    if ID == "loose": patMuonsAfterID.cut = cms.string("isLooseMuon")
-    elif ID == "medium": patMuonsAfterID.cut = cms.string("isMediumMuon")
-    elif ID == "tight": patMuonsAfterID.cut = cut = cms.string(
-        "isPFMuon && isGlobalMuon"
-        " && muonID('GlobalMuonPromptTight')"
-        " && numberOfMatchedStations > 1"
-        " && innerTrack.hitPattern.trackerLayersWithMeasurement > 5"
-        " && innerTrack.hitPattern.numberOfValidPixelHits > 0"
-        " && dB < 0.2"
-    )
-    path *= (process.hltTriggerType * process.makePatMuonsZmumuBaseline * patMuonsAfterID 
-                                    * process.makeZmumuCandidates * process.hltBoolEnd)
-    return path
+    process.load('TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff')
 
-def customiseMuonInputID(process):
+    process.patMuonsAfterKinCuts.src = muon_src
+    print "Input mons are ",muon_src
+
+    process.inputPath = cms.Path(process.makePatMuonsZmumuSelection)
+
+    process.inputPath *= process.externalLHEProducer
+
+    if muon_id == 'loose':
+        process.patMuonsAfterID = process.patMuonsAfterLooseID.clone()
+    elif muon_id == 'medium':
+        process.patMuonsAfterID = process.patMuonsAfterMediumID.clone()
+    elif muon_id == 'tight':
+        process.patMuonsAfterID = process.patMuonsAfterTightID.clone()
     
-    process.muonsLooseID = muonSelectionPath(process, "loose")
-    process.muonsLooseID *= process.externalLHEProducer
-    process.schedule.insert(-1, process.muonsLooseID)
-    
-    process.muonsMediumID = muonSelectionPath(process, "medium")
-    process.schedule.insert(-1, process.muonsMediumID)
-    
-    process.muonsTightID = muonSelectionPath(process, "tight")
-    process.schedule.insert(-1, process.muonsTightID)
+    print "Muon ID used: ",muon_id," which means: cut=",process.patMuonsAfterID.cut
+        
+    outputmodule = process.schedule[-1]
+    process.schedule.insert(0, process.inputPath)
     
     return process
 
-def customiseMuonInputForMiniAOD(process):
-    process.inputPath = cms.Path()
-    process.twoSlimmedMuonsFilter = cms.EDFilter("PATCandViewCountFilter",
-        src = cms.InputTag("slimmedMuons"),
-        minNumber = cms.uint32(2),
-        maxNumber = cms.uint32(999999),
-        filter = cms.bool(True)
-        )
-    
-    process.inputPath *= process.twoSlimmedMuonsFilter
-    process.patMuonsAfterKinCuts.src = cms.InputTag("slimmedMuons")
-    process.schedule.insert(0, process.inputPath)
-    return customiseMuonInputID(process)
+def customiseMuonInputForMiniAOD(process,muon_id='loose'):
+    return customiseMuonInputID(process,cms.InputTag("slimmedMuons"),muon_id)
 
-def customiseMuonInputForRECO(process):
-    process.inputPath = cms.Path()
+def customiseMuonInputForRECO(process,muon_id='loose'):
 
     from PhysicsTools.PatAlgos.producersLayer1.muonProducer_cff import patMuons, makePatMuons, muonMatch
     
@@ -64,17 +44,7 @@ def customiseMuonInputForRECO(process):
     patMuons.embedTcMETMuonCorrs = cms.bool(False)
     
     makePatMuons.remove(muonMatch)
-    process.inputPath *= makePatMuons
-    
-    process.twoPatMuonsFilter = cms.EDFilter("PATCandViewCountFilter",
-       src = cms.InputTag("patMuons"),
-       minNumber = cms.uint32(2),
-       maxNumber = cms.uint32(999999),
-       filter = cms.bool(True)
-       )
-    
-    process.inputPath *= process.twoPatMuonsFilter
-    process.patMuonsAfterKinCuts.src = cms.InputTag("patMuons")
-    process.schedule.insert(0, process.inputPath)
-    return customiseMuonInputID(process)
-
+    process = customiseMuonInputID(process,cms.InputTag("patMuons"),muon_id)
+    i_path = getattr(process,'inputPath')
+    i_path.replace(process.doubleMuonHLTTrigger,process.doubleMuonHLTTrigger+process.makePatMuons)
+    return process
