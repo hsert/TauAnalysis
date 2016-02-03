@@ -4,6 +4,12 @@
 ### Various set of customise functions needed for embedding
 import FWCore.ParameterSet.Config as cms
 
+def customiseAllSteps(process):
+    process._Process__name +="embedding"
+    print "Processing step: ",process._Process__name
+    return process
+
+
 
 def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='loose'):
 
