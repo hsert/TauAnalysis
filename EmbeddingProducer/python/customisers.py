@@ -16,7 +16,7 @@ def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='lo
     process.load('TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff')
 
     process.patMuonsAfterKinCuts.src = muon_src
-    print "Input mons are ",muon_src
+    print "Input muons are",muon_src
 
     process.inputPath = cms.Path(process.makePatMuonsZmumuSelection)
 
@@ -29,9 +29,12 @@ def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='lo
     elif muon_id == 'tight':
         process.patMuonsAfterID = process.patMuonsAfterTightID.clone()
     
-    print "Muon ID used: ",muon_id," which means: cut=",process.patMuonsAfterID.cut
-        
-    outputmodule = process.schedule[-1]
+    print "Muon ID used: ",muon_id," which means: cut =",process.patMuonsAfterID.cut
+    
+    #Getting the first output module and impose, that only events, which come through the 'inputPath' are saved.
+    outputModulesList = [key for key,value in process.outputModules.iteritems()]
+    outputModule = getattr(process, outputModulesList[0])
+    outputModule.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("inputPath"))
     process.schedule.insert(0, process.inputPath)
     
     return process
@@ -52,5 +55,6 @@ def customiseMuonInputForRECO(process,muon_id='loose'):
     makePatMuons.remove(muonMatch)
     process = customiseMuonInputID(process,cms.InputTag("patMuons"),muon_id)
     i_path = getattr(process,'inputPath')
-    i_path.replace(process.doubleMuonHLTTrigger,process.doubleMuonHLTTrigger+process.makePatMuons)
+    #Producing patMuons after doubleMuonHLTTrigger, which are used for further selection
+    i_path.replace(process.doubleMuonHLTTrigger, process.doubleMuonHLTTrigger + makePatMuons)
     return process
