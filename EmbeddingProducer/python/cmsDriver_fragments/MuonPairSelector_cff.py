@@ -75,18 +75,3 @@ makePatMuonsZmumuSelection = cms.Sequence(
     + ZmumuCandidates
     + ZmumuCandidatesFilter
 )
-
-
-
-## Sequence for baseline Z->mumu selection
-#makePatMuonsZmumuBaseline = cms.Sequence(
-#    doubleMuonHLTTrigger
-#    patMuonsAfterKinCuts
-#)
-
-## Sequence to choose Z candidates
-
-#makeZmumuCandidates = cms.Sequence(
-#    ZmumuCandidates
-#    + ZmumuCandidatesFilter
-#)

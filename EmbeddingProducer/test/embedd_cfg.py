@@ -25,25 +25,16 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 
 process.p = cms.Path()
 
-
-#process.load('HLTrigger.HLTanalyzers.hltTrigReport_cfi')
-#process.embedTrigReport = process.hltTrigReport.clone()
-#process.p *= process.embedTrigReport
-
-#process.MessageLogger = cms.Service("MessageLogger",
-#                                    destinations   = cms.untracked.vstring('trigger_messages.txt'),
-#                                    statistics     = cms.untracked.vstring('statistics1'),   
-#                                    statistics1 = cms.untracked.PSet(threshold = cms.untracked.string('DEBUG')                                                                     ),
-#                                    )
-
-
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(300)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/A8586143-EB6E-E511-8546-0025905B85B2.root'),
+    fileNames = cms.untracked.vstring(
+        'file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/A8586143-EB6E-E511-8546-0025905B85B2.root'
+        #'file:/pnfs/desy.de/cms/tier2/store/data/Run2015D/DoubleMuon/RECO/16Dec2015-v1/10000/2A27197B-2CA7-E511-9C08-A0369F7FC0BC.root'
+    ),
     secondaryFileNames = cms.untracked.vstring(),
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
     inputCommands = cms.untracked.vstring('keep *', 
@@ -60,6 +51,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         dataTier = cms.untracked.string(''),
         filterName = cms.untracked.string('')
     ),
+    SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('p')),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     fileName = cms.untracked.string('embedding.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
@@ -76,6 +68,7 @@ process.schedule = cms.Schedule(process.p,process.RECOSIMoutput_step)
 # Other statements
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_hlt_25ns14e33_v4', '')
 
 process.RECOSIMoutput.outputCommands.extend(
     cms.untracked.vstring("drop * ",
@@ -86,37 +79,15 @@ process.RECOSIMoutput.outputCommands.extend(
 process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.DYToMuMuGenFilter_cff")
 process.load("TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff")
 
-process.p *= (process.dYToMuMuGenFilter * process.makePatMuonsZmumu)
-
-#process.generator = cms.EDFilter("Pythia8EmbeddingGun",
-#				  PythiaParameters = cms.PSet(
-#				      py8Settings = cms.vstring(''),
-#				      parameterSets = cms.vstring('py8Settings')
-#				    ),
-#				      PGunParameters = cms.PSet(
-#					ParticleID = cms.vint32(521),
- #                                       AddAntiParticle = cms.bool(False),
-#                                        MinPhi = cms.double(-3.14159265359),
-#                                        MaxPhi = cms.double(3.14159265359),
-#                                        MinE = cms.double(100.0),
-#                                        MaxE = cms.double(200.0),
-#                                        MinEta = cms.double(0.0),
-#                                        MaxEta = cms.double(2.4)
-#				      ),
-				  
-			#	   src = cms.InputTag("goodMuonsFormumuSelection"),
-			#	   mixHepMc = cms.bool(False)
-#)
+process.patMuonsAfterID = process.patMuonsAfterMediumID.clone()
+process.p *= (process.makePatMuonsZmumuSelection)
 
 from Configuration.Generator.Pythia8CommonSettings_cfi import *
 from Configuration.Generator.Pythia8CUEP8M1Settings_cfi import *
 
 
-#process.load("GeneratorInterface/LHEInterface/ExternalLHEProducer_cfi")
-
-
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
-				src = cms.InputTag("patMuonsAfterMediumID"),
+				src = cms.InputTag("patMuonsAfterID"),
 				switchToMuonEmbedding = cms.bool(False),
 				mirroring = cms.bool(False)
 				)
@@ -138,7 +109,7 @@ process.generator = cms.EDFilter("Pythia8HadronizerFilter",
 #    parameterSets = cms.vstring('Tauola')
 #  ),
   maxEventsToPrint = cms.untracked.int32(1),
-  nAttempts = cms.uint32(10),
+  nAttempts = cms.uint32(100),
   HepMCFilter = cms.PSet(
     filterName = cms.string('EmbeddingHepMCFilter'),
     filterParameters = cms.PSet(

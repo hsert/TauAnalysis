@@ -1,6 +1,9 @@
 #ifndef __EMBEDDINGHEPMCFILTER__
 #define __EMBEDDINGHEPMCFILTER__
 
+
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim_all.hpp"
 
@@ -165,7 +168,7 @@ EmbeddingHepMCFilter::EmbeddingHepMCFilter(const edm::ParameterSet & iConfig)
     {
         // Reading out the cut string from the config
         std::string cut_string_copy = iConfig.getParameter<std::string>(dc_m.first + "Cut");
-        std::cout << dc_m.first << " : " << cut_string_copy << std::endl;
+        edm::LogInfo("EmbeddingHepMCFilter") << dc_m.first << " : " << cut_string_copy;
         boost::trim_fill(cut_string_copy, "");
         
         // Splitting cut string by paths
@@ -200,6 +203,7 @@ EmbeddingHepMCFilter::filter(const HepMC::GenEvent* evt)
     // One can stop the loop after the second tau is reached and processed.
     for ( HepMC::GenEvent::particle_const_iterator particle = evt->particles_begin(); particle != evt->particles_end(); ++particle )
     {
+        //(*particle)->print();
         bool neutrino = (std::abs((*particle)->pdg_id()) == tauon_neutrino_PDGID_) ||
                         (std::abs((*particle)->pdg_id()) == muon_neutrino_PDGID_) ||
                         (std::abs((*particle)->pdg_id()) == electron_neutrino_PDGID_);
@@ -210,18 +214,16 @@ EmbeddingHepMCFilter::filter(const HepMC::GenEvent* evt)
             reco::Candidate::LorentzVector p4Vis;
             decay_and_sump4Vis((*particle), p4Vis); // recursive access to final states.
             p4VisPair_.push_back(p4Vis);
-            //std::cout << "visible Px: " << p4Vis.Px() << std::endl;
         }
     }
-    //std::cout << "visible Px all: " << p4Vis_all.Px() << std::endl;
-    //std::cout << "p4VisPair size: " << p4VisPair_.size() << std::endl;
     // Putting DecayChannel_ in default convention:
     // For mixed decay channels use the Electron_Muon, Electron_Hadronic, Muon_Hadronic convention.
     // For symmetric decay channels (e.g. Muon_Muon) use Leading_Trailing convention with respect to Pt.
-    //std::cout << "DecayChannel: " << return_mode(DecayChannel_.first) << return_mode(DecayChannel_.second) << std::endl;
     sort_by_convention(DecayChannel_, p4VisPair_);
-    //std::cout << "DecayChannel: " << return_mode(DecayChannel_.first) << return_mode(DecayChannel_.second) << std::endl;
-   // std::cout << "Pt's: " << p4VisPair_[0].Pt() << " " << p4VisPair_[1].Pt() << std::endl;
+    edm::LogInfo("EmbeddingHepMCFilter") << "Quantities of the visible decay products:";
+    edm::LogInfo("EmbeddingHepMCFilter") << "Pt's: " << " 1st " << p4VisPair_[0].Pt() << ", 2nd " << p4VisPair_[1].Pt();
+    edm::LogInfo("EmbeddingHepMCFilter") << "Eta's: " << " 1st " << p4VisPair_[0].Eta() << ", 2nd " << p4VisPair_[1].Eta();
+    
     return apply_cuts(DecayChannel_, p4VisPair_, cuts_);
 }
 
@@ -273,19 +275,19 @@ EmbeddingHepMCFilter::sort_by_convention(DecayChannel &dc, std::vector<reco::Can
     
     if (dc.first == dc.second && p4VisPair[0].Pt() < p4VisPair[1].Pt())
     {
-        //std::cout << "Changing symmetric channels to Leading_Trailing convention in Pt" << std::endl;
-        //std::cout << "Pt's before: " << p4VisPair[0].Pt() << " " << p4VisPair[1].Pt() << std::endl;
+        edm::LogVerbatim("EmbeddingHepMCFilter") << "Changing symmetric channels to Leading_Trailing convention in Pt";
+        edm::LogVerbatim("EmbeddingHepMCFilter") << "Pt's before: " << p4VisPair[0].Pt() << " " << p4VisPair[1].Pt();
         std::reverse(p4VisPair.begin(),p4VisPair.end());
-        //std::cout << "Pt's after: " << p4VisPair[0].Pt() << " " << p4VisPair[1].Pt() << std::endl;
+        edm::LogVerbatim("EmbeddingHepMCFilter") << "Pt's after: " << p4VisPair[0].Pt() << " " << p4VisPair[1].Pt();
     }
     else if (mixed_false_order)
     {
-        //std::cout << "Swapping order of mixed channels" << std::endl;
-        //std::cout << "Pt's before: " << p4VisPair[0].Pt() << " " << p4VisPair[1].Pt() << std::endl;
+        edm::LogVerbatim("EmbeddingHepMCFilter") << "Swapping order of mixed channels";
+        edm::LogVerbatim("EmbeddingHepMCFilter") << "Pt's before: " << p4VisPair[0].Pt() << " " << p4VisPair[1].Pt();
         dc.reverse();
-        //std::cout << "DecayChannel: " << return_mode(dc.first) << return_mode(dc.second) << std::endl;
+        edm::LogVerbatim("EmbeddingHepMCFilter") << "DecayChannel: " << return_mode(dc.first) << return_mode(dc.second);
         std::reverse(p4VisPair.begin(),p4VisPair.end());
-        //std::cout << "Pt's after: " << p4VisPair[0].Pt() << " " << p4VisPair[1].Pt() << std::endl;
+        edm::LogVerbatim("EmbeddingHepMCFilter") << "Pt's after: " << p4VisPair[0].Pt() << " " << p4VisPair[1].Pt();
     }
 }
 
@@ -298,10 +300,10 @@ EmbeddingHepMCFilter::apply_cuts(DecayChannel &dc, std::vector<reco::Candidate::
         bool all_cuts_passed = false;
         if(dc.first == cuts[i].decaychannel.first && dc.second ==  cuts[i].decaychannel.second)
         {
-          //  std::cout << "Cut number " << i << " pt1 = " << cuts[i].pt1 << " pt2 = " << cuts[i].pt2;
-         //   std::cout << " eta1 = " << cuts[i].eta1 << " eta2 = " << cuts[i].eta2;
-         //   std::cout << " decay channel: " << return_mode(cuts[i].decaychannel.first);
-         //   std::cout << return_mode(cuts[i].decaychannel.second) << std::endl;
+            edm::LogInfo("EmbeddingHepMCFilter") << "Cut number " << i << " pt1 = " << cuts[i].pt1 << " pt2 = " << cuts[i].pt2
+            << " abs(eta1) = " << cuts[i].eta1 << " abs(eta2) = " << cuts[i].eta2
+            << " decay channel: " << return_mode(cuts[i].decaychannel.first)
+            << return_mode(cuts[i].decaychannel.second);
             
             if(cuts[i].pt1 != -1. && !(p4VisPair[0].Pt() > cuts[i].pt1)) all_cuts_passed = false;
             else if (cuts[i].pt2 != -1. && !(p4VisPair[1].Pt() > cuts[i].pt2)) all_cuts_passed = false;
@@ -311,7 +313,7 @@ EmbeddingHepMCFilter::apply_cuts(DecayChannel &dc, std::vector<reco::Candidate::
         }
         if (all_cuts_passed)
         {
-           // std::cout << "All cuts of one path passed!!!!" << std::endl;
+            edm::LogInfo("EmbeddingHepMCFilter") << "All cuts of one path passed!!!!";
             return true;
         }
     }
