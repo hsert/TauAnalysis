@@ -6,7 +6,7 @@
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('EMBS',eras.Run2_25ns)
+process = cms.Process('SKIM',eras.Run2_25ns)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -38,8 +38,8 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    #'file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/A8586143-EB6E-E511-8546-0025905B85B2.root',
-    'file:/pnfs/desy.de/cms/tier2/store/data/Run2015D/DoubleMuon/RECO/16Dec2015-v1/10000/2A27197B-2CA7-E511-9C08-A0369F7FC0BC.root'
+    'file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/A8586143-EB6E-E511-8546-0025905B85B2.root',
+    #'file:/pnfs/desy.de/cms/tier2/store/data/Run2015D/DoubleMuon/RECO/16Dec2015-v1/10000/2A27197B-2CA7-E511-9C08-A0369F7FC0BC.root'
     #"file:step2.root"
     ),
     secondaryFileNames = cms.untracked.vstring()
@@ -55,24 +55,16 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('skimmed_both.root'),
+    fileName = cms.untracked.string('skimmed.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
-    
-process.RECOSIMoutput.outputCommands.extend(
-    cms.untracked.vstring("drop * ",
-			  "keep LHEEventProduct_*_*_*",
-			  "keep LHERunInfoProduct_*_*_*",
-                          "keep *_*_*_EMBS",
-                         # "keep *_*_*_LHE"
-      ))
 
 # Path and EndPath definitions
 
 
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
-				src = cms.InputTag("patMuonsAfterID","","EMBS"),
+				src = cms.InputTag("patMuonsAfterID","","SKIM"),
 				switchToMuonEmbedding = cms.bool(False),
 				mirroring = cms.bool(False)
 				)
@@ -86,8 +78,8 @@ process.schedule = cms.Schedule(process.RECOSIMoutput_step)
 
 # Other statements
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_hlt_25ns14e33_v4', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_hlt_25ns14e33_v4', '')
 
 # customisation of the process.
 
@@ -97,12 +89,12 @@ from Configuration.DataProcessing.Utils import addMonitoring
 #call to customisation function addMonitoring imported from Configuration.DataProcessing.Utils
 process = addMonitoring(process)
 
-#from TauAnalysis.EmbeddingProducer.customisers import customiseMuonInputForMiniAOD
-#process = customiseMuonInputForMiniAOD(process)
+from TauAnalysis.EmbeddingProducer.customisers import customiseMuonInputForMiniAOD
+process = customiseMuonInputForMiniAOD(process)
 
 
-from TauAnalysis.EmbeddingProducer.customisers import customiseMuonInputForRECO
-process = customiseMuonInputForRECO(process)
+#from TauAnalysis.EmbeddingProducer.customisers import customiseMuonInputForRECO
+#process = customiseMuonInputForRECO(process)
 
 # End of customisation functions
 

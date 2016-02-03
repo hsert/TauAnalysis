@@ -2,7 +2,7 @@ from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 config = config()
 
 ##-- Your name of the crab project
-config.General.requestName = 'SKIM_FROM_CMSSW_7_6_3_patch2'
+config.General.requestName = 'ZTAUTAU_FROM_CMSSW_7_6_3_patch2_v1'
 config.General.workArea = 'crab_projects'
 
 ##-- Transfer root files as well as log files "cmsRun -j FrameworkJobReport.xml" (log file = FrameworkJobReport.xml)
@@ -14,14 +14,14 @@ config.User.voGroup = 'dcms'
 
 ##-- the scripts (Analysis means with EDM input) which are executed. psetName is the cmsRun config and scriptExe is a shell config which should include "cmsRun -j FrameworkJobReport.xml -p PSet.py" (PSet.py is the renamed config.JobType.psetName)
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'newskim_example.py'
-config.JobType.scriptExe = 'skim_step0_to_step2.sh'
+config.JobType.psetName = 'skim_example.py'
+config.JobType.scriptExe = 'crab_cfg_workflow.sh'
 #config.JobType.maxJobRuntimeMin = 2000
 config.JobType.maxMemoryMB = 2500
 
 ##-- instead of taking the outputfile per hand use the result of pset.py and renamed it, which cheat on the test of is an EDM file test and allows to use publish the data 
 config.JobType.disableAutomaticOutputCollection = False
-config.JobType.outputFiles = ['skimmed.root','hist.root']
+#config.JobType.outputFiles = ['skimmed.root']
 
 ##-- The dataset you want to process:
 config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'
@@ -40,5 +40,3 @@ config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
 ##-- Run in xrootd mode (which allows you to run the jobs on all possible sites) 
 config.Data.ignoreLocality = True
 config.Site.whitelist = ['T2_CH_CERN','T2_DE_DESY','T1_DE_KIT','T2_DE_RWTH']
-#config.Site.whitelist = ['T2_*','T1_DE_KIT']
-#config.Site.whitelist = ['T2_CH_CERN','T1_DE_KIT','T2_DE_RWTH']
