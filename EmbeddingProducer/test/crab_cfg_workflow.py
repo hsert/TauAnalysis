@@ -14,7 +14,8 @@ config.User.voGroup = 'dcms'
 
 ##-- the scripts (Analysis means with EDM input) which are executed. psetName is the cmsRun config and scriptExe is a shell config which should include "cmsRun -j FrameworkJobReport.xml -p PSet.py" (PSet.py is the renamed config.JobType.psetName)
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'skim_example.py'
+config.JobType.psetName = 'newskim_example.py'
+config.JobType.scriptExe = 'skim_step0_to_step2.sh'
 #config.JobType.maxJobRuntimeMin = 2000
 config.JobType.maxMemoryMB = 2500
 
