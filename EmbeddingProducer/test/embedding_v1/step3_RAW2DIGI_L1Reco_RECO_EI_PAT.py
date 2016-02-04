@@ -78,8 +78,8 @@ process.MINIAODSIMoutput = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, '76X_mcRun2_asymptotic_v12', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_hlt_25ns14e33_v4', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_mcRun2_asymptotic_v12', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_hlt_25ns14e33_v4', '')
 
 
 # Path and EndPath definitions

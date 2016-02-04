@@ -27,6 +27,22 @@ cmsDriver.py step3  --runUnscheduled  --conditions auto:run2_mc_25ns14e33_v4 \
   --no_exec -n -1
 
 
+
+cmsDriver.py step3  --runUnscheduled  --conditions 76X_dataRun2_v15 \
+  --filein file:step2.root --fileout file:step3.root \
+  --step RAW2DIGI,L1Reco,RECO,PAT \
+  --datatier GEN-SIM-RECO,MINIAODSIM \
+  --era Run2_25ns --eventcontent RECOSIM,MINIAODSIM \
+  --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps \
+  --no_exec -n -1 --data
+
+
+
+
+
+
+
+
 _____ Mini AOD and RECO in the same run
 
 cmsDriver.py step3  --runUnscheduled  --conditions 76X_mcRun2_asymptotic_v12 \
