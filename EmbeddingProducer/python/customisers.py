@@ -8,8 +8,6 @@ def customiseAllSteps(process):
     print "Processing step: ",process._Process__name
     return process
 
-
-
 def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='loose'):
 
     process.load('TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff')
@@ -36,8 +34,8 @@ def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='lo
     outputModule.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("inputPath"))
     outputModule.outputCommands.extend(
         cms.untracked.vstring("drop * ",
-            "keep LHEEventProduct_*_*_*",
-            "keep LHERunInfoProduct_*_*_*",
+            "keep LHEEventProduct_*_*_SKIM",
+            "keep LHERunInfoProduct_*_*_SKIM",
             "keep *_*_*_SKIM",
         )
     )
