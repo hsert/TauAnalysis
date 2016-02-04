@@ -38,8 +38,8 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-    #'file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/A8586143-EB6E-E511-8546-0025905B85B2.root',
-    'file:/pnfs/desy.de/cms/tier2/store/data/Run2015D/DoubleMuon/RECO/16Dec2015-v1/10000/2A27197B-2CA7-E511-9C08-A0369F7FC0BC.root'
+    'file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/A8586143-EB6E-E511-8546-0025905B85B2.root',
+    #'file:/pnfs/desy.de/cms/tier2/store/data/Run2015D/DoubleMuon/RECO/16Dec2015-v1/10000/2A27197B-2CA7-E511-9C08-A0369F7FC0BC.root'
     #"file:step2.root"
     ),
     secondaryFileNames = cms.untracked.vstring()
@@ -86,8 +86,8 @@ process.schedule = cms.Schedule(process.RECOSIMoutput_step)
 
 # Other statements
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-#process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_hlt_25ns14e33_v4', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_hlt_25ns14e33_v4', '')
 
 # customisation of the process.
 
