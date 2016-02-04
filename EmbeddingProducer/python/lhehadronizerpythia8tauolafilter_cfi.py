@@ -17,7 +17,7 @@ generator = cms.EDFilter("Pythia8HadronizerFilter",
     parameterSets = cms.vstring('Tauola')
   ),
   maxEventsToPrint = cms.untracked.int32(1),
-  nAttempts = cms.uint32(100),
+  nAttempts = cms.uint32(1000),
   HepMCFilter = cms.PSet(
     filterName = cms.string('EmbeddingHepMCFilter'),
     filterParameters = cms.PSet(

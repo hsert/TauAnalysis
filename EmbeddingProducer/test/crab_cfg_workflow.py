@@ -21,16 +21,16 @@ config.JobType.maxMemoryMB = 2500
 
 ##-- instead of taking the outputfile per hand use the result of pset.py and renamed it, which cheat on the test of is an EDM file test and allows to use publish the data 
 config.JobType.disableAutomaticOutputCollection = False
-#config.JobType.outputFiles = ['skimmed.root']
+config.JobType.outputFiles = ['skimmed.root','step3_inMINIAODSIM.root']
 
 ##-- The dataset you want to process:
 config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 2
+config.Data.unitsPerJob = 1
 
 ##-- If you want to run test jobs set totalUnits to a small number and publication to false
-#config.Data.totalUnits = 4
+config.Data.totalUnits = 4
 config.Data.publication = False
 
 ##-- the output strorage element
