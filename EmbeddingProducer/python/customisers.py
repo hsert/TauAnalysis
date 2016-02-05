@@ -35,6 +35,12 @@ def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='lo
     outputModulesList = [key for key,value in process.outputModules.iteritems()]
     outputModule = getattr(process, outputModulesList[0])
     outputModule.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("inputPath"))
+    outputModule.outputCommands.extend(cms.untracked.vstring("drop * ",
+			 "keep LHEEventProduct_*_*_"+process._Process__name,
+			 "keep LHERunInfoProduct_*_*_"+process._Process__name,
+      ))
+
+
     process.schedule.insert(0, process.inputPath)
 
 
