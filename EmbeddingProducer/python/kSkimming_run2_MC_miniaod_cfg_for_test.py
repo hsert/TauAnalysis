@@ -16,7 +16,7 @@ data = False
 isEmbedded = False
 globaltag = 'auto:run2_mc_25ns14e33_v4'
 outputfilename = "kappaTuple.root"
-maxevents = 10
+maxevents = -1
 
 ## Needed for configuration of Kappa itself to be able to run it.
 centerOfMassEnergy = int(13)

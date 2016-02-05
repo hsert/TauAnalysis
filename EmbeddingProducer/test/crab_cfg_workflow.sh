@@ -3,7 +3,7 @@ cmsRun -j FrameworkJobReport.xml -p PSet.py
 
 mv kappaTuple.root skimmed.root
 
-echo "================= creating softlink ===================="
+echo "================= creating softlink for cfipython ===================="
 
 rm -rf $CMSSW_BASE/cfipython
 ln $CMSSW_RELEASE_BASE/cfipython $CMSSW_BASE/cfipython -s
@@ -52,8 +52,9 @@ cmsRun -p step3.py
 rm step2.root
 echo "================= STEP3 finished ===================="
 
-cp $CMSSW_BASE/python/kSkimming_run2_MC_miniaod_cfg_for_test.py kappa.py
+cp $CMSSW_BASE/python/TauAnalysis/EmbeddingProducer/kSkimming_run2_MC_miniaod_cfg_for_test.py kappa.py
 cmsRun -p kappa.py
 rm skimmed_to_reco.root
 echo "================= KAPPASKIM finished ===================="
+
 echo "================= CMSRUN finished ===================="
