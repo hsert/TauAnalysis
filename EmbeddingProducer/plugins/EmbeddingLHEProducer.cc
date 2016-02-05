@@ -213,33 +213,28 @@ EmbeddingLHEProducer::endJob() {
 void
 EmbeddingLHEProducer::beginRunProduce(edm::Run &run, edm::EventSetup const&)
 {
- // std::cout<<"aaa"<<std::endl;
-  
-     // fill HEPRUP common block and store in edm::Run
+    // fill HEPRUP common block and store in edm::Run
     lhef::HEPRUP heprup;
     lhef::CommonBlocks::readHEPRUP(&heprup);
 
-  // make sure we write a valid LHE header, Herwig6Hadronizer
-  // will interpret it correctly and set up LHAPDF
-   heprup.PDFGUP.first = 0;
-   heprup.PDFGUP.second = 0;
+    // make sure we write a valid LHE header, Herwig6Hadronizer
+    // will interpret it correctly and set up LHAPDF
+    heprup.PDFGUP.first = 0;
+    heprup.PDFGUP.second = 0;
 
     std::auto_ptr<LHERunInfoProduct> runInfo(new LHERunInfoProduct(heprup));
   
     run.put(runInfo);
-  
 }
 
 
 void 
 EmbeddingLHEProducer::endRunProduce(edm::Run& run, edm::EventSetup const& es)
 {
-
-  if (!runInfoProducts.empty()) {
-    std::auto_ptr<LHERunInfoProduct> product(runInfoProducts.pop_front().release());
-    run.put(product);
-  }
-
+    if (!runInfoProducts.empty()) {
+        std::auto_ptr<LHERunInfoProduct> product(runInfoProducts.pop_front().release());
+        run.put(product);
+    }
 }
 
 void 

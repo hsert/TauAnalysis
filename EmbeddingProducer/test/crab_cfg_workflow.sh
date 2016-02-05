@@ -1,7 +1,12 @@
 echo "================= CMSRUN starting ===================="
 cmsRun -j FrameworkJobReport.xml -p PSet.py
 
-mv skimmed_to_reco skimmed.root
+mv kappaTuple.root skimmed.root
+
+echo "================= creating softlink ===================="
+
+rm -rf $CMSSW_BASE/cfipython
+ln $CMSSW_RELEASE_BASE/cfipython $CMSSW_BASE/cfipython -s
 
 echo "================= INPUT SKIMMING finished ===================="
 
@@ -35,8 +40,8 @@ echo "================= STEP2 finished ===================="
 cmsDriver.py step3  --runUnscheduled  --conditions auto:run2_mc_25ns14e33_v4 \
   --filein file:step2.root --fileout file:skimmed_to_reco.root \
   --step RAW2DIGI,L1Reco,RECO,EI,PAT \
-  --datatier GEN-SIM-RECO,MINIAODSIM \
-  --era Run2_25ns --eventcontent RECOSIM,MINIAODSIM \
+  --datatier MINIAODSIM \
+  --era Run2_25ns --eventcontent MINIAODSIM \
   --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps \
   --no_exec -n -1 --python_filename step3.py
 
@@ -47,5 +52,8 @@ cmsRun -p step3.py
 rm step2.root
 echo "================= STEP3 finished ===================="
 
-
+cp $CMSSW_BASE/python/kSkimming_run2_MC_miniaod_cfg_for_test.py kappa.py
+cmsRun -p kappa.py
+rm skimmed_to_reco.root
+echo "================= KAPPASKIM finished ===================="
 echo "================= CMSRUN finished ===================="
