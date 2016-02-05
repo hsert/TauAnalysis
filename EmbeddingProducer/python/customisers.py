@@ -5,7 +5,7 @@
 import FWCore.ParameterSet.Config as cms
 
 def customiseAllSteps(process):
-  #  process._Process__name +="embedding"
+    process._Process__name +="embedding"
     print "Processing step: ",process._Process__name
     return process
 
