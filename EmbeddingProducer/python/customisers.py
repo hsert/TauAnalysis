@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
+
 ### Various set of customise functions needed for embedding
 import FWCore.ParameterSet.Config as cms
 
 def customiseAllSteps(process):
-    process._Process__name +="embedding"
+  #  process._Process__name +="embedding"
     print "Processing step: ",process._Process__name
     return process
+
+
 
 def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='loose'):
 
@@ -32,14 +35,9 @@ def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='lo
     outputModulesList = [key for key,value in process.outputModules.iteritems()]
     outputModule = getattr(process, outputModulesList[0])
     outputModule.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("inputPath"))
-    outputModule.outputCommands.extend(
-        cms.untracked.vstring("drop * ",
-            "keep LHEEventProduct_*_*_SKIM",
-            "keep LHERunInfoProduct_*_*_SKIM",
-            "keep *_*_*_SKIM",
-        )
-    )
     process.schedule.insert(0, process.inputPath)
+
+
     
     return process
 
