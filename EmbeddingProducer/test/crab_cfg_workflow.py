@@ -2,7 +2,7 @@ from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 config = config()
 
 ##-- Your name of the crab project
-config.General.requestName = 'ZTAUTAU_FROM_CMSSW_7_6_3_patch2_v13'
+config.General.requestName = 'ZTAUTAU_FROM_CMSSW_7_6_3_patch2_v17'
 config.General.workArea = 'crab_projects'
 
 ##-- Transfer root files as well as log files "cmsRun -j FrameworkJobReport.xml" (log file = FrameworkJobReport.xml)
@@ -22,6 +22,7 @@ config.JobType.maxMemoryMB = 2500
 
 ##-- instead of taking the outputfile per hand use the result of pset.py and renamed it, which cheat on the test of is an EDM file test and allows to use publish the data 
 config.JobType.disableAutomaticOutputCollection = False
+config.JobType.outputFiles = ['kappaTuple.root']
 
 ##-- The dataset you want to process:
 config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'

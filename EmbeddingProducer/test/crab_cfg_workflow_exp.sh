@@ -34,6 +34,14 @@ rm step1.root
 
 echo "================= STEP2 finished ===================="
 
+echo "================= moving local PatUtils ===================="
+
+mkdir $CMSSW_BASE/python/PhysicsTools/moved/
+mv $CMSSW_BASE/python/PhysicsTools/PatUtils/ $CMSSW_BASE/python/PhysicsTools/moved/ -f
+
+echo "================= creating softlink for PatUtils ===================="
+ln $CMSSW_RELEASE_BASE/python/PhysicsTools/PatUtils/ $CMSSW_BASE/python/PhysicsTools/PatUtils -s
+
 cmsDriver.py step3  --runUnscheduled  --conditions auto:run2_mc_25ns14e33_v4 \
   --filein file:step2.root --fileout file:skimmed_to_reco.root \
   --step RAW2DIGI,L1Reco,RECO,EI,PAT \
@@ -48,6 +56,13 @@ echo 'process.patTrigger.processName = cms.string("HLTembedding")' >> step3.py
 cmsRun -p step3.py
 rm step2.root
 echo "================= STEP3 finished ===================="
+
+echo "================= removing softlink for PatUtils ===================="
+rm $CMSSW_BASE/python/PhysicsTools/PatUtils
+
+echo "================= moving local PatUtils back ===================="
+mv $CMSSW_BASE/python/PhysicsTools/moved/PatUtils/ $CMSSW_BASE/python/PhysicsTools/ -f
+rm $CMSSW_BASE/python/PhysicsTools/moved/ -rf
 
 cp $CMSSW_BASE/python/TauAnalysis/EmbeddingProducer/kSkimming_run2_MC_miniaod_cfg_for_test.py kappa.py
 cmsRun -p kappa.py

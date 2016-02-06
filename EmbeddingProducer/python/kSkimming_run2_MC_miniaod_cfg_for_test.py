@@ -8,6 +8,7 @@ if not hasattr(sys, 'argv'):
 
 import os
 import FWCore.ParameterSet.Config as cms
+from Configuration.StandardSequences.Eras import eras
 
 ### Configurations, that can be changed, are used as variables below.
 
@@ -30,7 +31,7 @@ kappaTag = 'KAPPA_2_1_0'
 ### Configuration
 
 ## Define Kappa process
-process = cms.Process("KAPPA")
+process = cms.Process("KAPPA",eras.Run2_25ns)
 
 ## Setting up geometry and magnetic field
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
