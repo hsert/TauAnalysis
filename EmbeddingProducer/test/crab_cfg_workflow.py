@@ -2,7 +2,7 @@ from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 config = config()
 
 ##-- Your name of the crab project
-config.General.requestName = 'ZTAUTAU_FROM_CMSSW_7_6_3_patch2_v17'
+config.General.requestName = 'ZTAUTAU_KAPPA_FROM_CMSSW_7_6_3_patch2_tauola'
 config.General.workArea = 'crab_projects'
 
 ##-- Transfer root files as well as log files "cmsRun -j FrameworkJobReport.xml" (log file = FrameworkJobReport.xml)
@@ -25,13 +25,20 @@ config.JobType.disableAutomaticOutputCollection = False
 config.JobType.outputFiles = ['kappaTuple.root']
 
 ##-- The dataset you want to process:
-config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'
+
+#amcatnlo
+#config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'
+#config.Data.inputDataset = 'dataset=/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_HCALDebug_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'
+
+#madgraph
+config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'
+
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1
 
 ##-- If you want to run test jobs set totalUnits to a small number and publication to false
-config.Data.totalUnits = 1
+#config.Data.totalUnits = 1
 config.Data.publication = False
 
 ##-- the output strorage element

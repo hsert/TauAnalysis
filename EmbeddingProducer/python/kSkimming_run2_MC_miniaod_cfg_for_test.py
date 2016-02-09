@@ -41,7 +41,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 ## MessageLogger: suppress too much error output
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.default = cms.untracked.PSet(ERROR = cms.untracked.PSet(limit = cms.untracked.int32(5)))
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 ## technical Kappa configuration
 

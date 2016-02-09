@@ -8,12 +8,8 @@ generator = cms.EDFilter("Pythia8HadronizerFilter",
   ExternalDecays = cms.PSet(
     Tauola = cms.untracked.PSet(
       TauolaNoPolar,
-      InputCards = cms.PSet(
-                pjak1 = cms.int32(1),
-                pjak2 = cms.int32(2),
-                mdtau = cms.int32(0)
-                )
-            ),
+      TauolaDefaultInputCards
+    ),
     parameterSets = cms.vstring('Tauola')
   ),
   maxEventsToPrint = cms.untracked.int32(1),
@@ -21,12 +17,12 @@ generator = cms.EDFilter("Pythia8HadronizerFilter",
   HepMCFilter = cms.PSet(
     filterName = cms.string('EmbeddingHepMCFilter'),
     filterParameters = cms.PSet(
-      ElElCut = cms.string("El1.Pt > 22 && El2.Pt > 10"),
-      MuMuCut = cms.string("Mu1.Pt > 17 && Mu2.Pt > 8"),
-      HadHadCut = cms.string("Had1.Pt > 35 && Had2.Pt > 30"),
-      ElMuCut = cms.string("(El.Pt > 21 && Mu.Pt > 10) || (El.Pt > 10 && Mu.Pt > 21)"),
-      ElHadCut = cms.string("El.Pt > 28 && Had.Pt > 25"),
-      MuHadCut = cms.string("Mu.Pt > 18 && Had.Pt > 25 && Mu.Eta < 2.1"),
+      ElElCut = cms.string("El1.Pt > 22 && El2.Pt > 10 && El1.Eta < 2.4 && El2.Eta < 2.4"),
+      MuMuCut = cms.string("Mu1.Pt > 17 && Mu2.Pt > 8 && Mu1.Eta < 2.4 && Mu2.Eta < 2.4"),
+      HadHadCut = cms.string("Had1.Pt > 40 && Had2.Pt > 40  && Had1.Eta < 2.1 && Had2.Eta < 2.1"),
+      ElMuCut = cms.string("(El.Pt > 13 && El.Eta < 2.5 && Mu.Pt > 18 && Mu.Eta < 2.4) || (El.Pt > 18 && El.Eta < 2.5 && Mu.Pt > 10 && Mu.Eta < 2.4"),
+      ElHadCut = cms.string("El.Pt > 24 && El.Eta < 2.1 && Had.Pt > 20 && Had.Eta < 2.3"),
+      MuHadCut = cms.string("Mu.Pt > 19 && Mu.Eta < 2.1 && Had.Pt > 20 && Had.Eta < 2.3"),
       switchToMuonEmbedding = cms.bool(False)
     )
   ),
