@@ -18,6 +18,11 @@
 
 
 // system include files
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <fstream>
+#include <string>
 #include <memory>
 #include "TLorentzVector.h"
 //#include "boost/bind.hpp"
@@ -92,6 +97,8 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       bool mirroring_;
       const double tauMass_ = 1.77682;
       
+      std::ofstream	file;
+      bool write_lheout;
       
 };
 
@@ -124,6 +131,13 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
    switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
    mirroring_ = iConfig.getParameter<bool>("mirroring");
+   
+   write_lheout=false;
+   std::string lhe_ouputfile = iConfig.getUntrackedParameter<std::string>("lhe_outputfilename","");
+   if (lhe_ouputfile !=""){
+     write_lheout=true;
+     file.open(lhe_ouputfile, std::fstream::out | std::fstream::trunc);
+   }
 }
 
 
@@ -176,6 +190,10 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     double originalXWGTUP_ = 0.1;
     std::auto_ptr<LHEEventProduct> product( new LHEEventProduct(hepeup,originalXWGTUP_) );
+    
+    if (write_lheout) std::copy(product->begin(), product->end(), std::ostream_iterator<std::string>(file));
+    
+    
     iEvent.put(product);
 
 /* This is an event example
@@ -223,8 +241,14 @@ EmbeddingLHEProducer::beginRunProduce(edm::Run &run, edm::EventSetup const&)
     heprup.PDFGUP.second = 0;
 
     std::auto_ptr<LHERunInfoProduct> runInfo(new LHERunInfoProduct(heprup));
-  
+    if (write_lheout)std::copy(runInfo->begin(), runInfo->end(),std::ostream_iterator<std::string>(file));
+    
     run.put(runInfo);
+    
+
+    
+
+    
 }
 
 
@@ -234,6 +258,10 @@ EmbeddingLHEProducer::endRunProduce(edm::Run& run, edm::EventSetup const& es)
     if (!runInfoProducts.empty()) {
         std::auto_ptr<LHERunInfoProduct> product(runInfoProducts.pop_front().release());
         run.put(product);
+    }
+    if (write_lheout) {
+      file << LHERunInfoProduct::endOfFile();
+      file.close();
     }
 }
 
