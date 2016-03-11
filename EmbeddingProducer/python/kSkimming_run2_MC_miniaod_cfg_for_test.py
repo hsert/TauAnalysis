@@ -45,6 +45,10 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 ## technical Kappa configuration
 
+# enable unscheduled mode
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
+	allowUnscheduled = cms.untracked.bool(True) )
+
 # maximal number of events
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxevents))
 

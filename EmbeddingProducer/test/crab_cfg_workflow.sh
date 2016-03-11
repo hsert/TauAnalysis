@@ -14,7 +14,7 @@ cmsDriver.py TauAnalysis/EmbeddingProducer/python/lhehadronizerpythia8tauolafilt
   --eventcontent FEVTDEBUG --relval 9000,50 \
   --step GEN,SIM --datatier GEN-SIM \
   --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps \
-  --beamspot Realistic50ns13TeVCollision --no_exec -n -1 \
+  --beamspot NominalCollision2015 --no_exec -n -1 \
   --python_filename embedding.py
 
 cmsRun -p embedding.py
@@ -23,7 +23,7 @@ echo "================= EMBEDDING STEP finished ===================="
 
 cmsDriver.py step2  --conditions auto:run2_mc_25ns14e33_v4 \
   --filein file:step1.root --fileout file:step2.root \
-  --step DIGI:pdigi_valid,L1,DIGI2RAW,HLT:@relval25ns \
+  --step DIGI,DATAMIX,L1,DIGI2RAW,HLT:@relval25ns \
   --datatier GEN-SIM-DIGI-RAW-HLTDEBUG  \
   --era Run2_25ns --eventcontent FEVTDEBUGHLT \
   --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps \
@@ -36,7 +36,7 @@ echo "================= STEP2 finished ===================="
 
 cmsDriver.py step3  --runUnscheduled  --conditions auto:run2_mc_25ns14e33_v4 \
   --filein file:step2.root --fileout file:skimmed_to_reco.root \
-  --step RAW2DIGI,L1Reco,RECO,EI,PAT \
+  --step RAW2DIGI,L1Reco,RECO,PAT \
   --datatier MINIAODSIM \
   --era Run2_25ns --eventcontent MINIAODSIM \
   --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps \
@@ -53,5 +53,5 @@ cp $CMSSW_BASE/python/TauAnalysis/EmbeddingProducer/kSkimming_run2_MC_miniaod_cf
 cmsRun -p kappa.py
 rm skimmed_to_reco.root
 echo "================= KAPPASKIM finished ===================="
-ls -lrth
+#ls -lrth
 echo "================= CMSRUN finished ===================="
