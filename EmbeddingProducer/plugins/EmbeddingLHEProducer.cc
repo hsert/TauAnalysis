@@ -85,6 +85,8 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       void fill_lhe_with_particle(TLorentzVector &particle, double spin, int motherindex, int pdgid, int status, lhef::HEPEUP &outlhe);
       
       void transform_mumu_to_tautau(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton);
+      const reco::Candidate* find_original_muon(const reco::Candidate* muon);
+      void assign_4vector(TLorentzVector &Lepton, const pat::Muon* muon, std::string FSRmode);
       void mirror(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton);
       
       // ----------member data ---------------------------
@@ -97,9 +99,13 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       bool mirroring_;
       const double tauMass_ = 1.77682;
       
-      std::ofstream	file;
+      std::ofstream file;
       bool write_lheout;
       
+      // instead of reconstruted 4vectors of muons generated are taken to study FSR. Possible modes:
+      // bare - muons without FSR photons taken into account
+      // dressed - muons with FSR photons taken into account
+      std::string studyFSRmode_;
 };
 
 //
@@ -131,6 +137,7 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
    switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
    mirroring_ = iConfig.getParameter<bool>("mirroring");
+   studyFSRmode_ = iConfig.getUntrackedParameter<std::string>("studyFSRmode","");
    
    write_lheout=false;
    std::string lhe_ouputfile = iConfig.getUntrackedParameter<std::string>("lhe_outputfilename","");
@@ -173,12 +180,12 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     {
       if (muon->charge() == 1 && !mu_plus_found)
       {
-        positiveLepton.SetPxPyPzE(muon->p4().px(),muon->p4().py(),muon->p4().pz(), muon->p4().e());
+        assign_4vector(positiveLepton, &(*muon), studyFSRmode_);
         mu_plus_found = true;
       }
       else if (muon->charge() == -1 && !mu_minus_found)
       {
-        negativeLepton.SetPxPyPzE(muon->p4().px(),muon->p4().py(),muon->p4().pz(), muon->p4().e());
+        assign_4vector(negativeLepton, &(*muon), studyFSRmode_);
         mu_minus_found = true;
       }
       else if (mu_minus_found && mu_plus_found) break;
@@ -343,6 +350,28 @@ void EmbeddingLHEProducer::transform_mumu_to_tautau(TLorentzVector &positiveLept
     negativeLepton.Boost(boost_from_Z_to_LAB);
 
     return;
+}
+
+void EmbeddingLHEProducer::assign_4vector(TLorentzVector &Lepton, const pat::Muon* muon, std::string FSRmode)
+{
+    if("bare" == FSRmode)
+    {
+        const reco::GenParticle* bareMuon = muon->genParticle();
+        Lepton.SetPxPyPzE(bareMuon->p4().px(),bareMuon->p4().py(),bareMuon->p4().pz(), bareMuon->p4().e());
+    }
+    else if ("dressed" == FSRmode)
+    {
+        const reco::Candidate* dressedMuon = find_original_muon(muon->genParticle());
+        Lepton.SetPxPyPzE(dressedMuon->p4().px(),dressedMuon->p4().py(),dressedMuon->p4().pz(), dressedMuon->p4().e());
+    }
+    else Lepton.SetPxPyPzE(muon->p4().px(),muon->p4().py(),muon->p4().pz(), muon->p4().e());
+    return;
+}
+
+const reco::Candidate* EmbeddingLHEProducer::find_original_muon(const reco::Candidate* muon)
+{
+    if(muon->pdgId() == muon->mother(0)->pdgId()) return find_original_muon(muon->mother(0));
+    else return muon;
 }
 
 void EmbeddingLHEProducer::mirror(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton)

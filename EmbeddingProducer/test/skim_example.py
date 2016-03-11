@@ -66,7 +66,9 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
 				src = cms.InputTag("patMuonsAfterID","","SKIM"),
 				switchToMuonEmbedding = cms.bool(False),
-				mirroring = cms.bool(False)
+				mirroring = cms.bool(False),
+				lhe_outputfilename = cms.untracked.string("lhe_out.lhe"),
+				studyFSRmode = cms.untracked.string("bare")
 				)
 
 

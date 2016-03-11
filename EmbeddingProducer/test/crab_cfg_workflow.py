@@ -2,7 +2,7 @@ from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 config = config()
 
 ##-- Your name of the crab project
-config.General.requestName = 'ZTAUTAU_KAPPA_FROM_CMSSW_7_6_3_patch2_tauola_sample_74X_eMinusmuPlus_noCut_polOn_noRad'
+config.General.requestName = 'ZTAUTAU_KAPPA_FROM_CMSSW_7_6_3_patch2_pythia_sample_74X_eMinusmuPlus_FSRbare_v2'
 config.General.workArea = 'crab_projects'
 
 ##-- Transfer root files as well as log files "cmsRun -j FrameworkJobReport.xml" (log file = FrameworkJobReport.xml)

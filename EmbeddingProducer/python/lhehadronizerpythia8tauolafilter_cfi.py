@@ -5,15 +5,15 @@ from GeneratorInterface.ExternalDecays.TauolaSettings_cff import *
 
 
 generator = cms.EDFilter("Pythia8HadronizerFilter",
-  ExternalDecays = cms.PSet(
-    Tauola = cms.untracked.PSet(
-      TauolaNoPolar,
-      TauolaDefaultInputCards
-    ),
-    parameterSets = cms.vstring('Tauola')
-  ),
+#  ExternalDecays = cms.PSet(
+#    Tauola = cms.untracked.PSet(
+#      TauolaPolar,
+#      TauolaDefaultInputCards
+#    ),
+#    parameterSets = cms.vstring('Tauola')
+#  ),
   maxEventsToPrint = cms.untracked.int32(1),
-  nAttempts = cms.uint32(1000),
+  nAttempts = cms.uint32(10000),
   HepMCFilter = cms.PSet(
     filterName = cms.string('EmbeddingHepMCFilter'),
     filterParameters = cms.PSet(
@@ -37,14 +37,17 @@ generator = cms.EDFilter("Pythia8HadronizerFilter",
     processParameters = cms.vstring(
         'JetMatching:merge = off',
         'Init:showChangedSettings = off', 
-        'Init:showChangedParticleData = off'
+        'Init:showChangedParticleData = off',
+        '15:onMode = off',
+        '15:onPosIfAny = 11',
+        '15:onNegIfAny = -13'
     ),
     parameterSets = cms.vstring('pythia8CommonSettings',
                                 'pythia8CUEP8M1Settings',
                                 'processParameters',
                                 )
     )
-                         )
+)
 
 ProductionFilterSequence = cms.Sequence(generator)
 

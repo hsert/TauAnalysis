@@ -106,7 +106,7 @@ process.kappaTuple.VertexSummary.rename = cms.vstring('offlineSlimmedPrimaryVert
 process.kappaTuple.VertexSummary.goodOfflinePrimaryVerticesSummary = cms.PSet(src=cms.InputTag("offlineSlimmedPrimaryVertices"))
 
 process.kappaTuple.active += cms.vstring('TriggerObjectStandalone')
-process.kappaTuple.TriggerObjectStandalone.bits = cms.InputTag("TriggerResults","","HLTembedding")
+process.kappaTuple.TriggerObjectStandalone.bits = cms.InputTag("TriggerResults","","HLT")
 
 process.kappaTuple.active += cms.vstring('BeamSpot')
 process.kappaTuple.BeamSpot.offlineBeamSpot = cms.PSet(src = cms.InputTag("offlineBeamSpot"))

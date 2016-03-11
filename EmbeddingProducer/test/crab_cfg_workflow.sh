@@ -9,7 +9,7 @@ ln $CMSSW_RELEASE_BASE/cfipython $CMSSW_BASE/cfipython -s
 echo "================= INPUT SKIMMING finished ===================="
 
 cmsDriver.py TauAnalysis/EmbeddingProducer/python/lhehadronizerpythia8tauolafilter_cfi.py  \
-  --filein file:skimmed.root --fileout file:step1.root \
+  --filein file:lhe_out.lhe --fileout file:step1.root \
   --conditions auto:run2_mc --era Run2_25ns \
   --eventcontent FEVTDEBUG --relval 9000,50 \
   --step GEN,SIM --datatier GEN-SIM \
@@ -23,10 +23,9 @@ echo "================= EMBEDDING STEP finished ===================="
 
 cmsDriver.py step2  --conditions auto:run2_mc_25ns14e33_v4 \
   --filein file:step1.root --fileout file:step2.root \
-  --step DIGI,DATAMIX,L1,DIGI2RAW,HLT:@relval25ns \
+  --step DIGI,L1,DIGI2RAW,HLT:@relval25ns \
   --datatier GEN-SIM-DIGI-RAW-HLTDEBUG  \
   --era Run2_25ns --eventcontent FEVTDEBUGHLT \
-  --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps \
   --no_exec -n -1 --python_filename step2.py
 
 cmsRun -p step2.py
@@ -39,11 +38,10 @@ cmsDriver.py step3  --runUnscheduled  --conditions auto:run2_mc_25ns14e33_v4 \
   --step RAW2DIGI,L1Reco,RECO,PAT \
   --datatier MINIAODSIM \
   --era Run2_25ns --eventcontent MINIAODSIM \
-  --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps \
   --no_exec -n -1 --python_filename step3.py
 
-echo 'process.CSCHaloData.HLTResultLabel = cms.InputTag("TriggerResults","","HLTembedding")' >> step3.py
-echo 'process.patTrigger.processName = cms.string("HLTembedding")' >> step3.py
+#echo 'process.CSCHaloData.HLTResultLabel = cms.InputTag("TriggerResults","","HLTembedding")' >> step3.py
+#echo 'process.patTrigger.processName = cms.string("HLTembedding")' >> step3.py
 
 cmsRun -p step3.py
 rm step2.root
