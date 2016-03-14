@@ -354,12 +354,12 @@ void EmbeddingLHEProducer::transform_mumu_to_tautau(TLorentzVector &positiveLept
 
 void EmbeddingLHEProducer::assign_4vector(TLorentzVector &Lepton, const pat::Muon* muon, std::string FSRmode)
 {
-    if("bare" == FSRmode)
+    if("bare" == FSRmode && muon->genParticle() != 0)
     {
         const reco::GenParticle* bareMuon = muon->genParticle();
         Lepton.SetPxPyPzE(bareMuon->p4().px(),bareMuon->p4().py(),bareMuon->p4().pz(), bareMuon->p4().e());
     }
-    else if ("dressed" == FSRmode)
+    else if ("dressed" == FSRmode && muon->genParticle() != 0)
     {
         const reco::Candidate* dressedMuon = find_original_muon(muon->genParticle());
         Lepton.SetPxPyPzE(dressedMuon->p4().px(),dressedMuon->p4().py(),dressedMuon->p4().pz(), dressedMuon->p4().e());
@@ -370,6 +370,7 @@ void EmbeddingLHEProducer::assign_4vector(TLorentzVector &Lepton, const pat::Muo
 
 const reco::Candidate* EmbeddingLHEProducer::find_original_muon(const reco::Candidate* muon)
 {
+    if(muon->mother(0) == 0) return muon;
     if(muon->pdgId() == muon->mother(0)->pdgId()) return find_original_muon(muon->mother(0));
     else return muon;
 }
