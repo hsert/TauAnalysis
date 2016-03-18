@@ -103,8 +103,8 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       bool write_lheout;
       
       // instead of reconstruted 4vectors of muons generated are taken to study FSR. Possible modes:
-      // bare - muons without FSR photons taken into account
-      // dressed - muons with FSR photons taken into account
+      // afterFSR - muons without FSR photons taken into account
+      // beforeFSR - muons with FSR photons taken into account
       std::string studyFSRmode_;
 };
 
@@ -354,17 +354,20 @@ void EmbeddingLHEProducer::transform_mumu_to_tautau(TLorentzVector &positiveLept
 
 void EmbeddingLHEProducer::assign_4vector(TLorentzVector &Lepton, const pat::Muon* muon, std::string FSRmode)
 {
-    if("bare" == FSRmode && muon->genParticle() != 0)
+    if("afterFSR" == FSRmode && muon->genParticle() != 0)
     {
-        const reco::GenParticle* bareMuon = muon->genParticle();
-        Lepton.SetPxPyPzE(bareMuon->p4().px(),bareMuon->p4().py(),bareMuon->p4().pz(), bareMuon->p4().e());
+        const reco::GenParticle* afterFSRMuon = muon->genParticle();
+        Lepton.SetPxPyPzE(afterFSRMuon->p4().px(),afterFSRMuon->p4().py(),afterFSRMuon->p4().pz(), afterFSRMuon->p4().e());
     }
-    else if ("dressed" == FSRmode && muon->genParticle() != 0)
+    else if ("beforeFSR" == FSRmode && muon->genParticle() != 0)
     {
-        const reco::Candidate* dressedMuon = find_original_muon(muon->genParticle());
-        Lepton.SetPxPyPzE(dressedMuon->p4().px(),dressedMuon->p4().py(),dressedMuon->p4().pz(), dressedMuon->p4().e());
+        const reco::Candidate* beforeFSRMuon = find_original_muon(muon->genParticle());
+        Lepton.SetPxPyPzE(beforeFSRMuon->p4().px(),beforeFSRMuon->p4().py(),beforeFSRMuon->p4().pz(), beforeFSRMuon->p4().e());
     }
-    else Lepton.SetPxPyPzE(muon->p4().px(),muon->p4().py(),muon->p4().pz(), muon->p4().e());
+    else
+    {
+        Lepton.SetPxPyPzE(muon->p4().px(),muon->p4().py(),muon->p4().pz(), muon->p4().e());
+    }
     return;
 }
 

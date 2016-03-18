@@ -37,8 +37,8 @@ process.maxEvents = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
     #'file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/A8586143-EB6E-E511-8546-0025905B85B2.root',
-    'file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/60000/A425C999-7E6D-E511-8AE4-008CFA0A5640.root'
-    #'file:/pnfs/desy.de/cms/tier2/store/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/70000/AC987CD7-79BA-E511-A3A6-0025905A606A.root',
+    #'file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/60000/A425C999-7E6D-E511-8AE4-008CFA0A5640.root'
+    'file:/pnfs/desy.de/cms/tier2/store/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/70000/AC987CD7-79BA-E511-A3A6-0025905A606A.root',
     #'file:/pnfs/desy.de/cms/tier2/store/data/Run2015D/DoubleMuon/RECO/16Dec2015-v1/10000/2A27197B-2CA7-E511-9C08-A0369F7FC0BC.root'
     #"file:step2.root"
     ),
@@ -67,8 +67,8 @@ process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
 				src = cms.InputTag("patMuonsAfterID","","SKIM"),
 				switchToMuonEmbedding = cms.bool(False),
 				mirroring = cms.bool(False),
-				lhe_outputfilename = cms.untracked.string("lhe_out.lhe"),
-				studyFSRmode = cms.untracked.string("bare")
+#				studyFSRmode = cms.untracked.string("beforeFSR")
+#				studyFSRmode = cms.untracked.string("afterFSR")
 				)
 
 
@@ -80,8 +80,8 @@ process.schedule = cms.Schedule(process.RECOSIMoutput_step)
 
 # Other statements
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
-#process.GlobalTag = GlobalTag(process.GlobalTag, '76X_mcRun2_asymptotic_v12')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '74X_mcRun2_asymptotic_AllChannelsGood_v0', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_mcRun2_asymptotic_v12')
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_hlt_25ns14e33_v4', '')
 
 # customisation of the process.

@@ -2,7 +2,7 @@ from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 config = config()
 
 ##-- Your name of the crab project
-config.General.requestName = 'ZTAUTAU_KAPPA_FROM_CMSSW_7_6_3_patch2_pythia_sample_74X_eMinusmuPlus_FSRbare_v2'
+config.General.requestName = 'ZTAUTAU_KAPPA_FROM_CMSSW_7_6_3_patch2_tauola_74X_eMinusmuPlus_FSRnormal_noRad_v2'
 config.General.workArea = 'crab_projects'
 
 ##-- Transfer root files as well as log files "cmsRun -j FrameworkJobReport.xml" (log file = FrameworkJobReport.xml)
@@ -17,7 +17,7 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.sendPythonFolder = True
 config.JobType.psetName = 'skim_example.py'
 config.JobType.scriptExe = 'crab_cfg_workflow.sh'
-#config.JobType.maxJobRuntimeMin = 2160
+config.JobType.maxJobRuntimeMin = 2160
 config.JobType.maxMemoryMB = 2500
 
 ##-- instead of taking the outputfile per hand use the result of pset.py and renamed it, which cheat on the test of is an EDM file test and allows to use publish the data 
@@ -31,8 +31,8 @@ config.JobType.outputFiles = ['kappaTuple.root']
 #config.Data.inputDataset = 'dataset=/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_HCALDebug_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'
 
 #madgraph
-config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'
-#config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'
+#config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/MINIAODSIM'
+config.Data.inputDataset = '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1

@@ -15,7 +15,7 @@ from Configuration.StandardSequences.Eras import eras
 ## Inputs configuration
 data = False
 isEmbedded = False
-globaltag = 'auto:run2_mc_25ns14e33_v4'
+globaltag = '76X_mcRun2_asymptotic_v12'
 outputfilename = "kappaTuple.root"
 maxevents = -1
 
@@ -106,7 +106,7 @@ process.kappaTuple.VertexSummary.rename = cms.vstring('offlineSlimmedPrimaryVert
 process.kappaTuple.VertexSummary.goodOfflinePrimaryVerticesSummary = cms.PSet(src=cms.InputTag("offlineSlimmedPrimaryVertices"))
 
 process.kappaTuple.active += cms.vstring('TriggerObjectStandalone')
-process.kappaTuple.TriggerObjectStandalone.bits = cms.InputTag("TriggerResults","","HLT")
+process.kappaTuple.TriggerObjectStandalone.bits = cms.InputTag("TriggerResults","","HLTembedding")
 
 process.kappaTuple.active += cms.vstring('BeamSpot')
 process.kappaTuple.BeamSpot.offlineBeamSpot = cms.PSet(src = cms.InputTag("offlineBeamSpot"))
