@@ -107,7 +107,7 @@ process.kappaTuple.VertexSummary.goodOfflinePrimaryVerticesSummary = cms.PSet(sr
 
 process.kappaTuple.active += cms.vstring('TriggerObjectStandalone')
 process.kappaTuple.TriggerObjectStandalone.bits = cms.InputTag("TriggerResults","","HLTembedding")
-
+process.kappaTuple.TriggerObjectStandalone.metfilterbits = cms.InputTag("TriggerResults","","HLTembedding")
 process.kappaTuple.active += cms.vstring('BeamSpot')
 process.kappaTuple.BeamSpot.offlineBeamSpot = cms.PSet(src = cms.InputTag("offlineBeamSpot"))
 
@@ -157,7 +157,7 @@ process.kappaTuple.Electrons.ids = cms.vstring(
 	"egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-tight",
 	"electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values"
 )
-setupElectrons(process)
+setupElectrons(process, "slimmedElectrons")
 process.p *= (process.makeKappaElectrons)
 
 ## Taus
