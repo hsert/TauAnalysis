@@ -39,13 +39,21 @@ class single_gen():
 		
 		self.photospp = '''ExternalDecays = cms.PSet(
     Photospp = cms.untracked.PSet(
-      parameterSets = cms.vstring('suppressAll','forceBremForBranch'),
+      parameterSets = cms.vstring('suppressAll', 'forceBremForBranch', 'setInfraredCutOff'),
       suppressAll = cms.bool(True),
       forceBremForBranch = cms.PSet(
         parameterSets = cms.vstring('TauPlus', 'TauMinus'),
         TauMinus = cms.vint32(0,15),
         TauPlus = cms.vint32(0,-15)
       ),
+      suppressBremForDecay = cms.PSet(
+        parameterSets = cms.vstring('Taumpipi0nu','Tauppipi0nu','Taumpipi0nugamma','Tauppipi0nugamma'),
+        Taumpipi0nu = cms.vint32(3, 15, 16, 111, -211),
+        Tauppipi0nu = cms.vint32(3, -15, -16, 111, 211),
+        Taumpipi0nugamma = cms.vint32(4, 15, 16, 22, 111, -211),
+        Tauppipi0nugamma = cms.vint32(4, -15, -16, 22, 111, 211)
+      ),
+      setInfraredCutOff = cms.double(0.01)
     ),
     parameterSets = cms.vstring('Photospp')
   ),'''

@@ -309,6 +309,11 @@ EmbeddingHepMCFilter::apply_cuts(DecayChannel &dc, std::vector<reco::Candidate::
             else if (cuts[i].pt2 != -1. && !(p4VisPair[1].Pt() > cuts[i].pt2)) all_cuts_passed = false;
             else if (cuts[i].eta1 != -1. && !(std::abs(p4VisPair[0].Eta()) < cuts[i].eta1)) all_cuts_passed = false;
             else if (cuts[i].eta2 != -1. && !(std::abs(p4VisPair[1].Eta()) < cuts[i].eta2)) all_cuts_passed = false;
+            else if (cuts[i].pt1 == -1. && cuts[i].pt2 == -1. && cuts[i].eta1 == -1. && cuts[i].eta2 == -1.)
+            {
+                edm::LogInfo("EmbeddingHepMCFilter") << "No cuts defined for decay channel " << return_mode(dc.first) << return_mode(dc.second) << ". Return 'false' as filter result." <<  std::endl;
+                all_cuts_passed = false;
+            }
             else all_cuts_passed = true;
         }
         if (all_cuts_passed)

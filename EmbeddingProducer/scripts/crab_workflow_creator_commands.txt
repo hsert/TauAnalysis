@@ -1,5 +1,5 @@
 # command for FSR studies:
 
-python crab_workflow_creator.py --fsrmodes "" "afterFSR" "beforeFSR" --decaychannels "EM" "TT" "MT" "ET" --externaldecays "" "photospp" --outputfolder "FSRstudies" --skimoutputfilename "skim.py" --genoutputfilename "lhehadronizerpythia8.py" --craboutputfilename "crab_workflow"
+crab_workflow_creator.py --fsrmodes "" "afterFSR" "beforeFSR" --decaychannels "EM" "TT" "MT" "ET" --externaldecays "" "photospp" --outputfolder "FSRstudies" --skimoutputfilename "skim.py" --genoutputfilename "lhehadronizerpythia8.py" --craboutputfilename "crab_workflow" --cfiswitch
 
 

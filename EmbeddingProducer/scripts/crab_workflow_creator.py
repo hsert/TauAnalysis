@@ -40,7 +40,7 @@ class single_crab_workflow():
 		
 		# setting default values for the switches in the templates
 		self.randomserviceswitch = False
-		self.cfiswitch = True
+		self.cfiswitch = False
 		self.testrunswitch = False
 		
 		# setting default skim filename and folder
