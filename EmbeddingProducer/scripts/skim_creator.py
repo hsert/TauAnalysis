@@ -24,7 +24,7 @@ class single_skim():
 		except IOError: print 'IOError: Skim template does not exist. Please define it as {TEMPLATE_PATH}'.format(TEMPLATE_PATH=self.template_path + '/skim_template.py.txt')
 		
 		# setting default template arguments
-		self.inputfile = "file:/pnfs/desy.de/cms/tier2/store/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/70000/AC987CD7-79BA-E511-A3A6-0025905A606A.root"
+		self.inputfile = "file:/pnfs/desy.de/cms/tier2/store/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/10000/004544CB-6DD8-E511-97E4-0026189438F6.root"
 		self.globaltag = "76X_mcRun2_asymptotic_v12"
 		self.fsrmode = ""
 		

@@ -167,7 +167,7 @@ EmbeddingHepMCFilter::EmbeddingHepMCFilter(const edm::ParameterSet & iConfig)
     for (auto & dc_m : decaychannel_markers)
     {
         // Reading out the cut string from the config
-        std::string cut_string_copy = iConfig.getParameter<std::string>(dc_m.first + "Cut");
+        std::string cut_string_copy = iConfig.getUntrackedParameter<std::string>(dc_m.first + "Cut", "REJECT");
         edm::LogInfo("EmbeddingHepMCFilter") << dc_m.first << " : " << cut_string_copy;
         boost::trim_fill(cut_string_copy, "");
         
@@ -178,8 +178,11 @@ EmbeddingHepMCFilter::EmbeddingHepMCFilter(const edm::ParameterSet & iConfig)
         {
             // Translating the cuts of a path into a struct which is later accessed to apply them on a event.
             CutsContainer cut;
-            fill_cut(cut_paths[i], dc_m.second, cut);
-            cuts_.push_back(cut);
+            if (cut_paths[i] != "REJECT")
+            {
+                fill_cut(cut_paths[i], dc_m.second, cut);
+                cuts_.push_back(cut);
+            }
         }
     }
 }
@@ -309,11 +312,6 @@ EmbeddingHepMCFilter::apply_cuts(DecayChannel &dc, std::vector<reco::Candidate::
             else if (cuts[i].pt2 != -1. && !(p4VisPair[1].Pt() > cuts[i].pt2)) all_cuts_passed = false;
             else if (cuts[i].eta1 != -1. && !(std::abs(p4VisPair[0].Eta()) < cuts[i].eta1)) all_cuts_passed = false;
             else if (cuts[i].eta2 != -1. && !(std::abs(p4VisPair[1].Eta()) < cuts[i].eta2)) all_cuts_passed = false;
-            else if (cuts[i].pt1 == -1. && cuts[i].pt2 == -1. && cuts[i].eta1 == -1. && cuts[i].eta2 == -1.)
-            {
-                edm::LogInfo("EmbeddingHepMCFilter") << "No cuts defined for decay channel " << return_mode(dc.first) << return_mode(dc.second) << ". Return 'false' as filter result." <<  std::endl;
-                all_cuts_passed = false;
-            }
             else all_cuts_passed = true;
         }
         if (all_cuts_passed)

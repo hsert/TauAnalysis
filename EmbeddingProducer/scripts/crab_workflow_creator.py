@@ -52,7 +52,7 @@ class single_crab_workflow():
 		# setting default template arguments
 		
 		self.globaltag = "76X_mcRun2_asymptotic_v12"
-		self.datasetpath = "/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM"
+		self.datasetpath = "/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/MINIAODSIM"
 		self.jobfoldername = self.stdjobfolderfilename + "test"
 		self.crabworkflowfilename = os.path.relpath(self.shfileoutname,self.fileoutfolder)
 		self.skimfilepath = os.path.relpath(self.skimfileabspath,self.fileoutfolder)

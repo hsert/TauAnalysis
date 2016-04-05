@@ -28,12 +28,12 @@ class single_gen():
 		self.nattempts = 1000
 		self.muonembedding = False
 		
-		self.ElElCut = "El1.Pt > 20 && El2.Pt > 8 && El1.Eta < 2.4 && El2.Eta < 2.4"
-		self.MuMuCut = "Mu1.Pt > 15 && Mu2.Pt > 6 && Mu1.Eta < 2.4 && Mu2.Eta < 2.4"
-		self.HadHadCut = "Had1.Pt > 30 && Had2.Pt > 30  && Had1.Eta < 2.1 && Had2.Eta < 2.1"
-		self.ElMuCut = "(El.Pt > 11 && El.Eta < 2.5 && Mu.Pt > 16 && Mu.Eta < 2.4) || (El.Pt > 16 && El.Eta < 2.5 && Mu.Pt > 8 && Mu.Eta < 2.4)"
-		self.ElHadCut = "El.Pt > 22 && El.Eta < 2.1 && Had.Pt > 10 && Had.Eta < 2.3"
-		self.MuHadCut = "Mu.Pt > 17 && Mu.Eta < 2.1 && Had.Pt > 10 && Had.Eta < 2.3"
+		self.ElElCut = 'ElElCut = cms.untracked.string("El1.Pt > 20 && El2.Pt > 8 && El1.Eta < 2.4 && El2.Eta < 2.4"),'
+		self.MuMuCut = 'MuMuCut = cms.untracked.string("Mu1.Pt > 15 && Mu2.Pt > 6 && Mu1.Eta < 2.4 && Mu2.Eta < 2.4"),'
+		self.HadHadCut = 'HadHadCut = cms.untracked.string("Had1.Pt > 30 && Had2.Pt > 30  && Had1.Eta < 2.1 && Had2.Eta < 2.1"),'
+		self.ElMuCut = 'ElMuCut = cms.untracked.string("(El.Pt > 11 && El.Eta < 2.5 && Mu.Pt > 16 && Mu.Eta < 2.4) || (El.Pt > 16 && El.Eta < 2.5 && Mu.Pt > 8 && Mu.Eta < 2.4)"),'
+		self.ElHadCut = 'ElHadCut = cms.untracked.string("El.Pt > 22 && El.Eta < 2.1 && Had.Pt > 10 && Had.Eta < 2.3"),'
+		self.MuHadCut = 'MuHadCut = cms.untracked.string("Mu.Pt > 17 && Mu.Eta < 2.1 && Had.Pt > 10 && Had.Eta < 2.3"),'
 		self.decaychannels = {"EE" : [0, self.ElElCut], "MM" : [1, self.MuMuCut], "TT" : [2, self.HadHadCut], "EM" : [3, self.ElMuCut], "ET" : [4, self.ElHadCut], "MT" : [5, self.MuHadCut]}
 		self.active_decaychannels = ["EM"]
 		
