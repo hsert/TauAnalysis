@@ -38,8 +38,10 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
-
+#include "DataFormats/Math/interface/Point3D.h"
 
 #include "SimDataFormats/GeneratorProducts/interface/LesHouches.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHECommonBlocks.h"
@@ -94,7 +96,9 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       boost::shared_ptr<lhef::LHERunInfo>	runInfo;
       boost::shared_ptr<lhef::LHEEvent>	partonLevel;
       boost::ptr_deque<LHERunInfoProduct>	runInfoProducts;
+      
       edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
+      edm::EDGetTokenT<reco::VertexCollection> vertexCollection_;
       bool switchToMuonEmbedding_;
       bool mirroring_;
       const double tauMass_ = 1.77682;
@@ -124,6 +128,7 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    //register your products
    produces<LHEEventProduct>();
    produces<LHERunInfoProduct, edm::InRun>();
+   produces<math::XYZPoint>("vertexPosition");
 /* Examples
    produces<ExampleData2>();
 
@@ -135,6 +140,7 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
 */
    //now do what ever other initialization is needed
    muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
+   vertexCollection_ = consumes<reco::VertexCollection>(edm::InputTag("offlineSlimmedPrimaryVertices"));
    switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
    mirroring_ = iConfig.getParameter<bool>("mirroring");
    studyFSRmode_ = iConfig.getUntrackedParameter<std::string>("studyFSRmode","");
@@ -170,10 +176,13 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     Handle<std::vector<pat::Muon>> coll_muons;
     iEvent.getByToken(muonsCollection_ , coll_muons);
+    
+    Handle<std::vector<reco::Vertex>> coll_vertices;
+    iEvent.getByToken(vertexCollection_ , coll_vertices);
+    
     TLorentzVector positiveLepton, negativeLepton;
     bool mu_plus_found = false;
     bool mu_minus_found = false;
-
     lhef::HEPEUP hepeup;
     // Assuming Pt-Order
     for (std::vector<pat::Muon>::const_iterator muon=  coll_muons->begin(); muon!= coll_muons->end();  ++muon)
@@ -190,6 +199,9 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
       else if (mu_minus_found && mu_plus_found) break;
     }
+    std::cout << "PV x position " << coll_vertices->at(0).x() << std::endl;
+    // Saving vertex position
+    
     
     transform_mumu_to_tautau(positiveLepton,negativeLepton); // if MuonEmbedding, function does nothing.
     mirror(positiveLepton,negativeLepton); // if no mirroring, function does nothing.
@@ -200,8 +212,9 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     if (write_lheout) std::copy(product->begin(), product->end(), std::ostream_iterator<std::string>(file));
     
-    
     iEvent.put(product);
+    std::auto_ptr<math::XYZPoint> vertex_position (new math::XYZPoint(coll_vertices->at(0).position()));
+    iEvent.put(vertex_position, "vertexPosition");
 
 /* This is an event example
    //Read 'ExampleData' from the Event

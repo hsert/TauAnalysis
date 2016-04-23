@@ -2,12 +2,12 @@ from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 config = config()
 
 ##-- Your name of the crab project
-config.General.requestName = '{JOBFOLDERNAME}'
+config.General.requestName = '{JOBFOLDERNAME}_{VERSION}'
 config.General.workArea = 'crab_projects'
 
 ##-- Transfer root files as well as log files "cmsRun -j FrameworkJobReport.xml" (log file = FrameworkJobReport.xml)
 config.General.transferOutputs = True
-config.General.transferLogs = True
+config.General.transferLogs = False
 
 ##-- We want to have the special dcms role (better fair share at german grid sites). 
 config.User.voGroup = 'dcms'
@@ -16,12 +16,12 @@ config.User.voGroup = 'dcms'
 config.JobType.pluginName = 'Analysis'
 config.JobType.sendPythonFolder = True
 config.JobType.psetName = '{SKIMFILEPATH}'
-config.JobType.scriptExe = '{CRABWORKFLOWFILENAME}'
-config.JobType.maxJobRuntimeMin = 2160
+config.JobType.scriptExe = '{SHELLWORKFLOWFILENAME}'
+config.JobType.maxJobRuntimeMin = 2800
 config.JobType.maxMemoryMB = 2500
 
 ##-- instead of taking the outputfile per hand use the result of pset.py and renamed it, which cheat on the test of is an EDM file test and allows to use publish the data 
-config.JobType.disableAutomaticOutputCollection = False
+config.JobType.disableAutomaticOutputCollection = True
 config.JobType.outputFiles = ['kappaTuple.root']
 
 ##-- The dataset you want to process:
@@ -41,4 +41,4 @@ config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
 
 ##-- Run in xrootd mode (which allows you to run the jobs on all possible sites) 
 config.Data.ignoreLocality = True
-config.Site.whitelist = ['T2_CH_CERN','T2_DE_DESY','T1_DE_KIT','T2_DE_RWTH']
+config.Site.whitelist = ['T2_CH_CERN','T2_DE_DESY','T1_DE_KIT','T2_DE_RWTH','T2_UK_London_IC', 'T2_US_MIT']

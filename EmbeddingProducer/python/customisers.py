@@ -9,7 +9,12 @@ def customiseAllSteps(process):
     print "Processing step: ",process._Process__name
     return process
 
+def customiseGeneratorVertexFromInput(process):
 
+    from TauAnalysis.EmbeddingProducer.cmsDriver_fragments.VertexCorrector_cff import VtxCorrectedToInput
+    process.VtxSmeared = VtxCorrectedToInput.clone()
+    print "Correcting Vertex in genEvent to one from input. Replaced 'VtxSmeared' with the Corrector."
+    return process
 
 def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='loose'):
 
@@ -38,13 +43,11 @@ def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='lo
     outputModule.outputCommands.extend(cms.untracked.vstring("drop * ",
 			 "keep LHEEventProduct_*_*_"+process._Process__name,
 			 "keep LHERunInfoProduct_*_*_"+process._Process__name,
+			 "keep double_*_vertexPosition*_"+process._Process__name,
       ))
 
 
     process.schedule.insert(0, process.inputPath)
-
-
-    
     return process
 
 def customiseMuonInputForMiniAOD(process,muon_id='loose'):

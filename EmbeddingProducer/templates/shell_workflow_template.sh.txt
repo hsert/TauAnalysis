@@ -1,5 +1,5 @@
-echo "================= CMSRUN starting ===================="
-cmsRun -j FrameworkJobReport.xml -p PSet.py
+{CRAB}echo "================= CMSRUN starting ===================="
+{CRAB}cmsRun -j FrameworkJobReport.xml -p PSet.py
 
 {CFISWITCH}echo "================= creating softlink for cfipython ===================="
 
@@ -22,6 +22,7 @@ cmsDriver.py TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/{GENERATORFI
 {RANDOMSERVICESWITCH}echo 'randSvc.populate()' >> embedding.py
 
 cmsRun -p embedding.py
+rm skimmed.root
 
 echo "================= EMBEDDING STEP finished ===================="
 
