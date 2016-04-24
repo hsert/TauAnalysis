@@ -41,7 +41,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/Math/interface/Point3D.h"
+#include "DataFormats/Math/interface/LorentzVector.h"
 
 #include "SimDataFormats/GeneratorProducts/interface/LesHouches.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHECommonBlocks.h"
@@ -128,7 +128,7 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    //register your products
    produces<LHEEventProduct>();
    produces<LHERunInfoProduct, edm::InRun>();
-   produces<math::XYZPoint>("vertexPosition");
+   produces<math::XYZTLorentzVectorD>("vertexPosition");
 /* Examples
    produces<ExampleData2>();
 
@@ -199,9 +199,7 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
       else if (mu_minus_found && mu_plus_found) break;
     }
-    std::cout << "PV x position " << coll_vertices->at(0).x() << std::endl;
-    // Saving vertex position
-    
+    //std::cout << "PV x position " << coll_vertices->at(0).x() << std::endl;
     
     transform_mumu_to_tautau(positiveLepton,negativeLepton); // if MuonEmbedding, function does nothing.
     mirror(positiveLepton,negativeLepton); // if no mirroring, function does nothing.
@@ -213,7 +211,8 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     if (write_lheout) std::copy(product->begin(), product->end(), std::ostream_iterator<std::string>(file));
     
     iEvent.put(product);
-    std::auto_ptr<math::XYZPoint> vertex_position (new math::XYZPoint(coll_vertices->at(0).position()));
+    // Saving vertex position
+    std::auto_ptr<math::XYZTLorentzVectorD> vertex_position (new math::XYZTLorentzVectorD(coll_vertices->at(0).x(),coll_vertices->at(0).y(),coll_vertices->at(0).z(),0.0));
     iEvent.put(vertex_position, "vertexPosition");
 
 /* This is an event example
