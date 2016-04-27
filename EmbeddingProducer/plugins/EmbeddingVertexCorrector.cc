@@ -158,7 +158,7 @@ EmbeddingVertexCorrector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
    //std::cout << "vertex shift in mm in X: " << vertex_shift->x() << std::endl;
    // Apply vertex shift to all production vertices of the event
    CorrectedGenEvent->applyVtxGen(vertex_shift);
-   HepMC::GenEvent* corgenevent = new HepMC::GenEvent(*CorrectedGenEvent->GetEvent());
+   //HepMC::GenEvent* corgenevent = new HepMC::GenEvent(*CorrectedGenEvent->GetEvent());
    //std::cout << "Corrected  X for Vertex 1: " << (*corgenevent->vertices_begin())->position().x() << std::endl;
    
    iEvent.put(std::move(CorrectedGenEvent));
