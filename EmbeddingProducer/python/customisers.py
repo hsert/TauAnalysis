@@ -6,6 +6,11 @@ import FWCore.ParameterSet.Config as cms
 
 def customiseAllSteps(process):
     process._Process__name +="embedding"
+    outputModulesList = [key for key,value in process.outputModules.iteritems()]
+    outputModule = getattr(process, outputModulesList[0])
+    outputModule.outputCommands.extend(cms.untracked.vstring("keep recoVertexs_offlineSlimmedPrimaryVertices__PAT",
+    "keep edmHepMCProduct_*_*_"+process._Process__name
+    ))
     print "Processing step: ",process._Process__name
     return process
 
@@ -43,7 +48,8 @@ def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='lo
     outputModule.outputCommands.extend(cms.untracked.vstring("drop * ",
 			 "keep LHEEventProduct_*_*_"+process._Process__name,
 			 "keep LHERunInfoProduct_*_*_"+process._Process__name,
-			 "keep *_externalLHEProducer_vertexPosition*_"+process._Process__name
+			 "keep *_externalLHEProducer_vertexPosition*_"+process._Process__name,
+			 "keep recoVertexs_offlineSlimmedPrimaryVertices__PAT"
       ))
 
 

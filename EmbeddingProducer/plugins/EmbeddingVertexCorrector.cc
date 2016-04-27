@@ -146,19 +146,20 @@ EmbeddingVertexCorrector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
    {
    counter++;
 
-   //std::cout << "Former vertex information: " << std::endl;
-   //std::cout << "X = " << (*vt)->position().x() << " Y = " << (*vt)->position().y() << " Z = " << (*vt)->position().z() << std::endl;
+   //std::cout << std::setprecision(10) << "Former vertex information in mm: " << std::endl;
+   //std::cout << "Vertex " << counter << ": X = " << (*vt)->position().x() << std::endl;
    }
    //std::cout << "Number of vertices: " << counter << std::endl;
-   
    //Retrieving vertex position from input and creating vertex shift
    Handle<math::XYZTLorentzVectorD> vertex_position;
    iEvent.getByLabel(vertexPositionLabel, vertex_position);
    
-   HepMC::FourVector* vertex_shift = new HepMC::FourVector(vertex_position.product()->x()*cm, vertex_position.product()->y()*cm, vertex_position.product()->z()*cm);
-   
+   HepMC::FourVector* vertex_shift = new HepMC::FourVector(vertex_position.product()->x()*cm, vertex_position.product()->y()*cm, vertex_position.product()->z()*cm); 
+   //std::cout << "vertex shift in mm in X: " << vertex_shift->x() << std::endl;
    // Apply vertex shift to all production vertices of the event
    CorrectedGenEvent->applyVtxGen(vertex_shift);
+   HepMC::GenEvent* corgenevent = new HepMC::GenEvent(*CorrectedGenEvent->GetEvent());
+   //std::cout << "Corrected  X for Vertex 1: " << (*corgenevent->vertices_begin())->position().x() << std::endl;
    
    iEvent.put(std::move(CorrectedGenEvent));
 /* this is an EventSetup example

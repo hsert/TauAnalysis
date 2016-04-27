@@ -98,12 +98,9 @@ process.ep *= process.kappaOut
 process.kappaTuple.Info.pileUpInfoSource = cms.InputTag("slimmedAddPileupInfo")
 
 process.kappaTuple.active += cms.vstring('VertexSummary')
-process.load("Kappa.Skimming.KVertices_cff")
-process.goodOfflinePrimaryVertices.src = cms.InputTag('offlineSlimmedPrimaryVertices')
-process.p *= (process.makeVertexes)
-process.kappaTuple.VertexSummary.whitelist = cms.vstring('offlineSlimmedPrimaryVertices')
-process.kappaTuple.VertexSummary.rename = cms.vstring('offlineSlimmedPrimaryVertices => goodOfflinePrimaryVerticesSummary')
-process.kappaTuple.VertexSummary.goodOfflinePrimaryVerticesSummary = cms.PSet(src=cms.InputTag("offlineSlimmedPrimaryVertices"))
+process.kappaTuple.VertexSummary.goodOfflinePrimaryVerticesSummaryPAT = cms.PSet(src=cms.InputTag("offlineSlimmedPrimaryVertices","","PAT"))
+process.kappaTuple.VertexSummary.goodOfflinePrimaryVerticesSummaryRECOembedding = cms.PSet(src=cms.InputTag("offlineSlimmedPrimaryVertices","","RECOembedding"))
+process.kappaTuple.VertexSummary.goodOfflinePrimaryVerticesSummary = cms.PSet(src=cms.InputTag("offlineSlimmedPrimaryVertices","","RECOembedding"))
 
 process.kappaTuple.active += cms.vstring('TriggerObjectStandalone')
 process.kappaTuple.TriggerObjectStandalone.bits = cms.InputTag("TriggerResults","","HLTembedding")
