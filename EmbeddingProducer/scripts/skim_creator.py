@@ -7,6 +7,7 @@ class single_skim():
 	def __init__(self):
 		
 		print "Initializing skim file."
+		
 		# setting used paths
 		self.cmssw_path = os.environ.get('CMSSW_BASE')
 		if self.cmssw_path is None:
@@ -42,6 +43,7 @@ class single_skim():
 	def set_skim(self, inputfile=None, globaltag=None, fsrmode=None, formatname=None):
 		
 		print "Changing settings for skim file."
+		
 		self.inputfile = self.inputfile if inputfile is None else inputfile
 		self.globaltag = self.globaltag if globaltag is None else globaltag
 		self.fsrmode = self.fsrmode if fsrmode is None else fsrmode
@@ -60,6 +62,8 @@ class single_skim():
 			self.fileoutfolder = self.skimming_path + '/' + fileoutfolder
 		if not fileoutname is None:
 			self.fileoutname = self.fileoutfolder + '/' + fileoutname
+		else:
+			self.fileoutname = self.fileoutfolder + '/skim_test.py'
 		if self.fsrmode != '':
 			fsr = '_' + self.fsrmode
 			insertindex = self.fileoutname.find(".py")

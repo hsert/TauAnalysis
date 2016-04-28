@@ -1,27 +1,35 @@
 [global]
-workdir = $CMSSW_BASE/src/TauAnalysis/EmbeddingProducer/grid_projects/work_{VERSION}
+workdir = $CMSSW_BASE/src/TauAnalysis/EmbeddingProducer/gridcontrol_projects/{JOBFOLDERNAME}{VERSION}
 task = CMSSW
-backend = local
-cmdargs = -G -c -m 3
+backend = {BACKEND}
+cmdargs = -G -c -m 0
 
 [jobs]
 wall time = 24:00:00
-memory = 2500
+memory = 2000
+{JOBS}
 
 [CMSSW]
 project area = $CMSSW_BASE
-config file = {FULLSKIMFILEPATH}
+config file = {SKIMFILEPATH}
 dataset = {DATASETPATH}
-events per job = 5000
+events per job = 10000
 se runtime = True
-epilog executable = {FULLSHELLWORKFLOWPATH}
+epilog executable = {SHELLWORKFLOWPATH}
+partition lfn modifier = <xrootd:us>
+depends = glite
 
 [local]
 wms = OGE
-memory = 2500
+memory = 4000
 proxy = VomsProxy
 
 [storage]
 se output files = *.root
 se path = srm://dcache-se-cms.desy.de:8443/srm/managerv2?SFN=/pnfs/desy.de/cms/tier2/store/user/{USER}/
-se output pattern = @NICK@/{JOBFOLDERNAME}/@XBASE@_@GC_JOB_ID@@XEXT@
+se output pattern = @NICK@/{JOBFOLDERNAME}{VERSION}/@XBASE@_@GC_JOB_ID@@XEXT@
+
+[condor]
+JDLData = Requirements=(TARGET.CLOUD_SITE=="BWFORCLUSTER")
+proxy = VomsProxy
+memory = 2000

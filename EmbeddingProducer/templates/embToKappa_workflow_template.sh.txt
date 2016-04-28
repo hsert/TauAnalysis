@@ -1,19 +1,11 @@
-{CRAB}echo "================= CMSRUN starting ===================="
-{CRAB}cmsRun -j FrameworkJobReport.xml -p PSet.py
-
-{CFISWITCH}echo "================= creating softlink for cfipython ===================="
-
-{CFISWITCH}rm -rf $CMSSW_BASE/cfipython
-{CFISWITCH}ln $CMSSW_RELEASE_BASE/cfipython $CMSSW_BASE/cfipython -s
-
 echo "================= INPUT SKIMMING finished ===================="
 
-cmsDriver.py TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/{GENERATORFILEPATH} \
+cmsDriver.py TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/{GENERATORFILE} \
   --filein file:skimmed.root --fileout file:step1.root \
   --conditions {GLOBALTAG} --era Run2_25ns \
   --eventcontent FEVTDEBUG --relval 9000,50 \
   --step GEN,SIM --datatier GEN-SIM \
-  --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps \
+  --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps{VERTEXCORRECTION} \
   --beamspot Realistic50ns13TeVCollision --no_exec -n -1 \
   --python_filename embedding.py
 
@@ -58,5 +50,5 @@ cp $CMSSW_BASE/python/TauAnalysis/EmbeddingProducer/Skimming/kSkimming_run2_MC_m
 cmsRun -p kappa.py
 rm skimmed_to_reco.root
 echo "================= KAPPASKIM finished ===================="
-#ls -lrth
+ls -lrth
 echo "================= CMSRUN finished ===================="

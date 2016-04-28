@@ -6,8 +6,8 @@ class single_gen():
 	
 	def __init__(self):
 		
-		
 		print "Initializing generator file."
+		
 		# setting used paths
 		self.cmssw_path = os.environ.get('CMSSW_BASE')
 		if self.cmssw_path is None:
@@ -59,6 +59,7 @@ class single_gen():
   ),'''
 		self.externaldecays = {"photospp" : self.photospp, "" : ""}
 		self.externaldecay = ""
+		self.pythiadecaymode = "'15:onMode = off',\n        '15:onIfAny = 11 13',"
 		
 		# setting default gen filename and folder
 		self.fileoutfolder = self.generator_path + '/test'
@@ -66,8 +67,7 @@ class single_gen():
 	
 	def set_gen(self, externaldecay=None, active_decaychannels=None, nattempts=None, muonembedding=None):
 		
-		print "Changing setting for generator file."
-		pythiadecaymode = "'15:onMode = off',\n        '15:onIfAny = 11 13',"
+		print "Changing settings for generator file."
 		
 		self.externaldecay = self.externaldecay if externaldecay is None else externaldecay
 		self.active_decaychannels = self.active_decaychannels if active_decaychannels is None else active_decaychannels
@@ -83,7 +83,7 @@ class single_gen():
 			NATTEMPTS=self.nattempts,
 			MUONEMBEDDING="True" if self.muonembedding else "False",
 			EXTERNALDECAY=self.externaldecays[self.externaldecay],
-			PYTHIADECAYMODE = pythiadecaymode if self.active_decaychannels == ["EM"] else ""
+			PYTHIADECAYMODE = self.pythiadecaymode if self.active_decaychannels == ["EM"] else ""
 		)
 	
 	def save_gen(self, fileoutname=None, fileoutfolder=None):
@@ -93,6 +93,8 @@ class single_gen():
 			self.fileoutfolder = self.generator_path + '/' + fileoutfolder
 		if not fileoutname is None:
 			self.fileoutname = self.fileoutfolder + '/' + fileoutname
+		else:
+			self.fileoutname = self.fileoutfolder + '/lhehadronizerpythia8_test.py'
 		if self.externaldecay != '':
 			externaldecay = '_' + self.externaldecay
 			insertindex = self.fileoutname.find(".py")
