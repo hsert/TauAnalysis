@@ -1,0 +1,8 @@
+echo "================= CMSRUN starting ===================="
+cmsRun -j FrameworkJobReport.xml -p PSet.py
+
+echo "================= creating softlink for cfipython ===================="
+
+rm -rf $CMSSW_BASE/cfipython
+ln $CMSSW_RELEASE_BASE/cfipython $CMSSW_BASE/cfipython -s
+
