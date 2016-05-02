@@ -112,7 +112,7 @@ if __name__ == "__main__":
 	class LoadFromFile (argparse.Action):
 		def __call__ (self, parser, namespace, values, option_string = None):
 			with values as f:
-				parser.parse_args(f.read().split(), namespace)
+				parser.parse_args(f.read().replace('"','').split(), namespace)
 	
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--loadfromfile', type=open, action=LoadFromFile, help='Load the options below from a .txt file.')
