@@ -57,8 +57,8 @@ class single_gen():
     ),
     parameterSets = cms.vstring('Photospp')
   ),'''
-		self.externaldecays = {"photospp" : self.photospp, "" : ""}
-		self.externaldecay = ""
+		self.externaldecays = {"photospp" : self.photospp, "noextdecayer" : ""}
+		self.externaldecay = "noextdecayer"
 		self.pythiadecaymode = "'15:onMode = off',\n        '15:onIfAny = 11 13',"
 		
 		# setting default gen filename and folder
@@ -137,7 +137,14 @@ if __name__ == "__main__":
 	
 	import argparse
 	
+	class LoadFromFile (argparse.Action):
+		def __call__ (self, parser, namespace, values, option_string = None):
+			with values as f:
+				parser.parse_args(f.read().replace('"','').split(), namespace)
+	
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--loadfromfile', type=open, action=LoadFromFile, help='Load the options below from a .txt file.')
+	
 	parser.add_argument('--decaychannels', default=[], nargs = '+', help='Defines, which set of decay channels of the ditau system should simulated and tested. If multiple channels are in a set, then separate them by comma in the string. Possible values: "EE","MM","TT","EM","ET","MT","ALL".')
 	parser.add_argument('--externaldecays', default=[], nargs = '+', help='Defines additional generators that should enabled within pythia8 hadronizer. Possible values: "photospp".')
 	parser.add_argument('--nattempts', default=None, type=int, help="Number of attempts for the filter that is tested.")

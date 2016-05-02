@@ -1,0 +1,11 @@
+# command for FSR studies:
+
+crab_config_creator.py --fsrmodes "" "afterFSR" "beforeFSR" --decaychannels "EM" "TT" "MT" "ET" --externaldecays "" --outputfolder "FSRstudies" --skimoutputfilename "skim.py" --genoutputfilename "lhehadronizerpythia8.py" --craboutputfilename "crab_config.py" --correctvtx --wfoutputfilename "embToKappa_workflow.sh"
+
+gc_config_creator.py --fsrmodes "" "afterFSR" "beforeFSR" --decaychannels "EM" "TT" "MT" "ET" --externaldecays "" --outputfolder "FSRstudies" --skimoutputfilename "skim.py" --genoutputfilename "lhehadronizerpythia8.py" --gcoutputfilename "gc_config.conf" --correctvtx --wfoutputfilename "embToKappa_workflow.sh" --backend "condor" --jobs "250" --user "aakhmets"
+
+# command for vertex correction check:
+
+gc_config_creator.py --fsrmodes "" --decaychannels "EM" "TT" "MT" "ET" --externaldecays "" --outputfolder "vtx_corrected" --skimoutputfilename "skim.py" --genoutputfilename "lhehadronizerpythia8.py" --gcoutputfilename "gc_config.conf" --correctvtx --wfoutputfilename "embToKappa_workflow.sh" --backend "condor" --jobs "250" --user "aakhmets" --version "vtx_corrected"
+
+gc_config_creator.py --fsrmodes "" --decaychannels "EM" "TT" "MT" "ET" --externaldecays "" --outputfolder "vtx_not_corrected" --skimoutputfilename "skim.py" --genoutputfilename "lhehadronizerpythia8.py" --gcoutputfilename "gc_config.conf" --wfoutputfilename "embToKappa_workflow.sh" --backend "condor" --jobs "250" --user "aakhmets" --version "vtx_not_corrected"

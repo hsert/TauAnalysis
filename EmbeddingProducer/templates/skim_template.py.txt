@@ -46,7 +46,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
 				src = cms.InputTag("patMuonsAfterID","","SKIM"),
-				switchToMuonEmbedding = cms.bool(False),
+				switchToMuonEmbedding = cms.bool({MUONEMBEDDING}),
 				mirroring = cms.bool(False),
 				studyFSRmode = cms.untracked.string("{FSRMODE}")
 				)

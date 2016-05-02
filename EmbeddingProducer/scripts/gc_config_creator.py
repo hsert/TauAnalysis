@@ -118,9 +118,9 @@ if __name__ == "__main__":
 	from gen_creator import single_gen
 	from embToKappa_workflow_creator import single_embToKappa_workflow
 	
-	def perform_skim_creation(fsrmode, formatname, inputfile, globaltag, fileoutfolder, fileoutname):
+	def perform_skim_creation(fsrmode, formatname, inputfile, globaltag, muonembedding, fileoutfolder, fileoutname):
 		skim = single_skim()
-		skim.set_skim(fsrmode=fsrmode, formatname=formatname, inputfile=inputfile, globaltag=globaltag)
+		skim.set_skim(fsrmode=fsrmode, formatname=formatname, inputfile=inputfile, globaltag=globaltag, muonembedding=muonembedding)
 		skim.save_skim(fileoutfolder=fileoutfolder, fileoutname=fileoutname)
 		skim.print_skim_settings()
 		return skim
@@ -172,21 +172,28 @@ if __name__ == "__main__":
 	
 	import argparse
 	
+	class LoadFromFile (argparse.Action):
+		def __call__ (self, parser, namespace, values, option_string = None):
+			with values as f:
+				parser.parse_args(f.read().replace('"','').split(), namespace)
+	
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--loadfromfile', type=open, action=LoadFromFile, help='Load the options below from a .txt file.')
+	
 	parser.add_argument('--globaltag', default=None, help='Global tag of the input file and sample production.')
 	parser.add_argument('--outputfolder', default=None, help='Name of the output folder used for all templates.')
+	parser.add_argument('--muonembedding', default=None, action='store_true', help='Enables muon embedding.')
 
 	skimgroup = parser.add_argument_group('skim options')
 	skimgroup.add_argument('--inputfile', default=None, help='Input file for ZToMuMu selection.')
 	skimgroup.add_argument('--format', default=None, help='Format of the input file. Possible values: "miniaod", "reco".')
-	skimgroup.add_argument('--fsrmodes', default=[], nargs = '+', help='Defines, whether final state radiation should be studied on generator level and if it is the case, which state of the muon should be taken. Possible values: "afterFSR", "beforeFSR", "". ')
+	skimgroup.add_argument('--fsrmodes', default=[], nargs = '+', help='Defines, whether final state radiation should be studied on generator level and if it is the case, which state of the muon should be taken. Possible values: "afterFSR", "beforeFSR", "reco". ')
 	skimgroup.add_argument('--skimoutputfilename', default=None, help='Name of the skim output file.')
 
 	gengroup = parser.add_argument_group('generator options')
 	gengroup.add_argument('--decaychannels', default=[], nargs = '+', help='Defines, which set of decay channels of the ditau system should simulated and tested. If multiple channels are in a set, then separate them by comma in the string. Possible values: "EE","MM","TT","EM","ET","MT","ALL".')
 	gengroup.add_argument('--externaldecays', default=[], nargs = '+', help='Defines additional generators that should enabled within pythia8 hadronizer. Possible values: "photospp".')
 	gengroup.add_argument('--nattempts', default=None, type=int, help="Number of attempts for the filter that is tested.")
-	gengroup.add_argument('--muonembedding', default=None, action='store_true', help='Enables muon embedding.')
 	gengroup.add_argument('--genoutputfilename', default=None, help='Name of the generator output file.')
 
 	workflowgroup = parser.add_argument_group('embedding to kappa workflow options')
@@ -206,7 +213,7 @@ if __name__ == "__main__":
 	
 	if len(args.fsrmodes) == 0: args.fsrmodes = [None]
 	for fsrmode in args.fsrmodes:
-		skim = perform_skim_creation(fsrmode=fsrmode, formatname = args.format, inputfile = args.inputfile, globaltag = args.globaltag, fileoutfolder = args.outputfolder, fileoutname = args.skimoutputfilename)
+		skim = perform_skim_creation(fsrmode=fsrmode, formatname = args.format, inputfile = args.inputfile, globaltag = args.globaltag, muonembedding=args.muonembedding, fileoutfolder = args.outputfolder, fileoutname = args.skimoutputfilename)
 		if len(args.decaychannels) == 0: args.decaychannels = [None]
 		for dcs in args.decaychannels:
 			if type(dcs) is str:
