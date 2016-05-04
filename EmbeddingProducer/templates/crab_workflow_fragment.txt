@@ -1,5 +1,5 @@
 echo "================= CMSRUN starting ===================="
-cmsRun -j FrameworkJobReport.xml -p PSet.py
+cmsRun -j FrameworkJobReport.xml PSet.py
 
 echo "================= creating softlink for cfipython ===================="
 

@@ -13,7 +13,7 @@ cmsDriver.py TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/{GENERATORFI
 {RANDOMSERVICESWITCH}echo 'randSvc = RandomNumberServiceHelper(process.RandomNumberGeneratorService)' >> embedding.py
 {RANDOMSERVICESWITCH}echo 'randSvc.populate()' >> embedding.py
 
-cmsRun -p embedding.py
+cmsRun embedding.py
 rm skimmed.root
 
 echo "================= EMBEDDING STEP finished ===================="
@@ -26,7 +26,7 @@ cmsDriver.py step2  --conditions {GLOBALTAG} \
   --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps \
   --no_exec -n -1 --python_filename step2.py
 
-cmsRun -p step2.py
+cmsRun step2.py
 rm step1.root
 
 echo "================= STEP2 finished ===================="
@@ -42,12 +42,12 @@ cmsDriver.py step3  --runUnscheduled  --conditions {GLOBALTAG} \
 echo 'process.CSCHaloData.HLTResultLabel = cms.InputTag("TriggerResults","","HLTembedding")' >> step3.py
 echo 'process.patTrigger.processName = cms.string("HLTembedding")' >> step3.py
 
-cmsRun -p step3.py
+cmsRun step3.py
 rm step2.root
 echo "================= STEP3 finished ===================="
 
 cp $CMSSW_BASE/python/TauAnalysis/EmbeddingProducer/Skimming/kSkimming_run2_MC_miniaod_cfg_for_test.py kappa.py
-cmsRun -p kappa.py
+cmsRun kappa.py
 rm skimmed_to_reco.root
 echo "================= KAPPASKIM finished ===================="
 ls -lrth
