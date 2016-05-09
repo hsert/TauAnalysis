@@ -15,7 +15,7 @@ from Configuration.StandardSequences.Eras import eras
 ## Inputs configuration
 data = False
 isEmbedded = False
-globaltag = '76X_mcRun2_asymptotic_v12'
+globaltag = '80X_mcRun2_asymptotic_2016_v3'
 outputfilename = "kappaTuple.root"
 maxevents = -1
 

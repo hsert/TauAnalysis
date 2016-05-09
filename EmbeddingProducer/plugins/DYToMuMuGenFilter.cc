@@ -23,11 +23,6 @@ private:
   virtual void endJob() override;
   edm::InputTag inputTag_;
   edm::EDGetTokenT<reco::GenParticleCollection> genParticleCollection_;
-  
-  //virtual bool beginRun(edm::Run&, edm::EventSetup const&)override;
-  // virtual bool endRun(edm::Run&, edm::EventSetup const&)override;
-  //virtual bool beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&)override;
-  //virtual bool endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&)override;
 
 };
 
@@ -40,10 +35,6 @@ DYToMuMuGenFilter::DYToMuMuGenFilter(const edm::ParameterSet& iConfig)
 
 
 DYToMuMuGenFilter::~DYToMuMuGenFilter() {
- 
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
-
 }
 
 
@@ -101,28 +92,7 @@ void DYToMuMuGenFilter::beginJob() {
 // ------------ method called once each job just after ending the event loop  ------------
 void DYToMuMuGenFilter::endJob() {
 }
-/*
-// ------------ method called when starting to processes a run  ------------
-bool DYToMuMuGenFilter::beginRun(edm::Run&, edm::EventSetup const&) { 
-  return true;
-}
 
-// ------------ method called when ending the processing of a run  ------------
-bool DYToMuMuGenFilter::endRun(edm::Run&, edm::EventSetup const&) {
-  return true;
-}
-
-// ------------ method called when starting to processes a luminosity block  ------------
-bool 
-DYToMuMuGenFilter::beginLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&) {
-  return true;
-}
-
-// ------------ method called when ending the processing of a luminosity block  ------------
-bool DYToMuMuGenFilter::endLuminosityBlock(edm::LuminosityBlock&, edm::EventSetup const&) {
-  return true;
-}
-*/
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void DYToMuMuGenFilter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation

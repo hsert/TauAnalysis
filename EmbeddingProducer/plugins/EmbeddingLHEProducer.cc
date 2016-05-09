@@ -25,8 +25,6 @@
 #include <string>
 #include <memory>
 #include "TLorentzVector.h"
-//#include "boost/bind.hpp"
-//#include "boost/shared_ptr.hpp"
 #include "boost/ptr_container/ptr_deque.hpp"
 
 // user include files
@@ -78,10 +76,6 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       
       virtual void beginRunProduce(edm::Run& run, edm::EventSetup const& es) override;
       virtual void endRunProduce(edm::Run&, edm::EventSetup const&) override;
-     // virtual void beginRun(edm::Run const &, edm::EventSetup const&) override;
-      //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
-      //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-      //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
       void fill_lhe_from_mumu(TLorentzVector &positiveLepton, TLorentzVector &negativeLepton, lhef::HEPEUP &outlhe);
       void fill_lhe_with_particle(TLorentzVector &particle, double spin, int motherindex, int pdgid, int status, lhef::HEPEUP &outlhe);
@@ -113,14 +107,6 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
 };
 
 //
-// constants, enums and typedefs
-//
-
-//
-// static data member definitions
-//
-
-//
 // constructors and destructor
 //
 EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
@@ -129,16 +115,7 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    produces<LHEEventProduct>();
    produces<LHERunInfoProduct, edm::InRun>();
    produces<math::XYZTLorentzVectorD>("vertexPosition");
-/* Examples
-   produces<ExampleData2>();
 
-   //if do put with a label
-   produces<ExampleData2>("label");
- 
-   //if you want to put into the Run
-   produces<ExampleData2,InRun>();
-*/
-   //now do what ever other initialization is needed
    muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
    vertexCollection_ = consumes<reco::VertexCollection>(edm::InputTag("offlineSlimmedPrimaryVertices"));
    switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
@@ -156,10 +133,6 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
 
 EmbeddingLHEProducer::~EmbeddingLHEProducer()
 {
- 
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
-
 }
 
 
@@ -199,7 +172,6 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
       else if (mu_minus_found && mu_plus_found) break;
     }
-    //std::cout << "PV x position " << coll_vertices->at(0).x() << std::endl;
     
     transform_mumu_to_tautau(positiveLepton,negativeLepton); // if MuonEmbedding, function does nothing.
     mirror(positiveLepton,negativeLepton); // if no mirroring, function does nothing.
@@ -215,23 +187,6 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::auto_ptr<math::XYZTLorentzVectorD> vertex_position (new math::XYZTLorentzVectorD(coll_vertices->at(0).x(),coll_vertices->at(0).y(),coll_vertices->at(0).z(),0.0));
     iEvent.put(vertex_position, "vertexPosition");
 
-/* This is an event example
-   //Read 'ExampleData' from the Event
-   Handle<ExampleData> pIn;
-   iEvent.getByLabel("example",pIn);
-
-   //Use the ExampleData to create an ExampleData2 which 
-   // is put into the Event
-   std::unique_ptr<ExampleData2> pOut(new ExampleData2(*pIn));
-   iEvent.put(std::move(pOut));
-*/
-
-/* this is an EventSetup example
-   //Read SetupData from the SetupRecord in the EventSetup
-   ESHandle<SetupData> pSetup;
-   iSetup.get<SetupRecord>().get(pSetup);
-*/
- 
 }
 
 // ------------ method called once each job just before starting event loop  ------------
@@ -263,11 +218,7 @@ EmbeddingLHEProducer::beginRunProduce(edm::Run &run, edm::EventSetup const&)
     if (write_lheout)std::copy(runInfo->begin(), runInfo->end(),std::ostream_iterator<std::string>(file));
     
     run.put(runInfo);
-    
 
-    
-
-    
 }
 
 
@@ -302,11 +253,8 @@ void EmbeddingLHEProducer::fill_lhe_with_particle(TLorentzVector &particle, doub
     // 'particleindex' follows usual C++ index conventions starting at 0 for a list.
     // 'motherindex' follows the LHE index conventions: 0 is for 'not defined', so the listing starts at 1.
     // That means: LHE index 1 == C++ index 0.
-    //std::cout << "old NUP: " << outlhe.NUP << std::endl;
     int particleindex = outlhe.NUP;
     outlhe.resize(outlhe.NUP+1);
-    //std::cout << "new NUP: " << outlhe.NUP << std::endl;
-    //std::cout << "particle index C++: " << particleindex << std::endl;
     
     outlhe.PUP[particleindex][0] = particle.Px();
     outlhe.PUP[particleindex][1] = particle.Py();
@@ -414,30 +362,6 @@ void EmbeddingLHEProducer::mirror(TLorentzVector &positiveLepton, TLorentzVector
     return;
 }
 
-// ------------ method called when ending the processing of a run  ------------
-/*
-void
-EmbeddingLHEProducer::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-*/
- 
-// ------------ method called when starting to processes a luminosity block  ------------
-/*
-void
-EmbeddingLHEProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-*/
- 
-// ------------ method called when ending the processing of a luminosity block  ------------
-/*
-void
-EmbeddingLHEProducer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-*/
- 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
 EmbeddingLHEProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
