@@ -58,6 +58,16 @@ def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='lo
 
 def customiseMuonInputForMiniAOD(process,muon_id='loose'):
     return customiseMuonInputID(process,cms.InputTag("slimmedMuons"),muon_id)
+    
+def customiseSkimming(process, muonembedding = False, mirroring = False):
+    process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
+        src = cms.InputTag("patMuonsAfterID","","SKIM"),
+        switchToMuonEmbedding = cms.bool(muonembedding),
+        mirroring = cms.bool(mirroring),
+        studyFSRmode = cms.untracked.string("reco")
+    )
+    process._Process__name = 'SKIM'
+    return process
 
 def customiseMuonInputForRECO(process,muon_id='loose'):
 
