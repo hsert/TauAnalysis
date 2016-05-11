@@ -14,6 +14,15 @@ def customiseAllSteps(process):
     print "Processing step: ",process._Process__name
     return process
 
+def customiseDropInputRECO(process):
+    outputModulesList = [key for key,value in process.outputModules.iteritems()]
+    outputModule = getattr(process, outputModulesList[0])
+    outputModule.outputCommands.extend(cms.untracked.vstring("drop *_*_*_RECO",
+    "keep HcalNoiseSummary_hcalnoise_*_*",
+    "keep ClusterSummary_clusterSummaryProducer_*_*",
+    "keep L1GlobalTriggerReadoutRecord_gtDigis_*_*"
+    ))
+    return process
 def customiseGeneratorVertexFromInput(process):
 
     from TauAnalysis.EmbeddingProducer.cmsDriver_fragments.VertexCorrector_cff import VtxCorrectedToInput
