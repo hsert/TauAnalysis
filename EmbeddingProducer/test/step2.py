@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: step2 --conditions 80X_mcRun2_asymptotic_2016_v3 --filein file:step1.root --fileout file:step2.root --step DIGI,L1,DIGI2RAW,HLT:@relval25ns --datatier GEN-SIM-DIGI-RAW-HLTDEBUG --era Run2_25ns --eventcontent FEVTDEBUGHLT --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps --no_exec -n -1 --python_filename step2.py
+# with command line options: step2 --conditions 76X_mcRun2_asymptotic_v12 --filein file:step1.root --fileout file:step2.root --step DIGI,L1,DIGI2RAW,HLT:@relval25ns --datatier GEN-SIM-DIGI-RAW-HLTDEBUG --era Run2_25ns --eventcontent FEVTDEBUGHLT --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps --no_exec -n -1 --python_filename step2.py
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -80,7 +80,7 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_v3', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_mcRun2_asymptotic_v12', '')
 
 # Path and EndPath definitions
 process.digitisation_step = cms.Path(process.pdigi)

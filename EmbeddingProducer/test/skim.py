@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: gen --filein root://dcache-cms-xrootd.desy.de:1094//store/mc/RunIISpring16MiniAODv1/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/20000/0017320C-7BFC-E511-9B2D-0CC47A4C8E34.root --fileout file:skimmed.root --conditions 80X_mcRun2_asymptotic_2016_v3 --era Run2_25ns --step NONE --customise TauAnalysis/EmbeddingProducer/customisers.customiseSkimming,TauAnalysis/EmbeddingProducer/customisers.customiseMuonInputForMiniAOD --no_exec -n -1 --python_filename skim.py
+# with command line options: gen --filein /store/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/10000/004544CB-6DD8-E511-97E4-0026189438F6.root --fileout file:skimmed.root --conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns --step NONE --customise TauAnalysis/EmbeddingProducer/customisers.customiseSkimming,TauAnalysis/EmbeddingProducer/customisers.customiseMuonInputForMiniAOD --no_exec -n -1 --python_filename skim.py
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -21,7 +21,7 @@ process.maxEvents = cms.untracked.PSet(
 
 # Input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('root://dcache-cms-xrootd.desy.de:1094//store/mc/RunIISpring16MiniAODv1/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/20000/0017320C-7BFC-E511-9B2D-0CC47A4C8E34.root'),
+    fileNames = cms.untracked.vstring('/store/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/10000/004544CB-6DD8-E511-97E4-0026189438F6.root'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
@@ -53,7 +53,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_v3', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_mcRun2_asymptotic_v12', '')
 
 # Path and EndPath definitions
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)

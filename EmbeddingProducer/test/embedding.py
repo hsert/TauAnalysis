@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/test/lhehadronizerpythia8_noextdecayer_MT_cfi.py --filein file:skimmed.root --fileout file:step1.root --conditions 80X_mcRun2_asymptotic_2016_v3 --era Run2_25ns --eventcontent FEVTDEBUG --relval 9000,50 --step GEN,SIM --datatier GEN-SIM --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps,TauAnalysis/EmbeddingProducer/customisers.customiseGeneratorVertexFromInput --beamspot Realistic50ns13TeVCollision --no_exec -n -1 --python_filename embedding.py
+# with command line options: TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/test/lhehadronizerpythia8_noextdecayer_MT_cfi.py --filein file:skimmed.root --fileout file:step1.root --conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns --eventcontent FEVTDEBUG --relval 9000,50 --step GEN,SIM --datatier GEN-SIM --customise TauAnalysis/EmbeddingProducer/customisers.customiseAllSteps,TauAnalysis/EmbeddingProducer/customisers.customiseGeneratorVertexFromInput --beamspot Realistic50ns13TeVCollision --no_exec -n -1 --python_filename embedding.py
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -70,7 +70,7 @@ process.FEVTDEBUGoutput = cms.OutputModule("PoolOutputModule",
 # Other statements
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_v3', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_mcRun2_asymptotic_v12', '')
 
 process.generator = cms.EDFilter("Pythia8HadronizerFilter",
     HepMCFilter = cms.PSet(
