@@ -157,6 +157,11 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     bool mu_plus_found = false;
     bool mu_minus_found = false;
     lhef::HEPEUP hepeup;
+    hepeup.IDPRUP = 0;
+    hepeup.XWGTUP = 1;
+    hepeup.SCALUP = -1;
+    hepeup.AQEDUP = -1;
+    hepeup.AQCDUP = -1;
     // Assuming Pt-Order
     for (std::vector<pat::Muon>::const_iterator muon=  coll_muons->begin(); muon!= coll_muons->end();  ++muon)
     {
@@ -214,20 +219,20 @@ EmbeddingLHEProducer::beginRunProduce(edm::Run &run, edm::EventSetup const&)
     //Process independent information
     
     //beam particles ID (two protons)
-    heprup.IDBMUP.first = 2212;
-    heprup.IDBMUP.second = 2212;
+    //heprup.IDBMUP.first = 2212;
+    //heprup.IDBMUP.second = 2212;
     
     //beam particles energies (both 6.5 GeV)
-    heprup.EBMUP.first = 6500.;
-    heprup.EBMUP.second = 6500.;
+    //heprup.EBMUP.first = 6500.;
+    //heprup.EBMUP.second = 6500.;
     
     //take default pdf group for both beamparticles
-    heprup.PDFGUP.first = 0;
-    heprup.PDFGUP.second = 0;
+    //heprup.PDFGUP.first = -1;
+    //heprup.PDFGUP.second = -1;
     
     //take certan pdf set ID (same as in officially produced DYJets LHE files)
-    heprup.PDFSUP.first = 263000;
-    heprup.PDFSUP.second = 263000;
+    //heprup.PDFSUP.first = -1;
+    //heprup.PDFSUP.second = -1;
     
     //master switch for event weight iterpretation (same as in officially produced DYJets LHE files) 
     heprup.IDWTUP = 3;
