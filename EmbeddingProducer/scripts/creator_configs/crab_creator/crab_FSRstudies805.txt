@@ -1,0 +1,19 @@
+--globaltag "80X_mcRun2_asymptotic_2016_v3"
+--outputfolder "FSRstudies"
+
+--inputfile "file:/pnfs/desy.de/cms/tier2/store/mc/RunIISpring16MiniAODv1/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/20000/0017320C-7BFC-E511-9B2D-0CC47A4C8E34.root"
+--format "miniaod"
+--fsrmodes "reco" "afterFSR" "beforeFSR"
+--skimoutputfilename "skim.py"
+
+--decaychannels "EM" "TT" "MT" "ET"
+--externaldecays "noextdecayer"
+--nattempts 1000
+--genoutputfilename "lhehadronizerpythia8.py"
+
+--wfoutputfilename "embToKappa_workflow.sh"
+--correctvtx
+
+--version "v1"
+--craboutputfilename "crab_config.py"
+--datasetpath "/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv1-PUSpring16_80X_mcRun2_asymptotic_2016_v3_ext1-v1/MINIAODSIM"

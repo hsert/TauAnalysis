@@ -48,8 +48,6 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #include "GeneratorInterface/Pythia8Interface/interface/Py8InterfaceBase.h"
-//#include "GeneratorInterface/Pythia8Interface/interface/P8RndmEngine.h"
-//#include "CLHEP/Random/RandomEngine.h"
 
 //
 // class declaration
@@ -72,11 +70,6 @@ class EmbeddingProducer : public edm::EDProducer {
       void match_count_and_fill(TString, std::vector<pat::Muon>::const_iterator);
       void count_and_fill(TString, TString, std::vector<pat::Muon>::const_iterator);
       
-      //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
-      //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
-      //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-      //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-
       // ----------member data ---------------------------
       edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
       edm::EDGetTokenT<reco::VertexCollection> vtxCollection_;
@@ -87,8 +80,7 @@ class EmbeddingProducer : public edm::EDProducer {
       bool mixHepMC_;
 
 
-      // the "fake" MC event from the embeded source
-      //HepMC::GenEvent* genEvt_output;
+      // the "fake" MC event from the embedded source
       std::auto_ptr<HepMC::GenEvent> genEvent_;
       std::auto_ptr<GenEventInfoProduct> genEventInfo_;
       
@@ -108,15 +100,6 @@ class EmbeddingProducer : public edm::EDProducer {
       std::map<TString,TH1F*> ptMuons;
       std::map<TString,TH1F*> etaMuons; 
 };
-
-//
-// constants, enums and typedefs
-//
-
-
-//
-// static data member definitions
-//
 
 //
 // constructors and destructor
@@ -162,10 +145,6 @@ EmbeddingProducer::EmbeddingProducer(const edm::ParameterSet& iConfig){
 
 EmbeddingProducer::~EmbeddingProducer()
 {
-  
-  // do anything here that needs to be done at desctruction time
-  // (e.g. close files, deallocate resources etc.)
-
 }
 
 
@@ -213,7 +192,7 @@ EmbeddingProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     if (passed_kin_cuts && is_z_candidate)
     {
       match_count_and_fill(selection[1],muon); // choosing "baseline" selection
-//      if ( muon->isTightMuon(*offlinePrimaryVertices->begin()) )
+      //if ( muon->isTightMuon(*offlinePrimaryVertices->begin()) )
       if ( muon->isMediumMuon())
       {
         match_count_and_fill(selection[2],muon); // choosing "id" selection
@@ -249,38 +228,6 @@ EmbeddingProducer::endJob() {
   histFile->Write();
   histFile->Close();
 }
-
-// ------------ method called when starting to processes a run  ------------
-/*
-void
-EmbeddingProducer::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-*/
- 
-// ------------ method called when ending the processing of a run  ------------
-/*
-void
-EmbeddingProducer::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-*/
- 
-// ------------ method called when starting to processes a luminosity block  ------------
-/*
-void
-EmbeddingProducer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-*/
- 
-// ------------ method called when ending the processing of a luminosity block  ------------
-/*
-void
-EmbeddingProducer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-*/
  
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
@@ -301,7 +248,6 @@ EmbeddingProducer::reset_event_content(){
   numEvents_tried  = 0;
   numEvents_passed = 0;
   genEvent_.reset(new HepMC::GenEvent);
-  //genEvt_output = new HepMC::GenEvent();
   
 }
 
@@ -347,11 +293,6 @@ EmbeddingProducer::count_and_fill(TString selection_string, TString matching_str
   ptMuons[string_key]->Fill(muon->p4().pt());
   etaMuons[string_key]->Fill(muon->p4().eta());
 }
-
-
-
-
-
 
 
 //define this as a plug-in

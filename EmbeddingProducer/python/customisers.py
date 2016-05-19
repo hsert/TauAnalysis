@@ -6,10 +6,29 @@ import FWCore.ParameterSet.Config as cms
 
 def customiseAllSteps(process):
     process._Process__name +="embedding"
+    outputModulesList = [key for key,value in process.outputModules.iteritems()]
+    outputModule = getattr(process, outputModulesList[0])
+    outputModule.outputCommands.extend(cms.untracked.vstring("keep recoVertexs_offlineSlimmedPrimaryVertices__PAT",
+    "keep edmHepMCProduct_*_*_"+process._Process__name
+    ))
     print "Processing step: ",process._Process__name
     return process
 
+def customiseDropInputRECO(process):
+    outputModulesList = [key for key,value in process.outputModules.iteritems()]
+    outputModule = getattr(process, outputModulesList[0])
+    outputModule.outputCommands.extend(cms.untracked.vstring("drop *_*_*_RECO",
+    "keep HcalNoiseSummary_hcalnoise_*_*",
+    "keep ClusterSummary_clusterSummaryProducer_*_*",
+    "keep L1GlobalTriggerReadoutRecord_gtDigis_*_*"
+    ))
+    return process
+def customiseGeneratorVertexFromInput(process):
 
+    from TauAnalysis.EmbeddingProducer.cmsDriver_fragments.VertexCorrector_cff import VtxCorrectedToInput
+    process.VtxSmeared = VtxCorrectedToInput.clone()
+    print "Correcting Vertex in genEvent to one from input. Replaced 'VtxSmeared' with the Corrector."
+    return process
 
 def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='loose'):
 
@@ -38,17 +57,26 @@ def customiseMuonInputID(process, muon_src=cms.InputTag("patMuons"), muon_id='lo
     outputModule.outputCommands.extend(cms.untracked.vstring("drop * ",
 			 "keep LHEEventProduct_*_*_"+process._Process__name,
 			 "keep LHERunInfoProduct_*_*_"+process._Process__name,
+			 "keep *_externalLHEProducer_vertexPosition*_"+process._Process__name,
+			 "keep recoVertexs_offlineSlimmedPrimaryVertices__PAT"
       ))
 
 
     process.schedule.insert(0, process.inputPath)
-
-
-    
     return process
 
 def customiseMuonInputForMiniAOD(process,muon_id='loose'):
     return customiseMuonInputID(process,cms.InputTag("slimmedMuons"),muon_id)
+    
+def customiseSkimming(process, muonembedding = False, mirroring = False):
+    process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
+        src = cms.InputTag("patMuonsAfterID","","SKIM"),
+        switchToMuonEmbedding = cms.bool(muonembedding),
+        mirroring = cms.bool(mirroring),
+        studyFSRmode = cms.untracked.string("reco")
+    )
+    process._Process__name = 'SKIM'
+    return process
 
 def customiseMuonInputForRECO(process,muon_id='loose'):
 
