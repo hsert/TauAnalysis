@@ -6,5 +6,6 @@
 <use name="GeneratorInterface/Pythia8Interface"/>
 <use name="GeneratorInterface/ExternalDecays"/>
 <use name="GeneratorInterface/Herwig6Interface"/>
+<use name="IOMC/EventVertexGenerators"/>
 <flags EDM_PLUGIN="1"/>
 
