@@ -31,6 +31,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 
 #include "DataFormats/CSCRecHit/interface/CSCRecHit2D.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -84,7 +85,7 @@ class StripCleaner : public edm::stream::EDProducer<> {
       using StripMaskContainer = edm::ContainerMask<edmNew::DetSetVector<SiStripCluster>>;
       
       
-      const edm::EDGetTokenT<edm::View<reco::Muon> > mu_input_;
+      const edm::EDGetTokenT<edm::View<pat::Muon> > mu_input_;
 // const TrackCollectionTokens trajectories_;
       
       const edm::EDGetTokenT<edmNew::DetSetVector<SiStripCluster> > stripClusters_;
@@ -105,7 +106,7 @@ class StripCleaner : public edm::stream::EDProducer<> {
 // constructors and destructor
 //
 StripCleaner::StripCleaner(const edm::ParameterSet& iConfig) :
-    mu_input_(consumes<edm::View<reco::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
+    mu_input_(consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
     stripClusters_(consumes<edmNew::DetSetVector<SiStripCluster> >(iConfig.getParameter<edm::InputTag>("stripClusters")))   
   {
 
@@ -113,7 +114,7 @@ StripCleaner::StripCleaner(const edm::ParameterSet& iConfig) :
     
     //produces<edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster> > >();
     //produces<edm::ContainerMask<edmNew::DetSetVector<SiStripCluster> > >();
-//    mu_token = consumes<edm::View<reco::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"));
+//    mu_token = consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"));
 
   
 }
@@ -138,9 +139,9 @@ StripCleaner::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
    
-   edm::Handle< edm::View<reco::Muon> > muonHandle;
+   edm::Handle< edm::View<pat::Muon> > muonHandle;
    iEvent.getByToken(mu_input_, muonHandle);
-   edm::View<reco::Muon> muons = *muonHandle;
+   edm::View<pat::Muon> muons = *muonHandle;
    
    
    edm::Handle<edmNew::DetSetVector<SiStripCluster> > stripClusters;
@@ -150,7 +151,7 @@ StripCleaner::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
    vetoStrips.resize(stripClusters->dataSize(), false);
 
 
-  for (edm::View<reco::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
+  for (edm::View<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
       
     if(!iMuon->isGlobalMuon() ) continue;
     reco::Track *mutrack = new reco::Track(*(iMuon->globalTrack() ));
@@ -173,7 +174,8 @@ StripCleaner::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    if (is_tracker){
 	    auto & thit = reinterpret_cast<BaseTrackerRecHit const&>(murechit);
              auto const & cluster = thit.firstClusterRef();
-	    if (cluster.isStrip()) {vetoStrips[cluster.key()]=true; std::cout<<cluster.key()<<std::endl;}
+	    if (cluster.isStrip()) {vetoStrips[cluster.key()]=true; //std::cout<<cluster.key()<<std::endl;
+	    }
 	    }
 	    
         }

@@ -31,6 +31,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/StreamID.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+
 
 #include "DataFormats/CSCRecHit/interface/CSCRecHit2D.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -84,7 +86,7 @@ class PixelCleaner : public edm::stream::EDProducer<> {
       using PixelMaskContainer = edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster>>;
       
       
-      const edm::EDGetTokenT<edm::View<reco::Muon> > mu_input_;
+      const edm::EDGetTokenT<edm::View<pat::Muon> > mu_input_;
 // const TrackCollectionTokens trajectories_;
       
       const edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > pixelClusters_;
@@ -105,7 +107,7 @@ class PixelCleaner : public edm::stream::EDProducer<> {
 // constructors and destructor
 //
 PixelCleaner::PixelCleaner(const edm::ParameterSet& iConfig) :
-    mu_input_(consumes<edm::View<reco::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
+    mu_input_(consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
    // trajectories_(iConfig.getParameter<edm::InputTag>("trajectories"),consumesCollector()),
     pixelClusters_(consumes<edmNew::DetSetVector<SiPixelCluster> >(iConfig.getParameter<edm::InputTag>("pixelClusters"))) 
   {
@@ -137,9 +139,9 @@ PixelCleaner::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
    
-   edm::Handle< edm::View<reco::Muon> > muonHandle;
+   edm::Handle< edm::View<pat::Muon> > muonHandle;
    iEvent.getByToken(mu_input_, muonHandle);
-   edm::View<reco::Muon> muons = *muonHandle;
+   edm::View<pat::Muon> muons = *muonHandle;
    
    
    edm::Handle<edmNew::DetSetVector<SiPixelCluster> > pixelClusters;
@@ -149,7 +151,7 @@ PixelCleaner::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   vetodPixels.resize(pixelClusters->dataSize(), false);
 
-  for (edm::View<reco::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
+  for (edm::View<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
       
     if(!iMuon->isGlobalMuon() ) continue;
   reco::Track *mutrack = new reco::Track(*(iMuon->globalTrack() ));
