@@ -7,5 +7,6 @@
 <use name="GeneratorInterface/ExternalDecays"/>
 <use name="GeneratorInterface/Herwig6Interface"/>
 <use name="IOMC/EventVertexGenerators"/>
+<use name="DataFormats/RPCRecHit"/>
 <flags EDM_PLUGIN="1"/>
 

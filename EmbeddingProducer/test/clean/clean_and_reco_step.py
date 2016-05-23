@@ -83,6 +83,22 @@ process.siStripClusters = cms.EDProducer('StripCleaner',
 )
 
 
+process.dt1DRecHits = cms.EDProducer('DTCleaner',
+	MuonCollection = cms.InputTag("muons","","RECO"),
+	oldCollection = cms.InputTag("dt1DRecHits","","RECO"),
+)
+
+process.csc2DRecHits = cms.EDProducer('CSCCleaner',
+	MuonCollection = cms.InputTag("muons","","RECO"),
+	oldCollection  = cms.InputTag("csc2DRecHits","","RECO"),
+)
+
+process.rpcRecHits = cms.EDProducer('RPCleaner',
+	MuonCollection = cms.InputTag("muons","","RECO"),
+	oldCollection  = cms.InputTag("rpcRecHits","","RECO"),
+)
+
+
 # Path and EndPath definitions
 
 
@@ -91,7 +107,10 @@ process.L1Reco_step = cms.Path(process.L1Reco)
 #process.siPixelClustersPreSplitting.src = cms.InputTag("siPixelDigis","","RECO")
 process.cleaning = cms.Path(
 			    process.siPixelClusters +
-			    process.siStripClusters
+			    process.siStripClusters +
+			    process.dt1DRecHits + process.dt2DSegments  +
+			    process.csc2DRecHits +
+			    process.rpcRecHits 
 			    )
 
 #process.cleaning = cms.Path(process.siPixelClusters*process.siStripClusters)
