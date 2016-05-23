@@ -157,6 +157,11 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     bool mu_plus_found = false;
     bool mu_minus_found = false;
     lhef::HEPEUP hepeup;
+    hepeup.IDPRUP = 0;
+    hepeup.XWGTUP = 1;
+    hepeup.SCALUP = -1;
+    hepeup.AQEDUP = -1;
+    hepeup.AQCDUP = -1;
     // Assuming Pt-Order
     for (std::vector<pat::Muon>::const_iterator muon=  coll_muons->begin(); muon!= coll_muons->end();  ++muon)
     {
@@ -207,13 +212,37 @@ EmbeddingLHEProducer::beginRunProduce(edm::Run &run, edm::EventSetup const&)
 {
     // fill HEPRUP common block and store in edm::Run
     lhef::HEPRUP heprup;
-    lhef::CommonBlocks::readHEPRUP(&heprup);
-
-    // make sure we write a valid LHE header, Herwig6Hadronizer
-    // will interpret it correctly and set up LHAPDF
-    heprup.PDFGUP.first = 0;
-    heprup.PDFGUP.second = 0;
-
+    
+    // set number of processes: 1 for Z to tau tau
+    heprup.resize(1);
+    
+    //Process independent information
+    
+    //beam particles ID (two protons)
+    //heprup.IDBMUP.first = 2212;
+    //heprup.IDBMUP.second = 2212;
+    
+    //beam particles energies (both 6.5 GeV)
+    //heprup.EBMUP.first = 6500.;
+    //heprup.EBMUP.second = 6500.;
+    
+    //take default pdf group for both beamparticles
+    //heprup.PDFGUP.first = -1;
+    //heprup.PDFGUP.second = -1;
+    
+    //take certan pdf set ID (same as in officially produced DYJets LHE files)
+    //heprup.PDFSUP.first = -1;
+    //heprup.PDFSUP.second = -1;
+    
+    //master switch for event weight iterpretation (same as in officially produced DYJets LHE files) 
+    heprup.IDWTUP = 3;
+    
+    //Information for first process (Z to tau tau), for now only placeholder:
+    heprup.XSECUP[0] = 1.;
+    heprup.XERRUP[0] = 0;
+    heprup.XMAXUP[0] = 1;
+    heprup.LPRUP[0]= 0;
+    
     std::auto_ptr<LHERunInfoProduct> runInfo(new LHERunInfoProduct(heprup));
     if (write_lheout)std::copy(runInfo->begin(), runInfo->end(),std::ostream_iterator<std::string>(file));
     
