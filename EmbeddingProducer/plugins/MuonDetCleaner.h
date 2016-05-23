@@ -85,7 +85,7 @@ void MuonDetCleaner<T1,T2>::produce(edm::Event& iEvent, const edm::EventSetup& e
    iEvent.getByToken(mu_input_, muonHandle);
    edm::View<reco::Muon> muons = *muonHandle;
    for (edm::View<reco::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
-     if(!iMuon->isGlobalMuon() ) return;
+     if(!iMuon->isGlobalMuon() ) continue;
      reco::Track *mutrack = new reco::Track(*(iMuon->outerTrack() ));
      //reco::Track *mutrack = new reco::Track(*(muon.globalTrack() ));
        for (trackingRecHit_iterator hitIt = mutrack->recHitsBegin(); hitIt != mutrack->recHitsEnd(); ++hitIt) {
