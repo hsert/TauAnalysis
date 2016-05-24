@@ -58,7 +58,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 # source
 process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring('file:cleaned.root'))
+	fileNames = cms.untracked.vstring('file:rerecoAndPAT.root'))
 
 # setting up paths
 process.p = cms.Path()
