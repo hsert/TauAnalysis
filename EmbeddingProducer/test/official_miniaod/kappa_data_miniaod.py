@@ -206,9 +206,9 @@ process.kappaTuple.PatJets.ak4PF = cms.PSet(src=cms.InputTag("slimmedJets"))
 #configureMVAMetForMiniAOD(process)
 
 ## Standard MET and GenMet from pat::MET
-#process.kappaTuple.active += cms.vstring('PatMET')
-#process.kappaTuple.PatMET.met = cms.PSet(src=cms.InputTag("slimmedMETs"))
-#process.kappaTuple.PatMET.metPuppi = cms.PSet(src=cms.InputTag("slimmedMETsPuppi"))
+process.kappaTuple.active += cms.vstring('PatMET')
+process.kappaTuple.PatMET.met = cms.PSet(src=cms.InputTag("slimmedMETs"))
+process.kappaTuple.PatMET.metPuppi = cms.PSet(src=cms.InputTag("slimmedMETsPuppi"))
 
 ## Write MVA MET to KMETs. To check what happens on AOD
 #process.kappaTuple.active += cms.vstring('PatMETs')

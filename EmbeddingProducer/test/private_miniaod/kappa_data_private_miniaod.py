@@ -108,10 +108,6 @@ process.kappaTuple.active += cms.vstring('BeamSpot')
 process.kappaTuple.BeamSpot.offlineBeamSpot = cms.PSet(src = cms.InputTag("offlineBeamSpot"))
 process.kappaTuple.active+= cms.vstring('DataInfo')
 
-process.kappaTuple.active+= cms.vstring('GenInfo')
-process.kappaTuple.active+= cms.vstring('GenParticles')
-process.kappaTuple.GenParticles.genParticles.src = cms.InputTag("genParticles")
-
 ## Trigger
 
 from Kappa.Skimming.hlt_run2 import hltBlacklist, hltWhitelist
