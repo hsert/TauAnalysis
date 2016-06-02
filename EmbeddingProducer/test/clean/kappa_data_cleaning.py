@@ -58,7 +58,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 # source
 process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring('file:rerecoAndPAT.root'))
+	fileNames = cms.untracked.vstring('file:RECO_RAW2DIGI_L1Reco_RECO_ALCA_EI_PAT_DQM_inMINIAOD.root'))
 
 # setting up paths
 process.p = cms.Path()
@@ -97,15 +97,21 @@ process.ep *= process.kappaOut
 
 process.kappaTuple.Info.pileUpInfoSource = cms.InputTag("slimmedAddPileupInfo")
 
-process.kappaTuple.VertexSummary.goodOfflinePrimaryVerticesSummary = cms.PSet(src=cms.InputTag("offlineSlimmedPrimaryVertices","","RECOembedding"))
+process.kappaTuple.active += cms.vstring('VertexSummary')
+process.kappaTuple.VertexSummary.goodOfflinePrimaryVerticesSummary = cms.PSet(src=cms.InputTag("offlineSlimmedPrimaryVertices","","RECO"))
 
 process.kappaTuple.active += cms.vstring('TriggerObjectStandalone')
 process.kappaTuple.TriggerObjectStandalone.bits = cms.InputTag("TriggerResults","","HLT")
 process.kappaTuple.TriggerObjectStandalone.metfilterbits = cms.InputTag("TriggerResults","","HLT")
-#process.kappaTuple.TriggerObjectStandalone.l1extratauJetSource = cms.untracked.InputTag("l1extraParticles","IsoTau","RECOembedding")
+
 process.kappaTuple.active += cms.vstring('BeamSpot')
 process.kappaTuple.BeamSpot.offlineBeamSpot = cms.PSet(src = cms.InputTag("offlineBeamSpot"))
 process.kappaTuple.active+= cms.vstring('DataInfo')
+
+process.kappaTuple.active+= cms.vstring('GenInfo')
+process.kappaTuple.active+= cms.vstring('GenParticles')
+process.kappaTuple.GenParticles.genParticles.src = cms.InputTag("genParticles")
+
 ## Trigger
 
 from Kappa.Skimming.hlt_run2 import hltBlacklist, hltWhitelist
@@ -206,8 +212,8 @@ process.kappaTuple.PatJets.ak4PF = cms.PSet(src=cms.InputTag("slimmedJets"))
 #configureMVAMetForMiniAOD(process)
 
 ## Standard MET and GenMet from pat::MET
-#process.kappaTuple.active += cms.vstring('PatMET')
-#process.kappaTuple.PatMET.met = cms.PSet(src=cms.InputTag("slimmedMETs"))
+process.kappaTuple.active += cms.vstring('PatMET')
+process.kappaTuple.PatMET.met = cms.PSet(src=cms.InputTag("slimmedMETs"))
 #process.kappaTuple.PatMET.metPuppi = cms.PSet(src=cms.InputTag("slimmedMETsPuppi"))
 
 ## Write MVA MET to KMETs. To check what happens on AOD
