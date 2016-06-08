@@ -22,13 +22,13 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(10)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-'file:RAWskimmed.root'
+'file:/pnfs/desy.de/cms/tier2/store/user/aakhmets/grid-control/DoubleMuon_Run2015D-v1_RAW/BASIC_SKIM_TEST_CMSSW_7_6_4_AACHEN/1/RAWskimmed_0.root'
 ),
     secondaryFileNames = cms.untracked.vstring()
 )
@@ -55,15 +55,15 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 	fileName = cms.untracked.string('file:cleaned.root'),
 	outputCommands = cms.untracked.vstring("keep * ",
 		"drop *_*_*_SKIM",
-		
+
+		"drop *_*_*_CLEANING",
 		# LHE product collections for GEN step
-		"keep LHEEventProduct_*_*_SKIM",
-		"keep LHERunInfoProduct_*_*_SKIM",
-		"keep *_externalLHEProducer_vertexPosition*_SKIM",
+		"keep LHEEventProduct_*_*_CLEANING",
+		"keep LHERunInfoProduct_*_*_CLEANING",
+		"keep *_externalLHEProducer_vertexPosition*_CLEANING",
 		"keep recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM",
 		
 		# save collections manipulated by CLEANING only
-		"drop *_*_*_CLEANING",
 		"keep *_siPixelClusters_*_CLEANING",
 		"keep *_siStripClusters_*_CLEANING",
 		"keep *_dt1DRecHits_*_CLEANING",
@@ -109,6 +109,14 @@ process.rpcRecHits = cms.EDProducer('RPCleaner',
 
 # Path and EndPath definitions
 
+process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
+	src = cms.InputTag("patMuonsAfterID","","SKIM"),
+	switchToMuonEmbedding = cms.bool(True),
+	mirroring = cms.bool(False),
+	studyFSRmode = cms.untracked.string("reco")
+    )
+
+
 # Selection of muons from input
 process.cleaning = cms.Path(
 	process.siPixelClusters
@@ -117,6 +125,7 @@ process.cleaning = cms.Path(
 	+ process.dt2DSegments
 	+ process.csc2DRecHits
 	+ process.rpcRecHits
+	+ process.externalLHEProducer
 )
 
 process.endjob_step = cms.EndPath(process.endOfProcess)

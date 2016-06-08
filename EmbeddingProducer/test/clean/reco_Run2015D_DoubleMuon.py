@@ -58,8 +58,8 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 )
 
 process.RECOoutput.outputCommands.extend(cms.untracked.vstring(
-	"keep LHEEventProduct_*_*_SKIM",
-	"keep LHERunInfoProduct_*_*_SKIM",
+	"keep LHEEventProduct_*_*_CLEANING",
+	"keep LHERunInfoProduct_*_*_CLEANING",
 	"keep *_*_*_GENembedding"
 ))
 
@@ -76,8 +76,8 @@ process.AODoutput = cms.OutputModule("PoolOutputModule",
 )
 
 process.AODoutput.outputCommands.extend(cms.untracked.vstring(
-	"keep LHEEventProduct_*_*_SKIM",
-	"keep LHERunInfoProduct_*_*_SKIM",
+	"keep LHEEventProduct_*_*_CLEANING",
+	"keep LHERunInfoProduct_*_*_CLEANING",
 	"keep *_*_*_GENembedding"
 ))
 
@@ -97,8 +97,8 @@ process.MINIAODoutput = cms.OutputModule("PoolOutputModule",
 )
 
 process.MINIAODoutput.outputCommands.extend(cms.untracked.vstring(
-	"keep LHEEventProduct_*_*_SKIM",
-	"keep LHERunInfoProduct_*_*_SKIM",
+	"keep LHEEventProduct_*_*_CLEANING",
+	"keep LHERunInfoProduct_*_*_CLEANING",
 	"keep *_*_*_GENembedding"
 ))
 
@@ -113,8 +113,8 @@ process.DQMoutput = cms.OutputModule("DQMRootOutputModule",
 )
 
 process.DQMoutput.outputCommands.extend(cms.untracked.vstring(
-	"keep LHEEventProduct_*_*_SKIM",
-	"keep LHERunInfoProduct_*_*_SKIM",
+	"keep LHEEventProduct_*_*_CLEANING",
+	"keep LHERunInfoProduct_*_*_CLEANING",
 	"keep *_*_*_GENembedding"
 ))
 

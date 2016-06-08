@@ -61,7 +61,7 @@ process.FEVTDEBUGoutput = cms.OutputModule("PoolOutputModule",
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     fileName = cms.untracked.string('file:generated_and_cleaned.root'),
     outputCommands = cms.untracked.vstring("keep * ",
-    "drop *_externalLHEProducer_vertexPosition*_SKIM",
+    "drop *_externalLHEProducer_vertexPosition*_CLEANING",
     "drop recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM",
     "drop edmTriggerResults_TriggerResults__GENembedding"
     ),
