@@ -91,7 +91,7 @@ class EmbeddingLHEProducer : public edm::one::EDProducer<edm::BeginRunProducer,
       boost::shared_ptr<lhef::LHEEvent>	partonLevel;
       boost::ptr_deque<LHERunInfoProduct>	runInfoProducts;
       
-      edm::EDGetTokenT<pat::MuonCollection> muonsCollection_;
+      edm::EDGetTokenT<edm::View<pat::Muon>> muonsCollection_;
       edm::EDGetTokenT<reco::VertexCollection> vertexCollection_;
       bool switchToMuonEmbedding_;
       bool mirroring_;
@@ -116,7 +116,7 @@ EmbeddingLHEProducer::EmbeddingLHEProducer(const edm::ParameterSet& iConfig)
    produces<LHERunInfoProduct, edm::InRun>();
    produces<math::XYZTLorentzVectorD>("vertexPosition");
 
-   muonsCollection_ = consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("src"));
+   muonsCollection_ = consumes<edm::View<pat::Muon>>(iConfig.getParameter<edm::InputTag>("src"));
    vertexCollection_ = consumes<reco::VertexCollection>(edm::InputTag("offlineSlimmedPrimaryVertices"));
    switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
    mirroring_ = iConfig.getParameter<bool>("mirroring");
@@ -147,8 +147,9 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     using namespace edm;
     
     
-    Handle<std::vector<pat::Muon>> coll_muons;
-    iEvent.getByToken(muonsCollection_ , coll_muons);
+    edm::Handle< edm::View<pat::Muon> > muonHandle;
+    iEvent.getByToken(muonsCollection_, muonHandle);
+    edm::View<pat::Muon> coll_muons = *muonHandle;
     
     Handle<std::vector<reco::Vertex>> coll_vertices;
     iEvent.getByToken(vertexCollection_ , coll_vertices);
@@ -163,7 +164,7 @@ EmbeddingLHEProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     hepeup.AQEDUP = -1;
     hepeup.AQCDUP = -1;
     // Assuming Pt-Order
-    for (std::vector<pat::Muon>::const_iterator muon=  coll_muons->begin(); muon!= coll_muons->end();  ++muon)
+    for (edm::View<pat::Muon>::const_iterator muon=  coll_muons.begin(); muon!= coll_muons.end();  ++muon)
     {
       if (muon->charge() == 1 && !mu_plus_found)
       {

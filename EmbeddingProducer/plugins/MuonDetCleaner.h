@@ -21,9 +21,7 @@
 #include "DataFormats/Common/interface/RangeMap.h"
 #include "DataFormats/Common/interface/OwnVector.h"
 
-#include "TauAnalysis/MCEmbeddingTools/interface/embeddingAuxFunctions.h"
-
-
+#include "DataFormats/PatCandidates/interface/Muon.h"
 
 #include <string>
 #include <vector>
@@ -51,7 +49,7 @@ class MuonDetCleaner : public edm::EDProducer
   
   
 
-  const edm::EDGetTokenT<edm::View<reco::Muon> > mu_input_;
+  const edm::EDGetTokenT<edm::View<pat::Muon> > mu_input_;
   const edm::EDGetTokenT<RecHitCollection > RecHitinput_;
   
   
@@ -60,7 +58,7 @@ class MuonDetCleaner : public edm::EDProducer
 
 template <typename T1, typename T2>
 MuonDetCleaner<T1,T2>::MuonDetCleaner(const edm::ParameterSet& iConfig):
-    mu_input_(consumes<edm::View<reco::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
+    mu_input_(consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
     RecHitinput_(consumes< RecHitCollection>(iConfig.getParameter<edm::InputTag>("oldCollection"))) 
 {
     produces<RecHitCollection>();
@@ -81,10 +79,10 @@ void MuonDetCleaner<T1,T2>::produce(edm::Event& iEvent, const edm::EventSetup& e
    std::vector<uint32_t> vetoHits;
   
   // First fill the veto RecHits colletion with the Hits from the input muons
-   edm::Handle< edm::View<reco::Muon> > muonHandle;
+   edm::Handle< edm::View<pat::Muon> > muonHandle;
    iEvent.getByToken(mu_input_, muonHandle);
-   edm::View<reco::Muon> muons = *muonHandle;
-   for (edm::View<reco::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
+   edm::View<pat::Muon> muons = *muonHandle;
+   for (edm::View<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
      if(!iMuon->isGlobalMuon() ) continue;
      reco::Track *mutrack = new reco::Track(*(iMuon->outerTrack() ));
      //reco::Track *mutrack = new reco::Track(*(muon.globalTrack() ));

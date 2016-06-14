@@ -57,7 +57,7 @@ patMuonsAfterID = patMuonsAfterLooseID.clone()
 ZmumuCandidates = cms.EDProducer("CandViewShallowCloneCombiner",
     checkCharge = cms.bool(True),
     # require one of the muons with pT > 17 GeV, and an invariant mass > 20 GeV
-    cut = cms.string('charge = 0 & max(daughter(0).pt, daughter(1).pt) > 17 & mass > 20'),
+    cut = cms.string('charge = 0 & max(daughter(0).pt, daughter(1).pt) > 17 & mass > 20 & daughter(0).isGlobalMuon & daughter(1).isGlobalMuon'),
     decay = cms.string("patMuonsAfterID@+ patMuonsAfterID@-")
 )
 
@@ -68,10 +68,15 @@ ZmumuCandidatesFilter = cms.EDFilter("CandViewCountFilter",
     filter = cms.bool(True)
 )
 
+selectedMuonsForEmbedding = cms.EDProducer("MuMuForEmbeddingSelector",
+    ZmumuCandidatesCollection = cms.InputTag("ZmumuCandidates")
+)
+
 makePatMuonsZmumuSelection = cms.Sequence(
     doubleMuonHLTTrigger
     + patMuonsAfterKinCuts
     + patMuonsAfterID
     + ZmumuCandidates
     + ZmumuCandidatesFilter
+    + selectedMuonsForEmbedding
 )
