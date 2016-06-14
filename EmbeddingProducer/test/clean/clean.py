@@ -28,7 +28,7 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-'file:/pnfs/desy.de/cms/tier2/store/user/aakhmets/grid-control/DoubleMuon_Run2015D-v1_RAW/BASIC_SKIM_TEST_CMSSW_7_6_4_AACHEN/1/RAWskimmed_0.root'
+'file:RAWskimmed.root'
 ),
     secondaryFileNames = cms.untracked.vstring()
 )
@@ -82,27 +82,27 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '76X_dataRun2_v15', '')
 
 #process.siStripClusters  = cms.EDProducer('MuonCleaner',
 process.siPixelClusters = cms.EDProducer('PixelCleaner',
-	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),
+	MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
         pixelClusters = cms.InputTag("siPixelClusters","","SKIM")
 )
 
 process.siStripClusters = cms.EDProducer('StripCleaner',
-	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),
+	MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
 	stripClusters = cms.InputTag("siStripClusters","","SKIM"),
 )
 
 process.dt1DRecHits = cms.EDProducer('DTCleaner',
-	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),
+	MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
 	oldCollection = cms.InputTag("dt1DRecHits","","SKIM"),
 )
 
 process.csc2DRecHits = cms.EDProducer('CSCCleaner',
-	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),
+	MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
 	oldCollection  = cms.InputTag("csc2DRecHits","","SKIM"),
 )
 
 process.rpcRecHits = cms.EDProducer('RPCleaner',
-	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),
+	MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
 	oldCollection  = cms.InputTag("rpcRecHits","","SKIM"),
 )
 
@@ -110,7 +110,7 @@ process.rpcRecHits = cms.EDProducer('RPCleaner',
 # Path and EndPath definitions
 
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
-	src = cms.InputTag("patMuonsAfterID","","SKIM"),
+	src = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
 	switchToMuonEmbedding = cms.bool(True),
 	mirroring = cms.bool(False),
 	studyFSRmode = cms.untracked.string("reco")

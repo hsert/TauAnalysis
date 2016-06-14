@@ -70,6 +70,7 @@ process.MINIAODoutput.outputCommands.extend(cms.untracked.vstring(
 	# muon collections considered for selection and LHE product
 	"keep *_patMuonsAfterID_*_SKIM",
 	"keep *_slimmedMuons_*_SKIM",
+	"keep *_selectedMuonsForEmbedding_*_SKIM",
 
 	# collections manipulated later by cleaning
 	"keep *_siPixelClusters_*_SKIM",
