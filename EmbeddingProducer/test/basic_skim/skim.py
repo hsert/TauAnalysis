@@ -79,6 +79,13 @@ process.MINIAODoutput.outputCommands.extend(cms.untracked.vstring(
 	"keep *_csc2DRecHits_*_SKIM",
 	"keep *_rpcRecHits_*_SKIM",
 	
+	"keep *_castorreco_*_SKIM",
+	"keep *_hfreco_*_SKIM",
+	"keep *_ecalPreshowerRecHit_*_SKIM",
+	"keep *_ecalRecHit_*_SKIM",
+	"keep *_hbhereco_*_SKIM",
+	"keep *_horeco_*_SKIM",
+	
 	# keep vertex collection for later LHEEventProduct creation
 	"keep recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM"
 ))

@@ -69,6 +69,13 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 		"keep *_dt1DRecHits_*_CLEANING",
 		"keep *_csc2DRecHits_*_CLEANING",
 		"keep *_rpcRecHits_*_CLEANING",
+		
+		"keep *_castorreco_*_CLEANING",
+		"keep *_hfreco_*_CLEANING",
+		"keep *_ecalPreshowerRecHit_*_CLEANING",
+		"keep *_ecalRecHit_*_CLEANING",
+		"keep *_hbhereco_*_CLEANING",
+		"keep *_horeco_*_CLEANING",
 	),
 	splitLevel = cms.untracked.int32(0)
 )
