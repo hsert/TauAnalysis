@@ -89,8 +89,6 @@ process.RECOoutput.outputCommands.extend(cms.untracked.vstring(
 	"keep recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM"
 ))
 
-process.RECOoutput.outputCommands.extend(process.RecoMuonRECO.outputCommands)
-
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '76X_dataRun2_v15', '')
