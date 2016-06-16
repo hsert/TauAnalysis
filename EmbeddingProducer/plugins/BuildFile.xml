@@ -8,5 +8,7 @@
 <use name="GeneratorInterface/Herwig6Interface"/>
 <use name="IOMC/EventVertexGenerators"/>
 <use name="DataFormats/RPCRecHit"/>
+<use name="TrackingTools/TrackAssociator"/>
+<use name="TrackingTools/TransientTrack"/>
 <flags EDM_PLUGIN="1"/>
 
