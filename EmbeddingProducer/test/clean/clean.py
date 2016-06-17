@@ -97,6 +97,36 @@ process.siStripClusters = cms.EDProducer('StripCleaner',
     stripClusters = cms.InputTag("siStripClusters","","SKIM"),
 )
 
+from TrackingTools.TrackAssociator.default_cfi import TrackAssociatorParameterBlock
+TrackAssociatorParameterBlock.TrackAssociatorParameters.EBRecHitCollectionLabel = cms.InputTag("ecalRecHit","EcalRecHitsEB","SKIM")
+TrackAssociatorParameterBlock.TrackAssociatorParameters.EERecHitCollectionLabel = cms.InputTag("ecalRecHit","EcalRecHitsEE","SKIM")
+TrackAssociatorParameterBlock.TrackAssociatorParameters.HBHERecHitCollectionLabel = cms.InputTag("hbhereco","","SKIM")
+TrackAssociatorParameterBlock.TrackAssociatorParameters.HORecHitCollectionLabel = cms.InputTag("horeco","","SKIM")
+
+
+process.ecalRecHit = cms.EDProducer("EcalRecHitCleaner",
+	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),		    
+	TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+	oldCollections = cms.VInputTag(cms.InputTag("ecalRecHit","EcalRecHitsEB","SKIM"),
+				      cms.InputTag("ecalRecHit","EcalRecHitsEE","SKIM"))
+)	
+
+
+process.hbhereco = cms.EDProducer("HBHERecHitCleaner",
+	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),		    
+	TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+	oldCollections = cms.VInputTag(cms.InputTag("hbhereco","","SKIM"))
+)	
+
+
+process.horeco= cms.EDProducer("HORecHitCleaner",
+	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),		    
+	TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+	oldCollections = cms.VInputTag(cms.InputTag("horeco","","SKIM"))
+)	
+
+
+
 process.dt1DRecHits = cms.EDProducer('DTCleaner',
     MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
     oldCollection = cms.InputTag("dt1DRecHits","","SKIM"),
@@ -127,6 +157,9 @@ process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
 process.cleaning = cms.Path(
     process.siPixelClusters
     + process.siStripClusters
+    + process.ecalRecHit
+    + process.hbhereco
+    + process.horeco
     + process.dt1DRecHits
     + process.csc2DRecHits
     + process.rpcRecHits
