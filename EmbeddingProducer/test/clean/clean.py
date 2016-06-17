@@ -87,52 +87,50 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '76X_dataRun2_v15', '')
 
 
-#process.siStripClusters  = cms.EDProducer('MuonCleaner',
 process.siPixelClusters = cms.EDProducer('PixelCleaner',
-	MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
-        pixelClusters = cms.InputTag("siPixelClusters","","SKIM")
+    MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
+    pixelClusters = cms.InputTag("siPixelClusters","","SKIM")
 )
 
 process.siStripClusters = cms.EDProducer('StripCleaner',
-	MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
-	stripClusters = cms.InputTag("siStripClusters","","SKIM"),
+    MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
+    stripClusters = cms.InputTag("siStripClusters","","SKIM"),
 )
 
 process.dt1DRecHits = cms.EDProducer('DTCleaner',
-	MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
-	oldCollection = cms.InputTag("dt1DRecHits","","SKIM"),
+    MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
+    oldCollection = cms.InputTag("dt1DRecHits","","SKIM"),
 )
 
 process.csc2DRecHits = cms.EDProducer('CSCCleaner',
-	MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
-	oldCollection  = cms.InputTag("csc2DRecHits","","SKIM"),
+    MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
+    oldCollection  = cms.InputTag("csc2DRecHits","","SKIM"),
 )
 
 process.rpcRecHits = cms.EDProducer('RPCleaner',
-	MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
-	oldCollection  = cms.InputTag("rpcRecHits","","SKIM"),
+    MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
+    oldCollection  = cms.InputTag("rpcRecHits","","SKIM"),
 )
 
 
 # Path and EndPath definitions
 
 process.externalLHEProducer = cms.EDProducer("EmbeddingLHEProducer",
-	src = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
-	switchToMuonEmbedding = cms.bool(True),
-	mirroring = cms.bool(False),
-	studyFSRmode = cms.untracked.string("reco")
-    )
+    src = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
+    switchToMuonEmbedding = cms.bool(True),
+    mirroring = cms.bool(False),
+    studyFSRmode = cms.untracked.string("reco")
+)
 
 
 # Selection of muons from input
 process.cleaning = cms.Path(
-	process.siPixelClusters
-	+ process.siStripClusters
-	+ process.dt1DRecHits
-	+ process.dt2DSegments
-	+ process.csc2DRecHits
-	+ process.rpcRecHits
-	+ process.externalLHEProducer
+    process.siPixelClusters
+    + process.siStripClusters
+    + process.dt1DRecHits
+    + process.csc2DRecHits
+    + process.rpcRecHits
+    + process.externalLHEProducer
 )
 
 process.endjob_step = cms.EndPath(process.endOfProcess)

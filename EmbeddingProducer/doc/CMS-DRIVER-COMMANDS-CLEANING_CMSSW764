@@ -1,0 +1,53 @@
+
+### First Step: skim RAW data, reconstruct it to select appropriate muon pairs, prepare for cleaning
+
+cmsDriver.py RECO -s RAW2DIGI,L1Reco,RECO,PAT \
+--runUnscheduled --data --scenario pp --conditions 76X_dataRun2_v15 \
+--eventcontent RECO --datatier RECO \
+--customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
+TauAnalysis/EmbeddingProducer/customisers.customiseKeepCleaningCollections,\
+TauAnalysis/EmbeddingProducer/customisers.customiseSkimming \
+--filein file:DoubleMuon2015DRAWPicked.root \
+--fileout RAWskimmed.root -n 100 --no_exec --python_filename=skim.py --no_exec
+
+
+### Second Step: perform cleaning, prepare generator step
+
+cmsDriver.py RECO \
+--filein file:RAWskimmed.root \
+--fileout file:cleaned.root \
+--conditions 76X_dataRun2_v15 --era Run2_25ns \
+--eventcontent RECO --datatier RECO \
+--step NONE \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseCleaning,\
+TauAnalysis/EmbeddingProducer/customisers.customiseKeepCleaningCollections \
+--no_exec -n -1 \
+--python_filename clean.py
+
+### Thirds Step: perform generation of simulated event
+
+cmsDriver.py TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/test/lhehadronizerpythia8_muonembedding_cfi.py \
+--filein file:cleaned.root --fileout generated_and_cleaned.root \
+--conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns \
+--eventcontent RECOSIM \
+--step GEN --datatier GEN \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseGeneratorVertexFromInput,\
+TauAnalysis/EmbeddingProducer/customisers.customiseGenerator \
+--beamspot Realistic50ns13TeVCollision \
+--no_exec -n -1 \
+--python_filename generator.py
+
+
+### Fourth Step: perform official reconstruction modified with the cleaned collections
+
+
+cmsDriver.py RECO -s RAW2DIGI,L1Reco,RECO,ALCA:TkAlZMuMu+MuAlCalIsolatedMu+MuAlOverlaps+MuAlZMuMu+DtCalib,EI,PAT,DQM:@standardDQM+@miniAODDQM \
+--runUnscheduled --data --scenario pp --conditions 76X_dataRun2_v15 \
+--eventcontent RECO,AOD,MINIAOD,DQM --datatier RECO,AOD,MINIAOD,DQMIO \
+--customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
+TauAnalysis/EmbeddingProducer/customisers.customiseReconstruction \
+--filein file:generated_and_cleaned.root -n -1 --no_exec --python_filename=reco_Run2015D_DoubleMuon.py --no_exec
+
+
+
+
