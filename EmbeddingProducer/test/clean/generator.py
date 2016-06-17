@@ -63,7 +63,7 @@ process.FEVTDEBUGoutput = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring("keep * ",
     "drop *_externalLHEProducer_vertexPosition*_CLEANING",
     "drop recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM",
-    "drop edmTriggerResults_TriggerResults__GENembedding"
+    "drop edmTriggerResults_TriggerResults__GEN"
     ),
     splitLevel = cms.untracked.int32(0)
 )
@@ -126,9 +126,6 @@ for path in process.paths:
 
 # Automatic addition of the customisation function from TauAnalysis.EmbeddingProducer.customisers
 from TauAnalysis.EmbeddingProducer.customisers import customiseAllSteps, customiseGeneratorVertexFromInput
-
-#call to customisation function customiseAllSteps imported from TauAnalysis.EmbeddingProducer.customisers
-process = customiseAllSteps(process)
 
 #call to customisation function customiseGeneratorVertexFromInput imported from TauAnalysis.EmbeddingProducer.customisers
 process = customiseGeneratorVertexFromInput(process)
