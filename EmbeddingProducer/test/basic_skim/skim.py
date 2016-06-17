@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: RECO -s RAW2DIGI,L1Reco,RECO,ALCA:TkAlZMuMu+MuAlCalIsolatedMu+MuAlOverlaps+MuAlZMuMu+DtCalib,EI,PAT,DQM:@standardDQM+@miniAODDQM --runUnscheduled --data --scenario pp --conditions 76X_dataRun2_v15 --eventcontent RECO,AOD,MINIAOD,DQM --datatier RECO,AOD,MINIAOD,DQMIO --customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns --filein DoubleMuonData2015RAW.root -n 100 --no_exec --python_filename=reco_Run2015D_DoubleMuon.py --no_exec
+# with command line options: RECO -s RAW2DIGI,L1Reco,RECO,ALCA:TkAlZMuMu+MuAlCalIsolatedMu+MuAlOverlaps+MuAlZMuMu+DtCalib,EI,PAT,DQM:@standardDQM+@RECODQM --runUnscheduled --data --scenario pp --conditions 76X_dataRun2_v15 --eventcontent RECO,AOD,RECO,DQM --datatier RECO,AOD,RECO,DQMIO --customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns --filein DoubleMuonData2015RAW.root -n 100 --no_exec --python_filename=reco_Run2015D_DoubleMuon.py --no_exec
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('SKIM')
@@ -46,27 +46,26 @@ process.configurationMetadata = cms.untracked.PSet(
 
 # Output definition
 
-process.MINIAODoutput = cms.OutputModule("PoolOutputModule",
+process.RECOoutput = cms.OutputModule("PoolOutputModule",
     compressionAlgorithm = cms.untracked.string('LZMA'),
     compressionLevel = cms.untracked.int32(4),
     dataset = cms.untracked.PSet(
-        dataTier = cms.untracked.string('MINIAOD'),
+        dataTier = cms.untracked.string('RECO'),
         filterName = cms.untracked.string('')
     ),
     dropMetaData = cms.untracked.string('ALL'),
     eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
     fastCloning = cms.untracked.bool(False),
     fileName = cms.untracked.string('RAWskimmed.root'),
-    outputCommands = process.MINIAODEventContent.outputCommands,
+    outputCommands = process.RECOEventContent.outputCommands,
     SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("skimming")),
     overrideInputFileSplitLevels = cms.untracked.bool(True)
 )
 
-process.MINIAODoutput.outputCommands.extend(cms.untracked.vstring(
+process.RECOoutput.outputCommands.extend(cms.untracked.vstring(
 	"keep *_*_*_LHC",
 	"keep *_*_*_HLT",
-
-	"drop *_*_*_SKIM",
+	
 	# muon collections considered for selection and LHE product
 	"keep *_patMuonsAfterID_*_SKIM",
 	"keep *_slimmedMuons_*_SKIM",
@@ -89,8 +88,6 @@ process.MINIAODoutput.outputCommands.extend(cms.untracked.vstring(
 	# keep vertex collection for later LHEEventProduct creation
 	"keep recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM"
 ))
-
-process.MINIAODoutput.outputCommands.extend(process.RecoMuonRECO.outputCommands)
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -121,9 +118,7 @@ process.Flag_EcalDeadCellBoundaryEnergyFilter = cms.Path(process.EcalDeadCellBou
 process.Flag_HcalStripHaloFilter = cms.Path(process.HcalStripHaloFilter)
 process.Flag_muonBadTrackFilter = cms.Path(process.muonBadTrackFilter)
 process.Flag_CSCTightHalo2015Filter = cms.Path(process.CSCTightHalo2015Filter)
-process.dqmoffline_step = cms.Path(process.DQMOffline)
-process.dqmoffline_1_step = cms.Path(process.DQMOfflineMiniAOD)
-process.MINIAODoutput_step = cms.EndPath(process.MINIAODoutput)
+process.RECOoutput_step = cms.EndPath(process.RECOoutput)
 
 process.load('TauAnalysis.EmbeddingProducer.cmsDriver_fragments.MuonPairSelector_cff')
 process.patMuonsAfterKinCuts.src = cms.InputTag("slimmedMuons","","SKIM")
@@ -161,10 +156,8 @@ process.schedule = cms.Schedule(
 	process.Flag_trkPOG_toomanystripclus53X,
 	process.Flag_trkPOG_logErrorTooManyClusters,
 	process.Flag_METFilters,
-	process.dqmoffline_step,
-	process.dqmoffline_1_step,
 	process.skimming,
-	process.MINIAODoutput_step
+	process.RECOoutput_step
 )
 
 # customisation of the process.
