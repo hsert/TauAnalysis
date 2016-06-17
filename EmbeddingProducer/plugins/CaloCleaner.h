@@ -76,12 +76,14 @@ class CaloCleaner : public edm::EDProducer
  // const edm::EDGetTokenT<RecHitCollection > RecHitinput_;
   
   std::vector<edm::EDGetTokenT<RecHitCollection > > RecHitinputs_;
-  
   std::vector< std::string> instances;
   
   TrackDetectorAssociator trackAssociator_;
   TrackAssociatorParameters parameters_;
   
+  //  uint32_t getRawDetId(const T2&);
+
+  void fill_correction_map(TrackDetMatchInfo *,  std::map<uint32_t, float> *);
   
 };
 
@@ -112,84 +114,53 @@ CaloCleaner<T>::~CaloCleaner()
 // nothing to be done yet...  
 }
 
-//namespace
-//{
- // double getCorrection(uint32_t rawDetId, const std::map<uint32_t, float>& energyDepositMap)
- // {
- //   double correction = 0.;
- //   std::map<uint32_t, float>::const_iterator energyDepositEntry = energyDepositMap.find(rawDetId);   
- //   if ( energyDepositEntry != energyDepositMap.end() ) {
- //     correction = energyDepositEntry->second;
- //   }
- //   return correction;
- // }
-//}
 
 template <typename T>
 void CaloCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+  edm::ESHandle<Propagator> propagator;
+  iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny", propagator);
+  trackAssociator_.setPropagator(propagator.product());
+  
+  edm::Handle< edm::View<pat::Muon> > muonHandle;
+  iEvent.getByToken(mu_input_, muonHandle);
+  edm::View<pat::Muon> muons = *muonHandle;
+  
+  std::map<uint32_t, float>    correction_map;
 
-       edm::ESHandle<Propagator> propagator;
-       iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny", propagator);
-       trackAssociator_.setPropagator(propagator.product());
- 
+  // Fill the correction map
+  for (edm::View<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
+    // get the basic informaiton like fill reco mouon does 
+    //     RecoMuon/MuonIdentification/plugins/MuonIdProducer.cc
+    const reco::Track* track = 0;
+    if      ( iMuon->track().isNonnull() ) track = iMuon->track().get();
+    else if ( iMuon->standAloneMuon().isNonnull() ) track = iMuon->standAloneMuon().get();
+    else throw cms::Exception("FatalError") << "Failed to fill muon id information for a muon with undefined references to tracks";
+    TrackDetMatchInfo info = trackAssociator_.associate(iEvent, iSetup, *track, parameters_,TrackDetectorAssociator::Any);
+    fill_correction_map(&info,&correction_map);
+  }
   
-  
-         edm::Handle< edm::View<pat::Muon> > muonHandle;
-      iEvent.getByToken(mu_input_, muonHandle);
-      edm::View<pat::Muon> muons = *muonHandle;
-      //subdetId()
-
-      
-      //caloTower() 
-      for (edm::View<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
-	
-	
-	  const reco::Track* track = 0;
-	  if      ( iMuon->track().isNonnull() ) track = iMuon->track().get();
-	  else if ( iMuon->standAloneMuon().isNonnull() ) track = iMuon->standAloneMuon().get();
-	  else throw cms::Exception("FatalError") << "Failed to fill muon id information for a muon with undefined references to tracks";
-
-	TrackDetMatchInfo info = trackAssociator_.associate(iEvent, iSetup, *track, parameters_,TrackDetectorAssociator::Any);
-	 // reco::Track *mutrack = new reco::Track(*(iMuon->globalTrack() ));
-	//  	TrackDetMatchInfo info = trackAssociator_.associate(iEvent, iSetup, *mutrack, parameters_);
-	  
-	//GlobalVector muonP3(iMuon->px(), iMuon->py(), iMuon->pz()); 
-       // GlobalPoint muonVtx(iMuon->vertex().x(), iMuon->vertex().y(), iMuon->vertex().z());
-       // TrackDetMatchInfo info = trackAssociator_.associate(iEvent, iSetup, muonP3, muonVtx, iMuon->charge(), parameters_);
-	  
-
-	
-	std::cout<<info.crossedEnergy(TrackDetMatchInfo::EcalRecHits)<<std::endl;
-	std::cout<<iMuon->calEnergy().em<<'\t'<<iMuon->calEnergy().emMax <<std::endl;
-	std::cout<<iMuon->calEnergy().ecal_id.subdetId()<<'\t'<<iMuon->calEnergy().hcal_id.subdetId()<<std::endl;
-	// for (edm::SortedCollection<CaloTower>::const_iterator tower = iMuon->caloTower().begin(); tower != iMuon->caloTower().end(); tower++)
-	
-	//  std::cout<<tower->emEnergy()<<std::endl;}
-      }
-  
-  
-  
-  
-  
-  
+  // Copy the old collection
   unsigned id = 0;
   for (auto RecHitinput_ : RecHitinputs_){
-  
-
-      std::auto_ptr<RecHitCollection> recHitCollection_output(new RecHitCollection());   
-      edm::Handle<RecHitCollection> recHitCollection;
-      iEvent.getByToken(RecHitinput_, recHitCollection);   
-      
-        for ( typename RecHitCollection::const_iterator recHit = recHitCollection->begin(); recHit != recHitCollection->end(); ++recHit ) {
-      
-              recHitCollection_output->push_back(*recHit);
-
+    std::auto_ptr<RecHitCollection> recHitCollection_output(new RecHitCollection());   
+    edm::Handle<RecHitCollection> recHitCollection;
+    iEvent.getByToken(RecHitinput_, recHitCollection);    
+    for ( typename RecHitCollection::const_iterator recHit = recHitCollection->begin(); recHit != recHitCollection->end(); ++recHit ) {
+      if (correction_map[recHit->detid().rawId()] > 0){
+	float new_energy =  recHit->energy() - correction_map[recHit->detid().rawId()];
+	if (new_energy < 0) new_energy =0;
+	T newRecHit (*recHit);
+	newRecHit.setEnergy(new_energy);
+	recHitCollection_output->push_back(newRecHit);
+      }
+      else{
+	recHitCollection_output->push_back(*recHit);
       }  
-    //  mixedRecHitInfos_.clear();        
-      iEvent.put(recHitCollection_output,instances[id]);
-      id++;
-   
     }
-}
+    // Save the new collection
+    iEvent.put(recHitCollection_output,instances[id]);
+    id++;   
+  }
 
+}
