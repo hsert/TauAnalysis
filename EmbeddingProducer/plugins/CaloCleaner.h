@@ -1,7 +1,6 @@
 /** \class CaloCleaner
  *
- * Merge collections of calorimeter recHits
- * for original Zmumu event and "embedded" simulated tau decay products
+ * Clean collections of calorimeter recHits
  * (detectors supported at the moment: EB/EE, HB/HE and HO)
  * 
  * \author Tomasz Maciej Frueboes;
@@ -11,6 +10,7 @@
  *
  * $Id: CaloCleaner.h,v 1.9 2013/03/23 09:12:51 veelken Exp $
  *
+ *  Clean Up from STefan Wayand, KIT
  */
 
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -33,23 +33,6 @@
 #include <map>
 
 template <typename T>
-struct CaloCleaner_mixedRecHitInfoType
-{
-  uint32_t rawDetId_;
-  
-  double energy1_;
-  bool isRecHit1_;
-  const T* recHit1_;
-  
-  double energy2_;
-  bool isRecHit2_;
-  const T* recHit2_;
-  
-  double energySum_;
-  bool isRecHitSum_;
-};
-
-template <typename T>
 class CaloCleaner : public edm::EDProducer 
 {
  public:
@@ -61,28 +44,14 @@ class CaloCleaner : public edm::EDProducer
 
   typedef edm::SortedCollection<T> RecHitCollection;
 
-  typedef std::map<uint32_t, CaloCleaner_mixedRecHitInfoType<T> > detIdToMixedRecHitInfoMap;
-  detIdToMixedRecHitInfoMap mixedRecHitInfos_;
-
-
-  edm::InputTag srcEnergyDepositMapMuPlus_;
-  edm::InputTag srcEnergyDepositMapMuMinus_;
-  enum { kAbsolute };
-  int typeEnergyDepositMap_;
-
-  typedef std::map<uint32_t, float> detIdToFloatMap;
-
   const edm::EDGetTokenT<edm::View<pat::Muon> > mu_input_;
- // const edm::EDGetTokenT<RecHitCollection > RecHitinput_;
-  
+
   std::vector<edm::EDGetTokenT<RecHitCollection > > RecHitinputs_;
   std::vector< std::string> instances;
   
   TrackDetectorAssociator trackAssociator_;
   TrackAssociatorParameters parameters_;
   
-  //  uint32_t getRawDetId(const T2&);
-
   void fill_correction_map(TrackDetMatchInfo *,  std::map<uint32_t, float> *);
   
 };
@@ -90,10 +59,7 @@ class CaloCleaner : public edm::EDProducer
 template <typename T>
 CaloCleaner<T>::CaloCleaner(const edm::ParameterSet& iConfig) :
     mu_input_(consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection")))
-  //  RecHitinput_(consumes< RecHitCollection>(iConfig.getParameter<edm::InputTag>("oldCollection"))) 
-{
- //  std::string instanceLabel = iConfig.getParameter<edm::InputTag>("oldCollection").instance();
- //  produces<RecHitCollection>(iConfig.getParameter<edm::InputTag>("oldCollection").instance());  
+{ 
   std::vector<edm::InputTag> inCollections =  iConfig.getParameter<std::vector<edm::InputTag> >("oldCollections");
   for (auto inCollection : inCollections){
     RecHitinputs_.push_back(consumes<RecHitCollection >(inCollection));
