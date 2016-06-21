@@ -52,6 +52,7 @@ class CaloCleaner : public edm::EDProducer
   TrackDetectorAssociator trackAssociator_;
   TrackAssociatorParameters parameters_;
   
+  bool is_preshower_;
   void fill_correction_map(TrackDetMatchInfo *,  std::map<uint32_t, float> *);
   
 };
@@ -67,6 +68,7 @@ CaloCleaner<T>::CaloCleaner(const edm::ParameterSet& iConfig) :
     instances.push_back(inCollection.instance()); 
     
   }
+   is_preshower_ =iConfig.getUntrackedParameter<bool>("is_preshower", false);
    edm::ParameterSet parameters = iConfig.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
    edm::ConsumesCollector iC = consumesCollector();
    parameters_.loadParameters( parameters, iC );
@@ -118,6 +120,7 @@ void CaloCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	if (new_energy < 0) new_energy =0;
 	T newRecHit (*recHit);
 	newRecHit.setEnergy(new_energy);
+	//if (new_energy>0) std::cout<< new_energy <<std::endl; to be tested 
 	recHitCollection_output->push_back(newRecHit);
       }
       else{
