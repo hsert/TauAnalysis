@@ -8,7 +8,7 @@ cmsDriver.py RECO -s RAW2DIGI,L1Reco,RECO,PAT \
 TauAnalysis/EmbeddingProducer/customisers.customiseKeepCleaningCollections,\
 TauAnalysis/EmbeddingProducer/customisers.customiseSkimming \
 --filein file:DoubleMuon2015DRAWPicked.root \
---fileout RAWskimmed.root -n 100 --no_exec --python_filename=skim.py --no_exec
+--fileout RAWskimmed.root -n 30 --no_exec --python_filename=skim.py --no_exec
 
 
 ### Second Step: perform cleaning, prepare generator step
@@ -24,12 +24,12 @@ TauAnalysis/EmbeddingProducer/customisers.customiseKeepCleaningCollections \
 --no_exec -n -1 \
 --python_filename clean.py
 
-### Thirds Step: perform generation of simulated event
+### Third Step: perform generation of simulated event
 
 cmsDriver.py TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/test/lhehadronizerpythia8_muonembedding_cfi.py \
 --filein file:cleaned.root --fileout generated_and_cleaned.root \
 --conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns \
---eventcontent RECOSIM \
+--eventcontent RAWSIM \
 --step GEN --datatier GEN \
 --customise TauAnalysis/EmbeddingProducer/customisers.customiseGeneratorVertexFromInput,\
 TauAnalysis/EmbeddingProducer/customisers.customiseGenerator \
