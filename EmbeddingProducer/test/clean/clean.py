@@ -63,19 +63,25 @@ process.RECOoutput = cms.OutputModule("PoolOutputModule",
 		"keep *_externalLHEProducer_vertexPosition*_CLEANING",
 		"keep recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM",
 		
-		# save collections manipulated by CLEANING only
+		## save collections manipulated by CLEANING and MERGING
+		
+		# track cleaning
 		"keep *_siPixelClusters_*_CLEANING",
 		"keep *_siStripClusters_*_CLEANING",
 		"keep *_dt1DRecHits_*_CLEANING",
 		"keep *_csc2DRecHits_*_CLEANING",
 		"keep *_rpcRecHits_*_CLEANING",
 		
-		"keep *_castorreco_*_CLEANING",
-		"keep *_hfreco_*_CLEANING",
-		"keep *_ecalPreshowerRecHit_*_CLEANING",
+		# calo cleaning
 		"keep *_ecalRecHit_*_CLEANING",
+		"keep *_ecalPreshowerRecHit_*_CLEANING",
 		"keep *_hbhereco_*_CLEANING",
 		"keep *_horeco_*_CLEANING",
+		
+		# not cleaned collections, but needed for merging
+		"keep *_castorreco_*_SKIM",
+		"keep *_hfreco_*_SKIM",
+		
 	),
 	splitLevel = cms.untracked.int32(0)
 )
@@ -89,12 +95,12 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '76X_dataRun2_v15', '')
 
 process.siPixelClusters = cms.EDProducer('PixelCleaner',
     MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
-    pixelClusters = cms.InputTag("siPixelClusters","","SKIM")
+    oldCollection = cms.InputTag("siPixelClusters","","SKIM")
 )
 
 process.siStripClusters = cms.EDProducer('StripCleaner',
     MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
-    stripClusters = cms.InputTag("siStripClusters","","SKIM"),
+    oldCollection = cms.InputTag("siStripClusters","","SKIM"),
 )
 
 from TrackingTools.TrackAssociator.default_cfi import TrackAssociatorParameterBlock
@@ -105,27 +111,31 @@ TrackAssociatorParameterBlock.TrackAssociatorParameters.HORecHitCollectionLabel 
 
 
 process.ecalRecHit = cms.EDProducer("EcalRecHitCleaner",
-	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),		    
-	TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
-	oldCollections = cms.VInputTag(cms.InputTag("ecalRecHit","EcalRecHitsEB","SKIM"),
-				      cms.InputTag("ecalRecHit","EcalRecHitsEE","SKIM"))
-)	
+    MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
+    TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+    oldCollections = cms.VInputTag(cms.InputTag("ecalRecHit","EcalRecHitsEB","SKIM"),
+        cms.InputTag("ecalRecHit","EcalRecHitsEE","SKIM"))
+)
 
+process.ecalPreshowerRecHit = cms.EDProducer("EcalRecHitCleaner",
+    MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),
+    TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+    is_preshower = cms.untracked.bool(True),
+    oldCollections = cms.VInputTag(cms.InputTag("ecalPreshowerRecHit","EcalRecHitsES","SKIM"))
+)
+process.ecalPreshowerRecHit.TrackAssociatorParameters.usePreshower = cms.bool(True) 
 
 process.hbhereco = cms.EDProducer("HBHERecHitCleaner",
-	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),		    
-	TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
-	oldCollections = cms.VInputTag(cms.InputTag("hbhereco","","SKIM"))
-)	
-
+    MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
+    TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+    oldCollections = cms.VInputTag(cms.InputTag("hbhereco","","SKIM"))
+)
 
 process.horeco= cms.EDProducer("HORecHitCleaner",
-	MuonCollection = cms.InputTag("patMuonsAfterID","","SKIM"),		    
-	TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
-	oldCollections = cms.VInputTag(cms.InputTag("horeco","","SKIM"))
-)	
-
-
+    MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
+    TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+    oldCollections = cms.VInputTag(cms.InputTag("horeco","","SKIM"))
+)
 
 process.dt1DRecHits = cms.EDProducer('DTCleaner',
     MuonCollection = cms.InputTag("selectedMuonsForEmbedding","","SKIM"),
@@ -158,6 +168,7 @@ process.cleaning = cms.Path(
     process.siPixelClusters
     + process.siStripClusters
     + process.ecalRecHit
+    + process.ecalPreshowerRecHit
     + process.hbhereco
     + process.horeco
     + process.dt1DRecHits
