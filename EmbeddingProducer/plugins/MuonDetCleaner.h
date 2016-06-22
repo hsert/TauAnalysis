@@ -41,7 +41,6 @@ class MuonDetCleaner : public edm::EDProducer
 
   typedef std::map<uint32_t, int> detIdToIntMap;
 
-  void addRecHits(std::map<T1, std::vector<T2> >&, const RecHitCollection&, bool, const detIdToIntMap&, const detIdToIntMap&, int&);
   void fillVetoHits(const TrackingRecHit& , std::vector<uint32_t>* );
   
   uint32_t getRawDetId(const T2&);

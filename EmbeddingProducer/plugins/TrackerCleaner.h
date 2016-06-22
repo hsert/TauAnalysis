@@ -68,7 +68,7 @@ class TrackerCleaner : public edm::EDProducer
   
   const edm::EDGetTokenT<TrackClusterCollection > trackClusterClusters_;
   
-  bool test_veto_rechit(const TrackingRecHit *murechit);
+  bool match_rechit_type(const TrackingRecHit &murechit);
 
 
 };
@@ -115,8 +115,8 @@ void TrackerCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     for (trackingRecHit_iterator hitIt = mutrack->recHitsBegin(); hitIt != mutrack->recHitsEnd(); ++hitIt) {
         const TrackingRecHit &murechit = **hitIt;     
         if(!(murechit).isValid()) continue;
-
-	if (test_veto_rechit(&murechit)){
+	
+	if (match_rechit_type(murechit)){
 	  auto & thit = reinterpret_cast<BaseTrackerRecHit const&>(murechit);
           auto const & cluster = thit.firstClusterRef();
 	  vetodClusters[cluster.key()]=true;
