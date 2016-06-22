@@ -1,0 +1,19 @@
+cmsDriver.py TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/test/lhehadronizerpythia8_muonembedding_cfi.py \
+--filein file:cleaned.root --fileout generated_and_cleaned.root \
+--conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns \
+--eventcontent RAWSIM \
+--step GEN,SIM --datatier GEN-SIM \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseGeneratorVertexFromInput,\
+TauAnalysis/EmbeddingProducer/customisers.customiseGenerator \
+--beamspot Realistic50ns13TeVCollision \
+--no_exec -n -1 \
+--python_filename generator.py
+
+
+cmsDriver.py step1 --filein file:generated_and_cleaned.root --fileout file:RAWSIM.root --mc \
+--eventcontent RAWSIM --datatier GEN-SIM-RAW \
+--conditions 76X_mcRun2_asymptotic_v12 --step DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
+--era Run2_25ns --python_filename rawsim.py --no_exec \
+--customise Configuration/DataProcessing/Utils.addMonitoring -n 82
+
+cmsDriver.py step2 --filein file:RAWSIM.root --fileout RECOSIM.root --mc --eventcontent RECOSIM --runUnscheduled --datatier RECOSIM --conditions 76X_mcRun2_asymptotic_v12 --step RAW2DIGI,L1Reco,RECO --era Run2_25ns --python_filename recosim.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 82
