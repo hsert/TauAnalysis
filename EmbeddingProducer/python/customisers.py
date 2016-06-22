@@ -44,7 +44,7 @@ def customiseCleaning(process):
     return process
 
 def customiseGenerator(process):
-    process.RECOSIMoutput.outputCommands = cms.untracked.vstring("keep * ",
+    process.RAWSIMoutput.outputCommands = cms.untracked.vstring("keep * ",
     "drop *_externalLHEProducer_vertexPosition*_CLEANING",
     "drop recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM",
     "drop edmTriggerResults_TriggerResults_*_GEN"
@@ -54,6 +54,9 @@ def customiseGenerator(process):
 def customiseReconstruction(process):
     process.reconstruction_step.remove(process.siPixelClusters)
     process.reconstruction_step.remove(process.siStripClusters)
+    process.reconstruction_step.remove(process.ecalRecHit)
+    process.reconstruction_step.remove(process.hbhereco)
+    process.reconstruction_step.remove(process.horeco)
     process.reconstruction_step.remove(process.dt1DRecHits)
     process.reconstruction_step.remove(process.csc2DRecHits)
     process.reconstruction_step.remove(process.rpcRecHits)
