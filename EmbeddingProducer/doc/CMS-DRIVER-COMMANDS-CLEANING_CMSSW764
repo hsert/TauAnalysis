@@ -3,10 +3,9 @@
 
 cmsDriver.py RECO -s RAW2DIGI,L1Reco,RECO,PAT \
 --runUnscheduled --data --scenario pp --conditions 76X_dataRun2_v15 \
---eventcontent RECO --datatier RECO \
+--eventcontent RAWRECO --datatier RECO \
 --customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
-TauAnalysis/EmbeddingProducer/customisers.customiseKeepCleaningCollections,\
-TauAnalysis/EmbeddingProducer/customisers.customiseSkimming \
+TauAnalysis/EmbeddingProducer/customisers.customiseSelecting \
 --filein file:DoubleMuon2015DRAWPicked.root \
 --fileout RAWskimmed.root -n 30 --no_exec --python_filename=skim.py --no_exec
 
@@ -17,10 +16,9 @@ cmsDriver.py RECO \
 --filein file:RAWskimmed.root \
 --fileout file:cleaned.root \
 --conditions 76X_dataRun2_v15 --era Run2_25ns \
---eventcontent RECO --datatier RECO \
+--eventcontent RAW --datatier RAW \
 --step NONE \
---customise TauAnalysis/EmbeddingProducer/customisers.customiseCleaning,\
-TauAnalysis/EmbeddingProducer/customisers.customiseKeepCleaningCollections \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseCleaning\
 --no_exec -n -1 \
 --python_filename clean.py
 

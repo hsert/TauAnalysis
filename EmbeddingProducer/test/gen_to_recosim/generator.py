@@ -32,15 +32,20 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
-    fileNames = cms.untracked.vstring('file:cleaned.root'),
+    fileNames = cms.untracked.vstring(
+      'file:/portal/ekpcms5/home/wayand/embedd/CMSSW_7_6_4/src/TauAnalysis/EmbeddingProducer/test/merg/tast/lhe_and_cleaned.root'
+      
+      #'file:cleaned.root'
+      ),
     inputCommands = cms.untracked.vstring('keep *', 
         'drop LHEXMLStringProduct_*_*_*'),
     secondaryFileNames = cms.untracked.vstring()
 )
 
-process.options = cms.untracked.PSet(
+#process.options = cms.untracked.PSet(
+#    emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis'),
 
-)
+#)
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
@@ -77,7 +82,7 @@ process.generator = cms.EDFilter("Pythia8HadronizerFilter",
         filterName = cms.string('EmbeddingHepMCFilter'),
         filterParameters = cms.PSet(
             MuMuCut = cms.untracked.string('Mu1.Pt > 15 && Mu2.Pt > 6 && Mu1.Eta < 2.4 && Mu2.Eta < 2.4'),
-            switchToMuonEmbedding = cms.bool(True)
+            switchToMuonEmbedding = cms.bool(False)
         )
     ),
     PythiaParameters = cms.PSet(

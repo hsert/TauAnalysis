@@ -1,13 +1,66 @@
-cmsDriver.py TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/test/lhehadronizerpythia8_muonembedding_cfi.py \
---filein file:cleaned.root --fileout generated_and_cleaned.root \
+
+cmsDriver.py LHEprodandCLEAN \
+--filein file:RAWskimmed.root \
+--fileout file:lhe_and_cleaned.root \
+--conditions 76X_dataRun2_v15 --era Run2_25ns \
+--eventcontent RAW --datatier RAW \
+--step NONE \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseLHEandCleaning \
+--no_exec -n -1 \
+--python_filename lheprodandcleaning.py
+
+
+## If you want only the indivual stept then use the followign two commands
+
+cmsDriver.py LHEprod \
+--filein file:RAWskimmed.root \
+--fileout file:lhe.root \
+--conditions 76X_dataRun2_v15 --era Run2_25ns \
+--eventcontent RAW --datatier RAW \
+--step NONE \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseLHE \
+--no_exec -n -1 \
+--python_filename lheprod.py
+
+
+
+
+cmsDriver.py CLEAN \
+--filein file:RAWskimmed.root \
+--fileout file:cleaned.root \
+--conditions 76X_dataRun2_v15 --era Run2_25ns \
+--eventcontent RAW --datatier RAW \
+--step NONE \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseCleaning\
+--no_exec -n -1 \
+--python_filename clean.py
+
+
+
+
+cmsDriver.py TauAnalysis/EmbeddingProducer/python/EmbeddingPythia8Hadronizer_cfi.py \
+--filein file:lhe_and_cleaned.root --fileout generated_and_cleaned.root \
 --conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns \
 --eventcontent RAWSIM \
 --step GEN,SIM --datatier GEN-SIM \
---customise TauAnalysis/EmbeddingProducer/customisers.customiseGeneratorVertexFromInput,\
-TauAnalysis/EmbeddingProducer/customisers.customiseGenerator \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseGenerator \
 --beamspot Realistic50ns13TeVCollision \
 --no_exec -n -1 \
 --python_filename generator.py
+
+
+cmsDriver.py TauAnalysis/EmbeddingProducer/python/EmbeddingPythia8Hadronizer_cfi.py \
+--filein file:lhe_and_cleaned.root --fileout generated_and_cleaned.root \
+--conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns \
+--eventcontent RAW \
+--step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns,RAW2DIGI,L1Reco,RECO --datatier GEN-SIM \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseGenerator \
+--beamspot Realistic50ns13TeVCollision \
+--no_exec -n -1 \
+--python_filename generator.py
+
+
+
 
 
 cmsDriver.py step1 --filein file:generated_and_cleaned.root --fileout file:RAWSIM.root --mc \
@@ -17,3 +70,19 @@ cmsDriver.py step1 --filein file:generated_and_cleaned.root --fileout file:RAWSI
 --customise Configuration/DataProcessing/Utils.addMonitoring -n 82
 
 cmsDriver.py step2 --filein file:RAWSIM.root --fileout RECOSIM.root --mc --eventcontent RECOSIM --runUnscheduled --datatier RECOSIM --conditions 76X_mcRun2_asymptotic_v12 --step RAW2DIGI,L1Reco,RECO --era Run2_25ns --python_filename recosim.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 82
+
+
+
+
+
+
+cmsDriver.py TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/test/lhehadronizerpythia8_muonembedding_cfi.py \
+--filein file:RAWskimmed.root --fileout generated.root \
+--conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns \
+--eventcontent RAWSIM \
+--step GEN,SIM --datatier GEN-SIM \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseGeneratorVertexFromInput,\
+TauAnalysis/EmbeddingProducer/customisers.customiseGenerator \
+--beamspot Realistic50ns13TeVCollision \
+--no_exec -n -1 \
+--python_filename generator.py

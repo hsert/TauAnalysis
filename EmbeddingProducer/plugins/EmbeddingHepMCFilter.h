@@ -20,8 +20,7 @@ class EmbeddingHepMCFilter : public BaseHepMCFilter{
         const int muonPDGID_ = 13;
         const int electron_neutrino_PDGID_ = 12;
         const int electronPDGID_ = 11;
-        
-        bool switchToMuonEmbedding_;
+	const int ZPDGID_ = 23;
         
         enum class TauDecayMode : int
         {
@@ -83,60 +82,11 @@ class EmbeddingHepMCFilter : public BaseHepMCFilter{
             DecayChannel decaychannel;
         };
         
-        void fill_cut(std::string cut_string, EmbeddingHepMCFilter::DecayChannel &dc, CutsContainer &cut)
-        {
-            cut.decaychannel = dc;
-            
-            boost::replace_all(cut_string,"(","");
-            boost::replace_all(cut_string,")","");
-            std::vector<std::string> single_cuts;
-            boost::split(single_cuts, cut_string, boost::is_any_of("&&"), boost::token_compress_on);
-            for (unsigned int i=0; i<single_cuts.size(); ++i)
-            {
-                std::string pt1_str, pt2_str, eta1_str, eta2_str;
-                if (dc.first == dc.second)
-                {
-                    pt1_str = return_mode(dc.first)+"1"+".Pt"+">";
-                    pt2_str = return_mode(dc.second)+"2"+".Pt"+">";
-                    eta1_str = return_mode(dc.first)+"1"+".Eta"+"<";
-                    eta2_str = return_mode(dc.second)+"2"+".Eta"+"<";
-                }
-                else
-                {
-                    pt1_str = return_mode(dc.first)+".Pt"+">";
-                    pt2_str = return_mode(dc.second)+".Pt"+">";
-                    eta1_str = return_mode(dc.first)+".Eta"+"<";
-                    eta2_str = return_mode(dc.second)+".Eta"+"<";
-                }
-                
-                if(boost::find_first(single_cuts[i], pt1_str))
-                {
-                    boost::erase_first(single_cuts[i], pt1_str);
-                    cut.pt1 = std::stod(single_cuts[i]);
-                }
-                else if (boost::find_first(single_cuts[i], pt2_str))
-                {
-                    boost::erase_first(single_cuts[i], pt2_str);
-                    cut.pt2 = std::stod(single_cuts[i]);
-                }
-                else if (boost::find_first(single_cuts[i], eta1_str))
-                {
-                    boost::erase_first(single_cuts[i], eta1_str);
-                    cut.eta1 = std::stod(single_cuts[i]);
-                }
-                else if (boost::find_first(single_cuts[i], eta2_str))
-                {
-                    boost::erase_first(single_cuts[i], eta2_str);
-                    cut.eta2 = std::stod(single_cuts[i]);
-                }
-            }
-        }
-        
         
         std::vector<CutsContainer> cuts_;
-        std::vector<reco::Candidate::LorentzVector> p4VisPair_;
         DecayChannel DecayChannel_;
-        
+	
+	virtual void fill_cut(std::string cut_string, EmbeddingHepMCFilter::DecayChannel &dc, CutsContainer &cut);
         virtual void decay_and_sump4Vis(HepMC::GenParticle* particle, reco::Candidate::LorentzVector &p4Vis);
         virtual void sort_by_convention(DecayChannel& dc, std::vector<reco::Candidate::LorentzVector> &p4VisPair);
         virtual bool apply_cuts(DecayChannel& dc, std::vector<reco::Candidate::LorentzVector> &p4VisPair, std::vector<CutsContainer> &cuts);
@@ -152,9 +102,7 @@ class EmbeddingHepMCFilter : public BaseHepMCFilter{
 
 
 EmbeddingHepMCFilter::EmbeddingHepMCFilter(const edm::ParameterSet & iConfig)
-{
-    switchToMuonEmbedding_ = iConfig.getParameter<bool>("switchToMuonEmbedding");
-    
+{    
     // Defining standard decay channels
     ee.fill(TauDecayMode::Electron); ee.fill(TauDecayMode::Electron);
     mm.fill(TauDecayMode::Muon); mm.fill(TauDecayMode::Muon);
@@ -195,29 +143,31 @@ EmbeddingHepMCFilter::~EmbeddingHepMCFilter()
 bool
 EmbeddingHepMCFilter::filter(const HepMC::GenEvent* evt)
 {
-    if (switchToMuonEmbedding_) return true; // Do nothing, if MuonEmbedding enabled.
-    
     //Reset DecayChannel_ and p4VisPair_ at the beginning of each event.
     DecayChannel_.reset();
-    p4VisPair_.resize(0);
+    std::vector<reco::Candidate::LorentzVector> p4VisPair_;
     
-    reco::Candidate::LorentzVector p4Vis_all;
     // Going through the particle list. Mother particles are allways before their children. 
     // One can stop the loop after the second tau is reached and processed.
     for ( HepMC::GenEvent::particle_const_iterator particle = evt->particles_begin(); particle != evt->particles_end(); ++particle )
     {
-        //(*particle)->print();
-        bool neutrino = (std::abs((*particle)->pdg_id()) == tauon_neutrino_PDGID_) ||
-                        (std::abs((*particle)->pdg_id()) == muon_neutrino_PDGID_) ||
-                        (std::abs((*particle)->pdg_id()) == electron_neutrino_PDGID_);
-        
-        if ((*particle)->status() == 1 && !neutrino) p4Vis_all += (reco::Candidate::LorentzVector) (*particle)->momentum();
-        if (std::abs((*particle)->pdg_id()) == tauonPDGID_)
-        {
-            reco::Candidate::LorentzVector p4Vis;
-            decay_and_sump4Vis((*particle), p4Vis); // recursive access to final states.
-            p4VisPair_.push_back(p4Vis);
+       // (*particle)->print();
+	int mom_id = -99; 
+	if ((*particle)->production_vertex() != 0) 
+	  if ((*particle)->production_vertex()->particles_in_const_begin() != (*particle)->production_vertex()->particles_in_const_end())  mom_id =  (*(*particle)->production_vertex()->particles_in_const_begin())->pdg_id();
+        if (std::abs((*particle)->pdg_id()) == tauonPDGID_  && mom_id == ZPDGID_)
+	{
+          reco::Candidate::LorentzVector p4Vis;
+          decay_and_sump4Vis((*particle), p4Vis); // recursive access to final states.
+          p4VisPair_.push_back(p4Vis);	  
         }
+         if (std::abs((*particle)->pdg_id()) == muonPDGID_  && mom_id == ZPDGID_) // Also handle the option when Z-> mumu
+	{
+          reco::Candidate::LorentzVector p4Vis = (reco::Candidate::LorentzVector) (*particle)->momentum();
+	  DecayChannel_.fill(TauDecayMode::Muon); // treat is like muon decays
+          p4VisPair_.push_back(p4Vis);
+	}
+        
     }
     // Putting DecayChannel_ in default convention:
     // For mixed decay channels use the Electron_Muon, Electron_Hadronic, Muon_Hadronic convention.
@@ -322,5 +272,58 @@ EmbeddingHepMCFilter::apply_cuts(DecayChannel &dc, std::vector<reco::Candidate::
     }
     return false;
 }
+
+void 
+EmbeddingHepMCFilter::fill_cut(std::string cut_string, EmbeddingHepMCFilter::DecayChannel &dc, CutsContainer &cut)
+{
+            cut.decaychannel = dc;
+            
+            boost::replace_all(cut_string,"(","");
+            boost::replace_all(cut_string,")","");
+            std::vector<std::string> single_cuts;
+            boost::split(single_cuts, cut_string, boost::is_any_of("&&"), boost::token_compress_on);
+            for (unsigned int i=0; i<single_cuts.size(); ++i)
+            {
+                std::string pt1_str, pt2_str, eta1_str, eta2_str;
+                if (dc.first == dc.second)
+                {
+                    pt1_str = return_mode(dc.first)+"1"+".Pt"+">";
+                    pt2_str = return_mode(dc.second)+"2"+".Pt"+">";
+                    eta1_str = return_mode(dc.first)+"1"+".Eta"+"<";
+                    eta2_str = return_mode(dc.second)+"2"+".Eta"+"<";
+                }
+                else
+                {
+                    pt1_str = return_mode(dc.first)+".Pt"+">";
+                    pt2_str = return_mode(dc.second)+".Pt"+">";
+                    eta1_str = return_mode(dc.first)+".Eta"+"<";
+                    eta2_str = return_mode(dc.second)+".Eta"+"<";
+                }
+                
+                if(boost::find_first(single_cuts[i], pt1_str))
+                {
+                    boost::erase_first(single_cuts[i], pt1_str);
+                    cut.pt1 = std::stod(single_cuts[i]);
+                }
+                else if (boost::find_first(single_cuts[i], pt2_str))
+                {
+                    boost::erase_first(single_cuts[i], pt2_str);
+                    cut.pt2 = std::stod(single_cuts[i]);
+                }
+                else if (boost::find_first(single_cuts[i], eta1_str))
+                {
+                    boost::erase_first(single_cuts[i], eta1_str);
+                    cut.eta1 = std::stod(single_cuts[i]);
+                }
+                else if (boost::find_first(single_cuts[i], eta2_str))
+                {
+                    boost::erase_first(single_cuts[i], eta2_str);
+                    cut.eta2 = std::stod(single_cuts[i]);
+                }
+            }
+}
+
+
+
 
 #endif
