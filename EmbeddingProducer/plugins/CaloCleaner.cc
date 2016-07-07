@@ -11,7 +11,6 @@ typedef CaloCleaner<EcalRecHit> EcalRecHitCleaner;
 typedef CaloCleaner<HBHERecHit> HBHERecHitCleaner;
 typedef CaloCleaner<HFRecHit> HFRecHitCleaner;
 typedef CaloCleaner<HORecHit> HORecHitCleaner;
-//typedef CaloCleaner<ZDCRecHit> ZDCRecHitCleaner;
 typedef CaloCleaner<CastorRecHit> CastorRecHitCleaner;
 
 //-------------------------------------------------------------------------------
@@ -62,6 +61,18 @@ void  CaloCleaner<HORecHit>::fill_correction_map(TrackDetMatchInfo * info,  std:
 }
 
 
+template <>
+void  CaloCleaner<HFRecHit>::fill_correction_map(TrackDetMatchInfo * info,  std::map<uint32_t, float> * cor_map)
+{
+ return; // No corrections for HF 
+}
+
+template <>
+void  CaloCleaner<CastorRecHit>::fill_correction_map(TrackDetMatchInfo * info,  std::map<uint32_t, float> * cor_map)
+{
+ return;// No corrections for Castor
+}
+
 
 
 
@@ -71,8 +82,8 @@ void  CaloCleaner<HORecHit>::fill_correction_map(TrackDetMatchInfo * info,  std:
 DEFINE_FWK_MODULE(EcalRecHitCleaner);
 DEFINE_FWK_MODULE(HBHERecHitCleaner);
 DEFINE_FWK_MODULE(HORecHitCleaner);
-// no  need for cleaning outside of tracker
-//DEFINE_FWK_MODULE(HFRecHitCleaner);
-//DEFINE_FWK_MODULE(CastorRecHitCleaner);
-////DEFINE_FWK_MODULE(ZDCRecHitCleaner);
+// no  need for cleaning outside of tracker, so just a copy of the old collection
+DEFINE_FWK_MODULE(HFRecHitCleaner);
+DEFINE_FWK_MODULE(CastorRecHitCleaner);
+
 

@@ -13,9 +13,24 @@ from FWCore.ParameterSet.Utilities import cleanUnscheduled
 ### RECO (maybe pick the muon + detinfo in futur)
 ### selectedMuonsForEmbedding which are PAT muons with special requierments
 
-to_beclened = ['siPixelClusters','siStripClusters','ecalRecHit','ecalPreshowerRecHit','hbhereco','horeco','dt1DRecHits','csc2DRecHits','rpcRecHits']
-to_besimulated  = to_beclened[:]
-to_besimulated.extend(['castorreco','hfreco'])
+to_bemanipulate ={}
+to_bemanipulate['siPixelClusters']=["Pixel",[""]]
+to_bemanipulate['siStripClusters']=["Strip",[""]]
+to_bemanipulate['ecalRecHit']=["EcalRecHit",["EcalRecHitsEB","EcalRecHitsEE"]]
+to_bemanipulate['ecalPreshowerRecHit']=["EcalRecHit",["EcalRecHitsES"]]
+to_bemanipulate['hbhereco']=["HBHERecHit",[""]]
+to_bemanipulate['horeco']=["HORecHit",[""]]
+to_bemanipulate['hfreco']=["HFRecHit",[""]]
+to_bemanipulate['castorreco']=["CastorRecHit",[""]]
+to_bemanipulate['dt1DRecHits']=["DTRecHit",[""]]
+to_bemanipulate['csc2DRecHits']=["CSCRecHit",[""]]
+to_bemanipulate['rpcRecHits']=["RPCRecHit",[""]]
+
+
+
+
+
+
 
 def keepSelected():
    return cms.untracked.vstring(
@@ -37,7 +52,7 @@ def keepCleaned():
 			  )
 def keepSimulated():
     ret_vstring = cms.untracked.vstring()
-    for akt_name in to_besimulated:
+    for akt_name in to_bemanipulate:
       akt_sim_name = "simulated"+akt_name
       ret_vstring.append("keep *_"+akt_sim_name+"_*_SIMembedding")
     return ret_vstring
@@ -81,7 +96,11 @@ def customiseCleaning(process, changeProcessname=True):
     process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
     process.load('Configuration.StandardSequences.Reconstruction_cff')
      
-    process.cleaning = cms.Path(process.makeCleaningProcedure)
+    process.cleaning = cms.Path(process.makeCleaningProcedure) 
+    
+    ## Also add a copy of castor reco and hf reco. There is no need for a cleaning, but for the merging step they are needed
+
+    
     process.schedule.insert(0,process.cleaning)
  
     outputModulesList = [key for key,value in process.outputModules.iteritems()]
@@ -153,6 +172,23 @@ def customiseGenerator(process, changeProcessname=True):
     
     return process
 
+################################ Customizer for merging ###########################
+
+def customiseMerging(process, changeProcessname=True):
+    if changeProcessname:
+      process._Process__name = "MERG"
+ 
+    process.merging = cms.Path()   
+    for mod_name in to_bemanipulate:
+      mergCollections_in = cms.VInputTag()
+      for instance in to_bemanipulate[mod_name][1]:
+	mergCollections_in.append(cms.InputTag("simulated"+mod_name,instance,""))
+      	mergCollections_in.append(cms.InputTag("cleaned"+mod_name,instance,""))
+      setattr(process, mod_name, cms.EDProducer(to_bemanipulate[mod_name][0]+"Merger",mergCollections = mergCollections_in))
+      process.merging *= getattr(process, mod_name)
+ #   process.merging = cms.Path(process.mergseq)
+    process.schedule.insert(-1, process.merging)
+    return process
 
 
 

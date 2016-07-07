@@ -38,9 +38,6 @@ class MuonDetCleaner : public edm::EDProducer
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
   typedef edm::RangeMap<T1, edm::OwnVector<T2> > RecHitCollection;
-
-  typedef std::map<uint32_t, int> detIdToIntMap;
-
   void fillVetoHits(const TrackingRecHit& , std::vector<uint32_t>* );
   
   uint32_t getRawDetId(const T2&);
@@ -74,18 +71,26 @@ template <typename T1, typename T2>
 void MuonDetCleaner<T1,T2>::produce(edm::Event& iEvent, const edm::EventSetup& es)
 {
    std::map<T1, std::vector<T2> > recHits_output; // This data format is easyer to handle
-   //std::auto_ptr<detIdToIntMap> vetoHits(new detIdToIntMap());
    std::vector<uint32_t> vetoHits;
   
   // First fill the veto RecHits colletion with the Hits from the input muons
    edm::Handle< edm::View<pat::Muon> > muonHandle;
    iEvent.getByToken(mu_input_, muonHandle);
    edm::View<pat::Muon> muons = *muonHandle;
-   for (edm::View<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {
-     if(!iMuon->isGlobalMuon() ) continue;
-     reco::Track *mutrack = new reco::Track(*(iMuon->outerTrack() ));
+   for (edm::View<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {     
+   //  const reco::Track* track = 0;
+    // if( iMuon->isGlobalMuon() ) track = iMuon->outerTrack().get();
+    // else if  ( iMuon->isStandAloneMuon() ) track =   iMuon->outerTrack().get();
+    // else if  ( iMuon->isRPCMuon() ) track =   iMuon->outerTrack().get();
+     
+     
+    // else if  ( iMuon->track().isNonnull() ) track = iMuon->track().get();
+    // else if ( iMuon->standAloneMuon().isNonnull() ) track = iMuon->standAloneMuon().get();
+   //  else throw cms::Exception("FatalError") << "Failed to fill muon id information for a muon with undefined references to tracks";
      //reco::Track *mutrack = new reco::Track(*(muon.globalTrack() ));
-       for (trackingRecHit_iterator hitIt = mutrack->recHitsBegin(); hitIt != mutrack->recHitsEnd(); ++hitIt) {
+   //  matches ()
+     //for (trackingRecHit_iterator hitIt = track->recHitsBegin(); hitIt != track->recHitsEnd(); ++hitIt) {
+     for (std::vector<MuonChamberMatch>::const_iterator muonChHits = iMuon->matches().begin();  muonChHits != iMuon->matches().end(); muonChHits++){
         const TrackingRecHit &murechit = **hitIt; // Base class for all rechits 
         if(!(murechit).isValid()) continue;
         if (!checkrecHit(murechit)) continue;   // Check if the hit belongs to a specifc detector section   

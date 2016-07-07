@@ -61,6 +61,20 @@ cmsDriver.py TauAnalysis/EmbeddingProducer/python/EmbeddingPythia8Hadronizer_cfi
 
 
 
+cmsDriver.py MERGER \
+--filein file:generated_and_cleaned.root \
+--fileout file:merged.root \
+--conditions 76X_dataRun2_v15 --era Run2_25ns \
+--eventcontent RAW --datatier RAW \
+--step NONE \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseMerging \
+--no_exec -n -1 \
+--python_filename merge.py
+
+
+
+
+
 
 
 cmsDriver.py step1 --filein file:generated_and_cleaned.root --fileout file:RAWSIM.root --mc \

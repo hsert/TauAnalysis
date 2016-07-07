@@ -1,8 +1,5 @@
 /** \class TrackerCleaner
  *
- * Merge collections of calorimeter recHits
- * for original Zmumu event and "embedded" simulated tau decay products
- * (detectors supported at the moment: EB/EE, HB/HE and HO)
  * 
  * \author Stefan Wayand;
  *         Christian Veelken, LLR
@@ -25,7 +22,7 @@
 #include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
 
 #include "DataFormats/Common/interface/SortedCollection.h"
-#include "DataFormats/EcalRecHit/interface/EcalRecHit.h"
+//#include "DataFormats/EcalRecHit/interface/EcalRecHit.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/TrackerRecHit2D/interface/BaseTrackerRecHit.h"
 #include "DataFormats/TrackerRecHit2D/interface/OmniClusterRef.h"
@@ -36,22 +33,6 @@
 #include <iostream>
 #include <map>
 
-template <typename T>
-struct TrackerCleaner_mixedRecHitInfoType
-{
-  uint32_t rawDetId_;
-  
-  double energy1_;
-  bool isRecHit1_;
-  const T* recHit1_;
-  
-  double energy2_;
-  bool isRecHit2_;
-  const T* recHit2_;
-  
-  double energySum_;
-  bool isRecHitSum_;
-};
 
 template <typename T>
 class TrackerCleaner : public edm::EDProducer 
@@ -129,11 +110,9 @@ void TrackerCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
     int idx = 0;
     for ( typename TrackClusterCollection::const_iterator clustSet = inputClusters->begin(); clustSet != inputClusters->end(); ++clustSet ) { 
-  //  for (SiPixelClusterCollectionNew::const_iterator clustSet = pixelClusters->begin(); clustSet!=pixelClusters->end(); ++clustSet) {
       DetId detIdObject( clustSet->detId() );
       typename TrackClusterCollection::FastFiller spc(*output, detIdObject);
       for (typename edmNew::DetSet<T>::const_iterator clustIt = clustSet->begin(); clustIt != clustSet->end(); ++clustIt ) { 
-      //for(edmNew::DetSet<SiPixelCluster>::const_iterator clustIt = clustSet->begin(); clustIt!=clustSet->end();++clustIt) {
         idx++;  
         if (vetodClusters[idx-1]) continue;
         spc.push_back(*clustIt);

@@ -22,12 +22,12 @@ cleanedecalRecHit = cms.EDProducer("EcalRecHitCleaner",
     cms.InputTag("ecalRecHit","EcalRecHitsEE",""))
 )
 
-cleanedecalPreShowerRecHit = cms.EDProducer("EcalRecHitCleaner",
+cleanedecalPreshowerRecHit = cms.EDProducer("EcalRecHitCleaner",
     MuonCollection = MuonImput,
     TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
     oldCollections = cms.VInputTag(cms.InputTag("ecalPreshowerRecHit","EcalRecHitsES",""))
 )
-cleanedecalPreShowerRecHit.TrackAssociatorParameters.usePreshower = cms.bool(True) 
+cleanedecalPreshowerRecHit.TrackAssociatorParameters.usePreshower = cms.bool(True) 
 
 cleanedhbhereco = cms.EDProducer("HBHERecHitCleaner",
     MuonCollection = MuonImput,
@@ -56,13 +56,18 @@ cleanedrpcRecHits = cms.EDProducer('RPCleaner',
     oldCollection  = cms.InputTag("rpcRecHits","",""),
 )
 
+## Nothing to clean for this collections, but keep a copy of them ;)
+
+
+
+
 
 
 makeCleaningProcedure = cms.Sequence(
     cleanedsiPixelClusters
     + cleanedsiStripClusters
     + cleanedecalRecHit
-    + cleanedecalPreShowerRecHit
+    + cleanedecalPreshowerRecHit
     + cleanedhbhereco
     + cleanedhoreco
     + cleaneddt1DRecHits

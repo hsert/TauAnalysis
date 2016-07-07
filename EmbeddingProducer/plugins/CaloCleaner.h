@@ -27,7 +27,6 @@
 #include "DataFormats/Common/interface/SortedCollection.h"
 #include "DataFormats/EcalRecHit/interface/EcalRecHit.h"
 
-//#include "TauAnalysis/MCEmbeddingTools/interface/embeddingAuxFunctions.h"
 #include <string>
 #include <iostream>
 #include <map>
@@ -46,9 +45,8 @@ class CaloCleaner : public edm::EDProducer
 
   const edm::EDGetTokenT<edm::View<pat::Muon> > mu_input_;
 
-  std::vector<edm::EDGetTokenT<RecHitCollection > > RecHitinputs_;
-  std::vector< std::string> instances;
-  
+  std::map<std::string,  edm::EDGetTokenT<RecHitCollection > > inputs_;
+ 
   TrackDetectorAssociator trackAssociator_;
   TrackAssociatorParameters parameters_;
   
@@ -61,17 +59,16 @@ template <typename T>
 CaloCleaner<T>::CaloCleaner(const edm::ParameterSet& iConfig) :
     mu_input_(consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection")))
 { 
-  std::vector<edm::InputTag> inCollections =  iConfig.getParameter<std::vector<edm::InputTag> >("oldCollections");
+  std::vector<edm::InputTag> inCollections =  iConfig.getParameter<std::vector<edm::InputTag> >("oldCollection");
   for (auto inCollection : inCollections){
-    RecHitinputs_.push_back(consumes<RecHitCollection >(inCollection));
-    produces<RecHitCollection>(inCollection.instance()); 
-    instances.push_back(inCollection.instance()); 
-    
+     inputs_[inCollection.instance()] = consumes<RecHitCollection >(inCollection);
+     produces<RecHitCollection>(inCollection.instance());
   }
-   is_preshower_ =iConfig.getUntrackedParameter<bool>("is_preshower", false);
-   edm::ParameterSet parameters = iConfig.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
-   edm::ConsumesCollector iC = consumesCollector();
-   parameters_.loadParameters( parameters, iC );
+  
+  is_preshower_ =iConfig.getUntrackedParameter<bool>("is_preshower", false);
+  edm::ParameterSet parameters = iConfig.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
+  edm::ConsumesCollector iC = consumesCollector();
+  parameters_.loadParameters( parameters, iC );
    //trackAssociator_.useDefaultPropagator();
  
 }
@@ -108,18 +105,19 @@ void CaloCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     fill_correction_map(&info,&correction_map);
   }
   
-  // Copy the old collection
-  unsigned id = 0;
-  for (auto RecHitinput_ : RecHitinputs_){
+  // Copy the old collection and correct if necessary 
+  for (auto input_ : inputs_){
     std::auto_ptr<RecHitCollection> recHitCollection_output(new RecHitCollection());   
     edm::Handle<RecHitCollection> recHitCollection;
-    iEvent.getByToken(RecHitinput_, recHitCollection);    
+   // iEvent.getByToken(input_.second[0], recHitCollection);   
+    iEvent.getByToken(input_.second, recHitCollection);  
     for ( typename RecHitCollection::const_iterator recHit = recHitCollection->begin(); recHit != recHitCollection->end(); ++recHit ) {
       if (correction_map[recHit->detid().rawId()] > 0){
 	float new_energy =  recHit->energy() - correction_map[recHit->detid().rawId()];
 	if (new_energy < 0) new_energy =0;
-	T newRecHit (*recHit);
+	T newRecHit(*recHit);
 	newRecHit.setEnergy(new_energy);
+	//std::cout<<newRecHit<<std::endl;
 	//if (new_energy>0) std::cout<< new_energy <<std::endl; to be tested 
 	recHitCollection_output->push_back(newRecHit);
       }
@@ -128,8 +126,8 @@ void CaloCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       }  
     }
     // Save the new collection
-    iEvent.put(recHitCollection_output,instances[id]);
-    id++;   
+    recHitCollection_output->sort();
+    iEvent.put(recHitCollection_output); 
   }
 
 }
