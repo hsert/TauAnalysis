@@ -14,14 +14,15 @@ from FWCore.ParameterSet.Utilities import cleanUnscheduled
 ### selectedMuonsForEmbedding which are PAT muons with special requierments
 
 to_bemanipulate ={}
-to_bemanipulate['siPixelClusters']=["Pixel",[""]]
+####to_bemanipulate['siPixelClusters']=["Pixel",[""]]
+to_bemanipulate['siPixelClustersPreSplitting']=["Pixel",[""]]
 to_bemanipulate['siStripClusters']=["Strip",[""]]
 to_bemanipulate['ecalRecHit']=["EcalRecHit",["EcalRecHitsEB","EcalRecHitsEE"]]
 to_bemanipulate['ecalPreshowerRecHit']=["EcalRecHit",["EcalRecHitsES"]]
 to_bemanipulate['hbhereco']=["HBHERecHit",[""]]
 to_bemanipulate['horeco']=["HORecHit",[""]]
-##to_bemanipulate['hfreco']=["HFRecHit",[""]]
-##to_bemanipulate['castorreco']=["CastorRecHit",[""]]
+to_bemanipulate['hfreco']=["HFRecHit",[""]]
+to_bemanipulate['castorreco']=["CastorRecHit",[""]]
 to_bemanipulate['dt1DRecHits']=["DTRecHit",[""]]
 to_bemanipulate['csc2DRecHits']=["CSCRecHit",[""]]
 to_bemanipulate['rpcRecHits']=["RPCRecHit",[""]]
@@ -33,7 +34,7 @@ to_bemanipulate['rpcRecHits']=["RPCRecHit",[""]]
 
 
 def keepSelected():
-   return cms.untracked.vstring(
+   ret_vstring = cms.untracked.vstring(
              "keep *_patMuonsAfterID_*_SELECT",
              "keep *_slimmedMuons_*_SELECT",
              "keep *_selectedMuonsForEmbedding_*_SELECT",
@@ -44,6 +45,10 @@ def keepSelected():
              "keep *_slimmedMuons_*_SKIM",
              "keep *_selectedMuonsForEmbedding_*_SKIM",
              "keep recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM")
+   for akt_name in to_bemanipulate:
+#      ret_vstring.append("keep *_"+akt_name+"_*_SKIM") 
+      ret_vstring.append("keep *_"+akt_name+"_*_SELECT") 
+   return ret_vstring
 
 def keepLHE(process):
     return cms.untracked.vstring("keep *_*_*_"+process._Process__name)
@@ -198,10 +203,7 @@ def customiseMerging(process, changeProcessname=True):
     for outputModule in outputModulesList:
         outputModule = getattr(process, outputModule)
         outputModule.outputCommands.extend(keepMerged(process)) #Also store the Selected muons 
-
-    
-    
-    
+ 
     return process
 
 
@@ -223,7 +225,7 @@ def customiseReconstruction(process):
     except:
       process.options = cms.untracked.PSet(emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis'))
   
-    process.reconstruction_step.remove(process.siPixelClusters)
+  #  process.reconstruction_step.remove(process.siPixelClusters)
     process.reconstruction_step.remove(process.siStripClusters)
     process.reconstruction_step.remove(process.ecalRecHit)
     process.reconstruction_step.remove(process.ecalPreshowerRecHit)

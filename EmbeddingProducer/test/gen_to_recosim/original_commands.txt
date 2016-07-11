@@ -1,4 +1,15 @@
 
+cmsDriver.py RECO -s RAW2DIGI,L1Reco,RECO,PAT \
+--runUnscheduled --data --scenario pp --conditions 76X_dataRun2_v15 \
+--eventcontent RAWRECO --datatier RECO \
+--customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
+TauAnalysis/EmbeddingProducer/customisers.customiseSelecting \
+--filein file:DoubleMuon2015DRAWPicked.root \
+--fileout RAWskimmed.root -n 30 --no_exec --python_filename=skim.py --no_exec
+
+
+
+
 cmsDriver.py LHEprodandCLEAN \
 --filein file:RAWskimmed.root \
 --fileout file:lhe_and_cleaned.root \
@@ -8,33 +19,6 @@ cmsDriver.py LHEprodandCLEAN \
 --customise TauAnalysis/EmbeddingProducer/customisers.customiseLHEandCleaning \
 --no_exec -n -1 \
 --python_filename lheprodandcleaning.py
-
-
-## If you want only the indivual stept then use the followign two commands
-
-cmsDriver.py LHEprod \
---filein file:RAWskimmed.root \
---fileout file:lhe.root \
---conditions 76X_dataRun2_v15 --era Run2_25ns \
---eventcontent RAW --datatier RAW \
---step NONE \
---customise TauAnalysis/EmbeddingProducer/customisers.customiseLHE \
---no_exec -n -1 \
---python_filename lheprod.py
-
-
-
-
-cmsDriver.py CLEAN \
---filein file:RAWskimmed.root \
---fileout file:cleaned.root \
---conditions 76X_dataRun2_v15 --era Run2_25ns \
---eventcontent RAW --datatier RAW \
---step NONE \
---customise TauAnalysis/EmbeddingProducer/customisers.customiseCleaning\
---no_exec -n -1 \
---python_filename clean.py
-
 
 
 
@@ -64,40 +48,6 @@ cmsDriver.py MERGER \
 
 
 
-
-
-
-
-cmsDriver.py step1 --filein file:generated_and_cleaned.root --fileout file:RAWSIM.root --mc \
---eventcontent RAWSIM --datatier GEN-SIM-RAW \
---conditions 76X_mcRun2_asymptotic_v12 --step DIGI,L1,DIGI2RAW,HLT:@frozen25ns \
---era Run2_25ns --python_filename rawsim.py --no_exec \
---customise Configuration/DataProcessing/Utils.addMonitoring -n 82
-
-cmsDriver.py step2 --filein file:RAWSIM.root --fileout RECOSIM.root --mc --eventcontent RECOSIM --runUnscheduled --datatier RECOSIM --conditions 76X_mcRun2_asymptotic_v12 --step RAW2DIGI,L1Reco,RECO --era Run2_25ns --python_filename recosim.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 82
-
-
-
-
-msDriver.py TauAnalysis/EmbeddingProducer/python/ZTauTauGeneration/test/lhehadronizerpythia8_muonembedding_cfi.py \
---filein file:RAWskimmed.root --fileout generated.root \
---conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns \
---eventcontent RAWSIM \
---step GEN,SIM --datatier GEN-SIM \
---customise TauAnalysis/EmbeddingProducer/customisers.customiseGeneratorVertexFromInput,\
-TauAnalysis/EmbeddingProducer/customisers.customiseGenerator \
---beamspot Realistic50ns13TeVCollision \
---no_exec -n -1 \
---python_filename generator.py
-
-
-cmsDriver.py RECO -s RAW2DIGI,L1Reco,RECO,ALCA:TkAlZMuMu+MuAlCalIsolatedMu+MuAlOverlaps+MuAlZMuMu+DtCalib,EI,PAT,DQM:@standardDQM+@miniAODDQM \
---filein file:merged.root  \
---runUnscheduled --data --scenario pp --conditions 76X_dataRun2_v15 \
---eventcontent RECO,AOD,MINIAOD,DQM --datatier RECO,AOD,MINIAOD,DQMIO \
---customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
-TauAnalysis/EmbeddingProducer/customisers.customiseReconstruction \
--n -1 --no_exec --python_filename=reco_Run2015D_DoubleMuon.py --no_exec
 
 
 cmsDriver.py RECO -s RAW2DIGI,RECO,PAT \
