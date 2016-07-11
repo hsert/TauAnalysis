@@ -20,8 +20,8 @@ to_bemanipulate['ecalRecHit']=["EcalRecHit",["EcalRecHitsEB","EcalRecHitsEE"]]
 to_bemanipulate['ecalPreshowerRecHit']=["EcalRecHit",["EcalRecHitsES"]]
 to_bemanipulate['hbhereco']=["HBHERecHit",[""]]
 to_bemanipulate['horeco']=["HORecHit",[""]]
-to_bemanipulate['hfreco']=["HFRecHit",[""]]
-to_bemanipulate['castorreco']=["CastorRecHit",[""]]
+##to_bemanipulate['hfreco']=["HFRecHit",[""]]
+##to_bemanipulate['castorreco']=["CastorRecHit",[""]]
 to_bemanipulate['dt1DRecHits']=["DTRecHit",[""]]
 to_bemanipulate['csc2DRecHits']=["CSCRecHit",[""]]
 to_bemanipulate['rpcRecHits']=["RPCRecHit",[""]]
@@ -45,21 +45,30 @@ def keepSelected():
              "keep *_selectedMuonsForEmbedding_*_SKIM",
              "keep recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM")
 
-def keepCleaned():
-   return cms.untracked.vstring(
-			  "keep *_*_*_CLEAN",
-			  "keep *_*_*_LHEembeddingCLEAN"	  
-			  )
-def keepSimulated():
+def keepLHE(process):
+    return cms.untracked.vstring("keep *_*_*_"+process._Process__name)
+
+
+def keepSimulated(process):
     ret_vstring = cms.untracked.vstring()
     for akt_name in to_bemanipulate:
       akt_sim_name = "simulated"+akt_name
-      ret_vstring.append("keep *_"+akt_sim_name+"_*_SIMembedding")
+      ret_vstring.append("keep *_"+akt_sim_name+"_*_"+process._Process__name)
     return ret_vstring
 
-def keepThisStep(process):
-   return cms.untracked.vstring("keep *_*_*_"+process._Process__name)
+def keepCleaned():
+   return cms.untracked.vstring(
+                         "keep *_*_*_CLEAN",
+                         "keep *_*_*_LHEembeddingCLEAN"          
+                         )
 
+
+  
+def keepMerged(process):
+    ret_vstring = cms.untracked.vstring()
+    for akt_name in to_bemanipulate:
+      ret_vstring.append("keep *_"+akt_name+"_*_"+process._Process__name)
+    return ret_vstring
 
 ################################ Customizer for Selecting ###########################
 
@@ -127,18 +136,7 @@ def customiseLHE(process, changeProcessname=True):
     for outputModule in outputModulesList:
         outputModule = getattr(process, outputModule)
         outputModule.outputCommands.extend(keepSelected()) #Also store the Selected muons 
-        outputModule.outputCommands.extend(keepThisStep(process))
-    return process
-
-
-def manipulate_reco_step(process):
-    ###print "reduce the reco step to the minimum" ## not true in the moment
-    ### At the moment keep the complett reco schedule, but in principle we could clean it up and only produce the "simulated*" once (and the module afterwards are unecessary.
-    for akt_mod_name in to_besimulated:
-      new_mod_name = "simulated"+akt_mod_name
-      cloned_module = getattr(process, akt_mod_name).clone()
-      setattr(process, new_mod_name, cloned_module)
-      process.reconstruction_step *= getattr(process, new_mod_name)
+        outputModule.outputCommands.extend(keepLHE(process))
     return process
 
 
@@ -160,14 +158,21 @@ def customiseGenerator(process, changeProcessname=True):
     process.VtxSmeared = process.VtxCorrectedToInput.clone()
     print "Correcting Vertex in genEvent to one from input. Replaced 'VtxSmeared' with the Corrector."
     
-    process = manipulate_reco_step(process)
+    
+    process.merging = cms.Path()   
+    for org_sim_name in to_bemanipulate:
+      new_sim_name = "simulated"+org_sim_name
+      cloned_module = getattr(process, org_sim_name).clone()
+      setattr(process, new_sim_name, cloned_module)
+      process.reconstruction_step *= getattr(process, new_sim_name)
+     
     
     outputModulesList = [key for key,value in process.outputModules.iteritems()]
     for outputModule in outputModulesList:
         outputModule = getattr(process, outputModule)
         outputModule.outputCommands.extend(keepSelected()) #Also store the Selected muons 
         outputModule.outputCommands.extend(keepCleaned())
-        outputModule.outputCommands.extend(keepSimulated())
+	outputModule.outputCommands.extend(keepSimulated(process))
       #  outputModule.outputCommands.extend(cms.untracked.vstring("keep *"))
     
     return process
@@ -176,7 +181,7 @@ def customiseGenerator(process, changeProcessname=True):
 
 def customiseMerging(process, changeProcessname=True):
     if changeProcessname:
-      process._Process__name = "MERG"
+      process._Process__name = "MERGE"
  
     process.merging = cms.Path()   
     for mod_name in to_bemanipulate:
@@ -186,8 +191,17 @@ def customiseMerging(process, changeProcessname=True):
       	mergCollections_in.append(cms.InputTag("cleaned"+mod_name,instance,""))
       setattr(process, mod_name, cms.EDProducer(to_bemanipulate[mod_name][0]+"Merger",mergCollections = mergCollections_in))
       process.merging *= getattr(process, mod_name)
- #   process.merging = cms.Path(process.mergseq)
     process.schedule.insert(-1, process.merging)
+    
+    
+    outputModulesList = [key for key,value in process.outputModules.iteritems()]
+    for outputModule in outputModulesList:
+        outputModule = getattr(process, outputModule)
+        outputModule.outputCommands.extend(keepMerged(process)) #Also store the Selected muons 
+
+    
+    
+    
     return process
 
 
@@ -204,6 +218,11 @@ def customiseLHEandCleaning(process):
 
 
 def customiseReconstruction(process):
+    try:
+      process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis')
+    except:
+      process.options = cms.untracked.PSet(emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis'))
+  
     process.reconstruction_step.remove(process.siPixelClusters)
     process.reconstruction_step.remove(process.siStripClusters)
     process.reconstruction_step.remove(process.ecalRecHit)

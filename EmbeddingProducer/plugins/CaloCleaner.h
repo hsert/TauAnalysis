@@ -116,9 +116,7 @@ void CaloCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	float new_energy =  recHit->energy() - correction_map[recHit->detid().rawId()];
 	if (new_energy < 0) new_energy =0;
 	T newRecHit(*recHit);
-	newRecHit.setEnergy(new_energy);
-	//std::cout<<newRecHit<<std::endl;
-	//if (new_energy>0) std::cout<< new_energy <<std::endl; to be tested 
+	newRecHit.setEnergy(new_energy); 
 	recHitCollection_output->push_back(newRecHit);
       }
       else{
@@ -127,7 +125,7 @@ void CaloCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     // Save the new collection
     recHitCollection_output->sort();
-    iEvent.put(recHitCollection_output); 
+    iEvent.put(recHitCollection_output,input_.first); 
   }
 
 }

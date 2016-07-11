@@ -41,14 +41,10 @@ class MuonDetCleaner : public edm::EDProducer
   void fillVetoHits(const TrackingRecHit& , std::vector<uint32_t>* );
   
   uint32_t getRawDetId(const T2&);
-  bool checkrecHit(const TrackingRecHit&);
-  
-  
+  bool checkrecHit(const TrackingRecHit&); 
 
   const edm::EDGetTokenT<edm::View<pat::Muon> > mu_input_;
   const edm::EDGetTokenT<RecHitCollection > RecHitinput_;
-  
-  
   
 };
 
@@ -78,19 +74,18 @@ void MuonDetCleaner<T1,T2>::produce(edm::Event& iEvent, const edm::EventSetup& e
    iEvent.getByToken(mu_input_, muonHandle);
    edm::View<pat::Muon> muons = *muonHandle;
    for (edm::View<pat::Muon>::const_iterator iMuon = muons.begin(); iMuon != muons.end(); ++iMuon) {     
-   //  const reco::Track* track = 0;
-    // if( iMuon->isGlobalMuon() ) track = iMuon->outerTrack().get();
-    // else if  ( iMuon->isStandAloneMuon() ) track =   iMuon->outerTrack().get();
-    // else if  ( iMuon->isRPCMuon() ) track =   iMuon->outerTrack().get();
-     
-     
-    // else if  ( iMuon->track().isNonnull() ) track = iMuon->track().get();
-    // else if ( iMuon->standAloneMuon().isNonnull() ) track = iMuon->standAloneMuon().get();
-   //  else throw cms::Exception("FatalError") << "Failed to fill muon id information for a muon with undefined references to tracks";
-     //reco::Track *mutrack = new reco::Track(*(muon.globalTrack() ));
-   //  matches ()
-     //for (trackingRecHit_iterator hitIt = track->recHitsBegin(); hitIt != track->recHitsEnd(); ++hitIt) {
-     for (std::vector<MuonChamberMatch>::const_iterator muonChHits = iMuon->matches().begin();  muonChHits != iMuon->matches().end(); muonChHits++){
+      const reco::Track* track = 0;
+      if( iMuon->isGlobalMuon() ) track = iMuon->outerTrack().get();
+      else if  ( iMuon->isStandAloneMuon() ) track =   iMuon->outerTrack().get();
+      else if  ( iMuon->isRPCMuon() ) track =   iMuon->innerTrack().get(); // To add, try to access the rpc track 
+      else if  ( iMuon->isTrackerMuon() ) track = iMuon->innerTrack().get();
+      else {
+	std::cout<<"The imput muon: "<<(*iMuon)<<" must be either global or does or be tracker muon"<<std::endl; //todo fill this tho cmssw error logger
+	assert(0);
+      }
+      
+      
+     for (trackingRecHit_iterator hitIt = track->recHitsBegin(); hitIt != track->recHitsEnd(); ++hitIt) {
         const TrackingRecHit &murechit = **hitIt; // Base class for all rechits 
         if(!(murechit).isValid()) continue;
         if (!checkrecHit(murechit)) continue;   // Check if the hit belongs to a specifc detector section   
@@ -117,7 +112,6 @@ void MuonDetCleaner<T1,T2>::produce(edm::Event& iEvent, const edm::EventSetup& e
       output->put(recHit->first, recHit->second.begin(), recHit->second.end());
     }
     output->post_insert();
-
     iEvent.put(output);
 }
 

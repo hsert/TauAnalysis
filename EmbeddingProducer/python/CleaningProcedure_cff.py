@@ -18,27 +18,27 @@ from TrackingTools.TrackAssociator.default_cfi import TrackAssociatorParameterBl
 cleanedecalRecHit = cms.EDProducer("EcalRecHitCleaner",
     MuonCollection = MuonImput,
     TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
-    oldCollections = cms.VInputTag(cms.InputTag("ecalRecHit","EcalRecHitsEB",""),
+    oldCollection = cms.VInputTag(cms.InputTag("ecalRecHit","EcalRecHitsEB",""),
     cms.InputTag("ecalRecHit","EcalRecHitsEE",""))
 )
 
 cleanedecalPreshowerRecHit = cms.EDProducer("EcalRecHitCleaner",
     MuonCollection = MuonImput,
     TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
-    oldCollections = cms.VInputTag(cms.InputTag("ecalPreshowerRecHit","EcalRecHitsES",""))
+    oldCollection = cms.VInputTag(cms.InputTag("ecalPreshowerRecHit","EcalRecHitsES",""))
 )
 cleanedecalPreshowerRecHit.TrackAssociatorParameters.usePreshower = cms.bool(True) 
 
 cleanedhbhereco = cms.EDProducer("HBHERecHitCleaner",
     MuonCollection = MuonImput,
     TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
-    oldCollections = cms.VInputTag(cms.InputTag("hbhereco","",""))
+    oldCollection = cms.VInputTag(cms.InputTag("hbhereco","",""))
 )
 
 cleanedhoreco = cms.EDProducer("HORecHitCleaner",
     MuonCollection = MuonImput,
     TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
-    oldCollections = cms.VInputTag(cms.InputTag("horeco","",""))
+    oldCollection = cms.VInputTag(cms.InputTag("horeco","",""))
 )
 
 cleaneddt1DRecHits = cms.EDProducer('DTCleaner',

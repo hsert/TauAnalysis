@@ -37,7 +37,7 @@ void  CaloCleaner<EcalRecHit>::fill_correction_map(TrackDetMatchInfo * info,  st
   else {
     for(std::vector<const EcalRecHit*>::const_iterator hit=info->crossedEcalRecHits.begin(); hit!=info->crossedEcalRecHits.end(); hit++){
       //    (*cor_map) [(*hit)->detid().rawId()] +=(*hit)->energy();
-      (*cor_map) [(*hit)->detid().rawId()] =(*hit)->energy(); // should be more correct ;)
+      (*cor_map) [(*hit)->detid().rawId()] =(*hit)->energy(); 
     }
   }
 }
@@ -47,7 +47,7 @@ template <>
 void  CaloCleaner<HBHERecHit>::fill_correction_map(TrackDetMatchInfo * info,  std::map<uint32_t, float> * cor_map)
 {
   for(std::vector<const HBHERecHit*>::const_iterator hit = info->crossedHcalRecHits.begin(); hit != info->crossedHcalRecHits.end(); hit++) {
-    (*cor_map) [(*hit)->detid().rawId()] =(*hit)->energy(); // should be more correct ;)
+    (*cor_map) [(*hit)->detid().rawId()] =(*hit)->energy(); 
   }
 }
 
@@ -56,7 +56,7 @@ template <>
 void  CaloCleaner<HORecHit>::fill_correction_map(TrackDetMatchInfo * info,  std::map<uint32_t, float> * cor_map)
 {
   for(std::vector<const HORecHit*>::const_iterator hit = info->crossedHORecHits.begin(); hit != info->crossedHORecHits.end(); hit++) {
-    (*cor_map) [(*hit)->detid().rawId()] =(*hit)->energy(); // should be more correct ;)
+    (*cor_map) [(*hit)->detid().rawId()] =(*hit)->energy(); 
   }
 }
 
