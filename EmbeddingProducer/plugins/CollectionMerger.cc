@@ -75,6 +75,7 @@ void  CollectionMerger<T1,T2>::fill_output_obj_calo(std::auto_ptr<MergeCollectio
  // First merge the two collections again
  for (auto inputCollection : inputCollections){
   for ( typename MergeCollection::const_iterator recHit = inputCollection->begin(); recHit!= inputCollection->end(); ++recHit ) {
+    if (recHit->energy() <= 0) continue;
     DetId detIdObject( recHit->detid().rawId() );
     T2 *akt_calo_obj = &output_map[detIdObject.rawId()];
     float new_energy = akt_calo_obj->energy() + recHit->energy();
