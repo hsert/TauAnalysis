@@ -99,7 +99,7 @@ void MuonDetCleaner<T1,T2>::produce(edm::Event& iEvent, const edm::EventSetup& e
     RecHitCollectionHandle RecHitinput;
     iEvent.getByToken(RecHitinput_, RecHitinput);
     for ( typename RecHitCollection::const_iterator recHit = RecHitinput->begin(); recHit != RecHitinput->end(); ++recHit ) { // loop over the basic rec hit collection (DT CSC or RPC)
-	if (find(vetoHits.begin(),vetoHits.end(),getRawDetId(*recHit)) != vetoHits.end()) continue; // If the hit is not in the  	
+	if (find(vetoHits.begin(),vetoHits.end(),getRawDetId(*recHit)) == vetoHits.end()) continue; // If the hit is not in the  	
 	T1 detId(getRawDetId(*recHit));
 	recHits_output[detId].push_back(*recHit);	
     }

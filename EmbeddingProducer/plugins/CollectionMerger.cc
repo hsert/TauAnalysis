@@ -17,6 +17,8 @@
 #include "DataFormats/CSCRecHit/interface/CSCRecHit2D.h"
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "DataFormats/RPCRecHit/interface/RPCRecHit.h"
+#include "DataFormats/HcalRecHit/interface/ZDCRecHit.h"
+
 
 #include "DataFormats/Common/interface/RangeMap.h"
 #include "DataFormats/Common/interface/OwnVector.h"
@@ -31,6 +33,7 @@ typedef CollectionMerger<edm::SortedCollection<HBHERecHit>, HBHERecHit> HBHERecH
 typedef CollectionMerger<edm::SortedCollection<HFRecHit>, HFRecHit> HFRecHitMerger;
 typedef CollectionMerger<edm::SortedCollection<HORecHit>, HORecHit> HORecHitMerger;
 typedef CollectionMerger<edm::SortedCollection<CastorRecHit>, CastorRecHit> CastorRecHitMerger;
+typedef CollectionMerger<edm::SortedCollection<ZDCRecHit>, ZDCRecHit> ZDCRecHitMerger;
 
 
 
@@ -43,26 +46,29 @@ typedef CollectionMerger<edm::RangeMap<RPCDetId, edm::OwnVector<RPCRecHit> >, RP
 
 // -------- Here Tracker Merger -----------
 template <typename T1, typename T2>
-void  CollectionMerger<T1,T2>::fill_output_obj_tracker(std::auto_ptr<MergeCollection > & output, std::vector<edm::Handle<MergeCollection> > &inputCollections)
+void  CollectionMerger<T1,T2>::fill_output_obj_tracker(std::auto_ptr<MergeCollection > & output, std::vector<edm::Handle<MergeCollection> > &inputCollections, bool print_pixel)
 {
-  std::map<uint32_t, std::vector<BaseHit> >   output_map;
+  //std::map<uint32_t, std::vector<BaseHit> >   output_map;
   // First merge the collections with the help of the output map
+  if (print_pixel) std::cout<<"------------------------------------"<<std::endl;
   for (auto inputCollection : inputCollections){
    for ( typename MergeCollection::const_iterator clustSet = inputCollection->begin(); clustSet!= inputCollection->end(); ++clustSet ) {
       DetId detIdObject( clustSet->detId() );
+      typename MergeCollection::FastFiller spc(*output, detIdObject);
       for (typename edmNew::DetSet<BaseHit>::const_iterator clustIt = clustSet->begin(); clustIt != clustSet->end(); ++clustIt ) { 	
-        output_map[detIdObject.rawId()].push_back(*clustIt);	
+       // output_map[detIdObject.rawId()].push_back(*clustIt);
+	spc.push_back(*clustIt);
        }
     } 
   }
   // Now save it into the standard CMSSW format, with the standard Filler
-  for (typename std::map<uint32_t, std::vector<BaseHit> >::const_iterator outHits = output_map.begin(); outHits != output_map.end(); ++outHits ) {
-     DetId detIdObject(outHits->first);
-     typename MergeCollection::FastFiller spc(*output, detIdObject);
-     for (auto Hit : outHits->second){ 
-       spc.push_back(Hit);
-     }     
-   }  
+ // for (typename std::map<uint32_t, std::vector<BaseHit> >::const_iterator outHits = output_map.begin(); outHits != output_map.end(); ++outHits ) {
+  //   DetId detIdObject(outHits->first);
+   //  typename MergeCollection::FastFiller spc(*output, detIdObject);
+   //  for (auto Hit : outHits->second){ 
+  //     spc.push_back(Hit);
+  //   }     
+  // }  
 }
 
 
@@ -125,7 +131,51 @@ void  CollectionMerger<T1,T2>::fill_output_obj(std::auto_ptr<MergeCollection > &
 template <>
 void  CollectionMerger<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster>::fill_output_obj(std::auto_ptr<MergeCollection > & output, std::vector<edm::Handle<MergeCollection> > &inputCollections)
 {
-  fill_output_obj_tracker(output,inputCollections);
+ // fill_output_obj_tracker(output,inputCollections,true);
+  
+  std::cout<<"------------------------------------"<<std::endl;
+  
+   for (auto inputCollection : inputCollections){
+   for ( typename MergeCollection::const_iterator clustSet = inputCollection->begin(); clustSet!= inputCollection->end(); ++clustSet ) {
+      DetId detIdObject( clustSet->detId() );
+      typename MergeCollection::FastFiller spc(*output, detIdObject);
+      for (typename edmNew::DetSet<BaseHit>::const_iterator clustIt = clustSet->begin(); clustIt != clustSet->end(); ++clustIt ) { 	
+       // output_map[detIdObject.rawId()].push_back(*clustIt);
+	spc.push_back(*clustIt);
+	SiPixelCluster newRecHit(*clustIt);
+
+	 unsigned ttt=newRecHit.size();
+	 std::cout<<"size: "<<ttt<<" DetID "<<detIdObject.rawId()<<" Main "<<detIdObject.det()<<" sub "<<detIdObject.subdetId()<<std::endl;
+	 for (int ii = 0; ii< (int) ttt; ii++){
+	   std::cout<<" x "<<clustIt->pixel(ii).x<<" y "<<clustIt->pixel(ii).y<<" adc "<<clustIt->pixel(ii).adc
+	     <<" x() "<<clustIt->x()<<" sizex "<<clustIt->sizeX()
+	     <<" y() "<<clustIt->y()<<" sizey "<<clustIt->sizeY()
+	     <<" charge "<<clustIt->charge()
+	     <<std::endl; 
+	 }
+	  
+	
+	
+	
+       }
+    } 
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }
 
 
@@ -169,6 +219,13 @@ void  CollectionMerger<edm::SortedCollection<CastorRecHit>, CastorRecHit>::fill_
 }
 
 
+template <>
+void  CollectionMerger<edm::SortedCollection<ZDCRecHit>, ZDCRecHit>::fill_output_obj(std::auto_ptr<MergeCollection > & output, std::vector<edm::Handle<MergeCollection> > &inputCollections)
+{
+  fill_output_obj_calo(output,inputCollections);
+}
+
+
 
 // Here the Muon Chamber
 template <>
@@ -192,7 +249,6 @@ void  CollectionMerger<edm::RangeMap<RPCDetId, edm::OwnVector<RPCRecHit> >, RPCR
 
 
 
-
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 DEFINE_FWK_MODULE(PixelMerger);
@@ -203,6 +259,8 @@ DEFINE_FWK_MODULE(HBHERecHitMerger);
 DEFINE_FWK_MODULE(HFRecHitMerger);
 DEFINE_FWK_MODULE(HORecHitMerger);
 DEFINE_FWK_MODULE(CastorRecHitMerger);
+DEFINE_FWK_MODULE(ZDCRecHitMerger);
+
 
 
 DEFINE_FWK_MODULE(DTRecHitMerger);

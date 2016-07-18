@@ -114,7 +114,7 @@ void TrackerCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       typename TrackClusterCollection::FastFiller spc(*output, detIdObject);
       for (typename edmNew::DetSet<T>::const_iterator clustIt = clustSet->begin(); clustIt != clustSet->end(); ++clustIt ) { 
         idx++;  
-        if (vetodClusters[idx-1]) continue;
+        if (!vetodClusters[idx-1]) continue;
         spc.push_back(*clustIt);
       }
     }

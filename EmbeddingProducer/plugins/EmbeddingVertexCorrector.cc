@@ -39,6 +39,16 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 
+#include "CondFormats/DataRecord/interface/SimBeamSpotObjectsRcd.h"
+#include "CondFormats/BeamSpotObjects/interface/SimBeamSpotObjects.h"
+#include "CondFormats/DataRecord/interface/BeamSpotObjectsRcd.h"
+#include "CondFormats/BeamSpotObjects/interface/BeamSpotObjects.h"
+
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+
+
+
 namespace HepMC {
    class FourVector ;
 }
@@ -55,6 +65,7 @@ class EmbeddingVertexCorrector : public edm::stream::EDProducer<> {
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
    private:
+      virtual void beginRun(const edm::Run & , const edm::EventSetup& iEventSetup) override;
       virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
       // ----------member data ---------------------------
@@ -83,6 +94,22 @@ EmbeddingVertexCorrector::~EmbeddingVertexCorrector()
 // member functions
 //
 
+
+void
+EmbeddingVertexCorrector::beginRun(const edm::Run & , const edm::EventSetup& iEventSetup)
+{
+   // edm::ESHandle< SimBeamSpotObjects > beamhandle;
+   // iEventSetup.get<SimBeamSpotObjectsRcd>().get(beamhandle);
+    
+    edm::ESHandle< BeamSpotObjects > beamhandle;
+    iEventSetup.get<BeamSpotObjectsRcd>().get(beamhandle);
+    
+    
+    std::cout<<"beam handle"<<std::endl;
+    std::cout<<(*beamhandle)<<std::endl;
+
+
+}
 // ------------ method called to produce the data  ------------
 void
 EmbeddingVertexCorrector::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)

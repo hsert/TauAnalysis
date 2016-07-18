@@ -51,7 +51,7 @@ class CollectionMerger : public edm::EDProducer
 
   
   void fill_output_obj(std::auto_ptr<MergeCollection > & output, std::vector<edm::Handle<MergeCollection> > &inputCollections);
-  void fill_output_obj_tracker(std::auto_ptr<MergeCollection > & output, std::vector<edm::Handle<MergeCollection> > &inputCollections);
+  void fill_output_obj_tracker(std::auto_ptr<MergeCollection > & output, std::vector<edm::Handle<MergeCollection> > &inputCollections, bool print_pixel=false);
   void fill_output_obj_calo(std::auto_ptr<MergeCollection > & output, std::vector<edm::Handle<MergeCollection> > &inputCollections);
   void fill_output_obj_muonchamber(std::auto_ptr<MergeCollection > & output, std::vector<edm::Handle<MergeCollection> > &inputCollections);
   

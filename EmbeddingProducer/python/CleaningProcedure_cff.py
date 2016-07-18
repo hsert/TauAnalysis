@@ -8,6 +8,11 @@ cleanedsiPixelClusters = cms.EDProducer('PixelCleaner',
     oldCollection = cms.InputTag("siPixelClusters","","")
 )
 
+cleanedsiPixelClustersPreSplitting = cms.EDProducer('PixelCleaner',
+    MuonCollection = MuonImput,
+    oldCollection = cms.InputTag("siPixelClustersPreSplitting","","")
+)
+
 cleanedsiStripClusters = cms.EDProducer('StripCleaner',
     MuonCollection = MuonImput,
     oldCollection = cms.InputTag("siStripClusters","",""),
@@ -41,6 +46,36 @@ cleanedhoreco = cms.EDProducer("HORecHitCleaner",
     oldCollection = cms.VInputTag(cms.InputTag("horeco","",""))
 )
 
+
+cleanedzdcreco = cms.EDProducer('ZDCRecHitCleaner',
+    MuonCollection = MuonImput,
+    TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+    oldCollection  = cms.VInputTag(cms.InputTag("zdcreco","",""))
+)
+
+cleanedhbheprereco = cms.EDProducer('HBHERecHitCleaner',
+    MuonCollection = MuonImput,
+    TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+    oldCollection  = cms.VInputTag(cms.InputTag("hbheprereco","",""))
+)
+
+cleanedhfreco = cms.EDProducer('HFRecHitCleaner',
+    MuonCollection = MuonImput,
+    TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+    oldCollection  = cms.VInputTag(cms.InputTag("hfreco","",""))
+)
+
+cleanedcastorreco = cms.EDProducer('CastorRecHitCleaner',
+    MuonCollection = MuonImput,
+    TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+    oldCollection  = cms.VInputTag(cms.InputTag("castorreco","",""))
+)
+
+
+
+
+
+
 cleaneddt1DRecHits = cms.EDProducer('DTCleaner',
     MuonCollection = MuonImput,
     oldCollection = cms.InputTag("dt1DRecHits","",""),
@@ -56,6 +91,16 @@ cleanedrpcRecHits = cms.EDProducer('RPCleaner',
     oldCollection  = cms.InputTag("rpcRecHits","",""),
 )
 
+cleaneddt1DCosmicRecHits = cms.EDProducer('DTCleaner',
+    MuonCollection = MuonImput,
+    oldCollection  = cms.InputTag("dt1DCosmicRecHits","",""),
+)
+
+
+
+
+
+
 ## Nothing to clean for this collections, but keep a copy of them ;)
 
 
@@ -65,6 +110,7 @@ cleanedrpcRecHits = cms.EDProducer('RPCleaner',
 
 makeCleaningProcedure = cms.Sequence(
     cleanedsiPixelClusters
+    + cleanedsiPixelClustersPreSplitting
     + cleanedsiStripClusters
     + cleanedecalRecHit
     + cleanedecalPreshowerRecHit
@@ -73,4 +119,9 @@ makeCleaningProcedure = cms.Sequence(
     + cleaneddt1DRecHits
     + cleanedcsc2DRecHits
     + cleanedrpcRecHits
+    + cleanedzdcreco
+    + cleanedhbheprereco
+    + cleaneddt1DCosmicRecHits
+    + cleanedhfreco
+    + cleanedcastorreco
 )

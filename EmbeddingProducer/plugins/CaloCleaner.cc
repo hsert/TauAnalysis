@@ -12,6 +12,8 @@ typedef CaloCleaner<HBHERecHit> HBHERecHitCleaner;
 typedef CaloCleaner<HFRecHit> HFRecHitCleaner;
 typedef CaloCleaner<HORecHit> HORecHitCleaner;
 typedef CaloCleaner<CastorRecHit> CastorRecHitCleaner;
+typedef CaloCleaner<ZDCRecHit> ZDCRecHitCleaner;
+
 
 //-------------------------------------------------------------------------------
 // define 'buildRecHit' functions used for different types of recHits
@@ -73,6 +75,12 @@ void  CaloCleaner<CastorRecHit>::fill_correction_map(TrackDetMatchInfo * info,  
  return;// No corrections for Castor
 }
 
+template <>
+void  CaloCleaner<ZDCRecHit>::fill_correction_map(TrackDetMatchInfo * info,  std::map<uint32_t, float> * cor_map)
+{
+ return;// No corrections for Castor
+}
+
 
 
 
@@ -85,5 +93,7 @@ DEFINE_FWK_MODULE(HORecHitCleaner);
 // no  need for cleaning outside of tracker, so just a copy of the old collection
 DEFINE_FWK_MODULE(HFRecHitCleaner);
 DEFINE_FWK_MODULE(CastorRecHitCleaner);
+DEFINE_FWK_MODULE(ZDCRecHitCleaner);
+
 
 

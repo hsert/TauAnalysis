@@ -27,7 +27,7 @@ cmsDriver.py LHEprodandCLEAN \
 cmsDriver.py TauAnalysis/EmbeddingProducer/python/EmbeddingPythia8Hadronizer_cfi.py \
 --filein file:lhe_and_cleaned.root --fileout simulated_and_cleaned.root \
 --conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns \
---eventcontent RAW \
+--eventcontent RAWRECO \
 --step GEN,SIM,DIGI,L1,DIGI2RAW,HLT:@frozen25ns,RAW2DIGI,L1Reco,RECO --datatier GEN-SIM \
 --customise TauAnalysis/EmbeddingProducer/customisers.customiseGenerator \
 --beamspot Realistic50ns13TeVCollision \
@@ -40,7 +40,7 @@ cmsDriver.py MERGER \
 --filein file:simulated_and_cleaned.root \
 --fileout file:merged.root \
 --conditions 76X_dataRun2_v15 --era Run2_25ns \
---eventcontent RAW --datatier RAW \
+--eventcontent RAWRECO --datatier RECO \
 --step NONE \
 --customise TauAnalysis/EmbeddingProducer/customisers.customiseMerging \
 --no_exec -n -1 \
@@ -57,6 +57,14 @@ cmsDriver.py RECO -s RAW2DIGI,RECO,PAT \
 --customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
 TauAnalysis/EmbeddingProducer/customisers.customiseReconstruction \
 -n -1 --no_exec --python_filename=reco_Run2015D_DoubleMuon.py --no_exec
+
+
+cmsDriver.py RECO -s RAW2DIGI,RECO \
+--filein file:merged.root  --data --scenario pp --conditions 76X_dataRun2_v15 \
+--eventcontent RECO --datatier RECO \
+--customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
+TauAnalysis/EmbeddingProducer/customisers.customiseReconstruction \
+-n -1 --no_exec --python_filename=reco_Run2015D_DoubleMuon_only_reco.py --no_exec
 
 
 
