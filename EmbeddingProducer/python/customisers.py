@@ -13,30 +13,42 @@ from FWCore.ParameterSet.Utilities import cleanUnscheduled
 ### RECO (maybe pick the muon + detinfo in futur)
 ### selectedMuonsForEmbedding which are PAT muons with special requierments
 
-to_bemanipulate ={}
-to_bemanipulate['siPixelClusters']=["Pixel",[""]]
-to_bemanipulate['siPixelClustersPreSplitting']=["Pixel",[""]]
-to_bemanipulate['siStripClusters']=["Strip",[""]]
-to_bemanipulate['ecalRecHit']=["EcalRecHit",["EcalRecHitsEB","EcalRecHitsEE"]]
-to_bemanipulate['ecalPreshowerRecHit']=["EcalRecHit",["EcalRecHitsES"]]
-
-to_bemanipulate['hbheprereco']=["HBHERecHit",[""]]
-to_bemanipulate['hbhereco']=["HBHERecHit",[""]]
-to_bemanipulate['zdcreco']=["ZDCRecHit",[""]]
 
 
+class module_manipulate():
+  def __init__(self, module_name, manipulator_name, steps = ["SELECT","CLEAN","SIM","MERGE"], instance=[""]):
+    self.module_name = module_name
+    self.manipulator_name = manipulator_name
+    self.steps = steps
+    self.steps = instance
+    self.merger_name = manipulator_name+"Merger"
 
-to_bemanipulate['horeco']=["HORecHit",[""]]
-to_bemanipulate['hfreco']=["HFRecHit",[""]]
-to_bemanipulate['castorreco']=["CastorRecHit",[""]]
-to_bemanipulate['dt1DRecHits']=["DTRecHit",[""]]
-to_bemanipulate['dt1DCosmicRecHits']=["DTRecHit",[""]]
-to_bemanipulate['csc2DRecHits']=["CSCRecHit",[""]]
-to_bemanipulate['rpcRecHits']=["RPCRecHit",[""]]
+    
+
+to_bemanipulate = []
+
+to_bemanipulate.append(module_manipulate(module_name = 'siPixelClusters', manipulator_name = "Pixel", steps = ["SELECT","CLEAN"] ))
+to_bemanipulate.append(module_manipulate(module_name = 'siStripClusters', manipulator_name = "Strip", steps = ["SELECT","CLEAN"] ))
+to_bemanipulate.append(module_manipulate(module_name = 'generalTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"]))
+to_bemanipulate.append(module_manipulate(module_name = 'electronGsfTracks', manipulator_name = "electronGsfTracks", steps = ["SIM", "MERGE"]))
 
 
+to_bemanipulate.append(module_manipulate(module_name = 'ecalRecHit', manipulator_name = "EcalRecHit", instance= ["EcalRecHitsEB","EcalRecHitsEE"]))
+to_bemanipulate.append(module_manipulate(module_name = 'ecalPreshowerRecHit', manipulator_name = "EcalRecHit", instance= ["EcalRecHitsES"]))
+
+to_bemanipulate.append(module_manipulate(module_name = 'hbheprereco', manipulator_name = "HBHERecHit"))
+to_bemanipulate.append(module_manipulate(module_name = 'hbhereco', manipulator_name = "HBHERecHit"))
+to_bemanipulate.append(module_manipulate(module_name = 'zdcreco', manipulator_name = "ZDCRecHit"))
+
+to_bemanipulate.append(module_manipulate(module_name = 'horeco', manipulator_name = "HORecHit"))
+to_bemanipulate.append(module_manipulate(module_name = 'hfreco', manipulator_name = "HFRecHit"))
+to_bemanipulate.append(module_manipulate(module_name = 'castorreco', manipulator_name = "CastorRecHit"))
 
 
+to_bemanipulate.append(module_manipulate(module_name = 'dt1DRecHits', manipulator_name = "DTRecHit"))
+to_bemanipulate.append(module_manipulate(module_name = 'dt1DCosmicRecHits', manipulator_name = "DTRecHit"))
+to_bemanipulate.append(module_manipulate(module_name = 'csc2DRecHits', manipulator_name = "CSCRecHit"))
+to_bemanipulate.append(module_manipulate(module_name = 'rpcRecHits', manipulator_name = "RPCRecHit"))
 
 
 
@@ -52,9 +64,9 @@ def keepSelected():
              "keep *_slimmedMuons_*_SKIM",
              "keep *_selectedMuonsForEmbedding_*_SKIM",
              "keep recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM")
-   for akt_name in to_bemanipulate:
-#      ret_vstring.append("keep *_"+akt_name+"_*_SKIM") 
-      ret_vstring.append("keep *_"+akt_name+"_*_SELECT") 
+   for akt_manimod in to_bemanipulate:
+      if "SELECT" in akt_manimod.steps:
+	ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_SELECT") 
    return ret_vstring
 
 def keepLHE(process):
@@ -63,48 +75,36 @@ def keepLHE(process):
 
 def keepSimulated():
     ret_vstring = cms.untracked.vstring()
-    for akt_name in to_bemanipulate:
-      akt_sim_name = "simulated"+akt_name
-      ret_vstring.append("keep *_"+akt_sim_name+"_*_SIMembedding")
+    for akt_manimod in to_bemanipulate:
+      if "MERGE" in akt_manimod.steps:
+	akt_sim_name = "simulated"+akt_manimod.module_name
+        ret_vstring.append("keep *_"+akt_sim_name+"_*_SIMembedding")
     ret_vstring.append("keep *_genParticles_*_SIMembedding") 
-    ret_vstring.append("keep *_MeasurementTrackerEventPreSplitting_*_SIMembedding") 
-    ret_vstring.append("keep *_ecalMultiFitUncalibRecHit_*_SIMembedding") 
-    ret_vstring.append("keep *_siPixelDigis_*_SIMembedding") 
-    ret_vstring.append("keep *_siStripDigis_*_SIMembedding") 
-    #ret_vstring.append("keep *_siStripZeroSuppression_*_SIMembedding") 
-    ret_vstring.append("keep *_ecalDigis_*_SIMembedding") 
-    ret_vstring.append("keep *_hcalDigis_*_SIMembedding") 
-    
     return ret_vstring
 
 def keepCleaned():
-   return cms.untracked.vstring(
-                         "keep *_*_*_CLEAN",
-                         "keep *_*_*_LHEembeddingCLEAN"          
-                         )
+   ret_vstring = cms.untracked.vstring()
+   for akt_manimod in to_bemanipulate:
+      if "MERGE" in akt_manimod.steps:
+	akt_clean_name = "cleaned"+akt_manimod.module_name
+        ret_vstring.append("keep *_"+akt_clean_name+"_*_LHEembeddingCLEAN")
+        ret_vstring.append("keep *_"+akt_clean_name+"_*_CLEAN")
+   return ret_vstring
+   
 
 
   
 def keepMerged(process):
     ret_vstring = cms.untracked.vstring()
-    for akt_name in to_bemanipulate:
-      ret_vstring.append("keep *_"+akt_name+"_*_"+process._Process__name)
+    for akt_manimod in to_bemanipulate:
+      if "MERGE" in akt_manimod.steps:
+	ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_"+process._Process__name) 
     ret_vstring.append("drop *_*_*_CLEAN")
     ret_vstring.append("drop *_*_*_SKIM") 
     ret_vstring.append("drop *_*_*_SELECT") 
-    ret_vstring.append("drop *_*_*_HLT") 
-    ret_vstring.append("drop *_*_*_LHC") 
     ret_vstring.append("drop *_*_*_LHEembeddingCLEAN") 
     ret_vstring.append("drop *_*_*_SIMembedding") 
-    ret_vstring.append("keep *_rawDataCollector_*_SIMembedding") 
-    #ret_vstring.append("keep *_MeasurementTrackerEventPreSplitting_*_SIMembedding") 
-    #ret_vstring.append("keep *_MeasurementTrackerEvent_*_SIMembedding") 
-    ret_vstring.append("keep *_genParticles_*_SIMembedding") 
-    ret_vstring.append("keep *_ecalMultiFitUncalibRecHit_*_SIMembedding") 
-    ret_vstring.append("keep *_siPixelDigis_*_SIMembedding") 
-    ret_vstring.append("keep *_siStripDigis_*_SIMembedding") 
-    ret_vstring.append("keep *_ecalDigis_*_SIMembedding") 
-    ret_vstring.append("keep *_hcalDigis_*_SIMembedding") 
+    ret_vstring.append("drop *_*_*_GENembedding") 
     
     return ret_vstring
 
@@ -176,7 +176,7 @@ def customiseLHE(process, changeProcessname=True):
         outputModule.outputCommands.extend(keepSelected()) #Also store the Selected muons 
         outputModule.outputCommands.extend(keepLHE(process))
     return process
-
+  
 
 def customiseGenerator(process, changeProcessname=True):
     if changeProcessname:
@@ -186,24 +186,20 @@ def customiseGenerator(process, changeProcessname=True):
     except:
       process.options = cms.untracked.PSet(emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis'))
       
-  #  process.RAWSIMoutput.outputCommands = cms.untracked.vstring("keep * ",
-  #  "drop *_externalLHEProducer_vertexPosition*_CLEANING",
-  #  "drop recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM",
-   # "drop edmTriggerResults_TriggerResults_*_GEN"
     #)
     ## here correct the vertex collectoin
     process.load('TauAnalysis.EmbeddingProducer.EmbeddingVertexCorrector_cfi')
     process.VtxSmeared = process.VtxCorrectedToInput.clone()
     print "Correcting Vertex in genEvent to one from input. Replaced 'VtxSmeared' with the Corrector."
     
-    
+    ## This module runs the complete GEN-SIM-RECO step. Thefore just clone this collections
     process.merging = cms.Path()   
-    for org_sim_name in to_bemanipulate:
-      new_sim_name = "simulated"+org_sim_name
-      cloned_module = getattr(process, org_sim_name).clone()
-      setattr(process, new_sim_name, cloned_module)
-      process.reconstruction_step *= getattr(process, new_sim_name)
-     
+    for akt_manimod in to_bemanipulate:
+      if "SIM" in akt_manimod.steps:
+	new_sim_name = "simulated"+akt_manimod.module_name
+	cloned_module = getattr(process, akt_manimod.module_name).clone()
+	setattr(process, new_sim_name, cloned_module)
+	process.reconstruction_step *= getattr(process, new_sim_name)
     
     outputModulesList = [key for key,value in process.outputModules.iteritems()]
     for outputModule in outputModulesList:
@@ -211,7 +207,8 @@ def customiseGenerator(process, changeProcessname=True):
         outputModule.outputCommands.extend(keepSelected()) #Also store the Selected muons 
         outputModule.outputCommands.extend(keepCleaned())
 	outputModule.outputCommands.extend(keepSimulated())
-      #  outputModule.outputCommands.extend(cms.untracked.vstring("keep *"))
+	
+
     
     return process
 
@@ -222,13 +219,15 @@ def customiseMerging(process, changeProcessname=True):
       process._Process__name = "MERGE"
  
     process.merging = cms.Path()   
-    for mod_name in to_bemanipulate:
-      mergCollections_in = cms.VInputTag()
-      for instance in to_bemanipulate[mod_name][1]:
-#	mergCollections_in.append(cms.InputTag("simulated"+mod_name,instance,""))
-      	mergCollections_in.append(cms.InputTag("cleaned"+mod_name,instance,""))
-      setattr(process, mod_name, cms.EDProducer(to_bemanipulate[mod_name][0]+"Merger",mergCollections = mergCollections_in))
-      process.merging *= getattr(process, mod_name)
+    for akt_manimod in to_bemanipulate:
+      if "CLEAN" in akt_manimod.steps: 
+	mergCollections_in = cms.VInputTag()   
+        for instance in akt_manimod.instance:
+	  if "MERGE" in akt_manimod.steps: 
+	    mergCollections_in.append(cms.InputTag("simulated"+akt_manimod.module_name,instance,"")) ## Only merge simulated and cleaned for collection where the merging happens on the same level as cleaning (Calo and Muon Chambers). 
+      	  mergCollections_in.append(cms.InputTag("cleaned"+akt_manimod.module_name,instance,"")) ## For Tracker this means its just a clone of the cleaned collections
+        setattr(process, mod_name, cms.EDProducer(akt_manimod.merger_name,mergCollections = mergCollections_in))
+        process.merging *= getattr(process, mod_name)
     process.schedule.insert(-1, process.merging)
     
     
@@ -257,35 +256,11 @@ def customiseReconstruction(process):
       process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis')
     except:
       process.options = cms.untracked.PSet(emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis'))
-  
-    for mod_name in to_bemanipulate: 
-      process.reconstruction_step.remove(getattr(process, mod_name))
-    
-
-    
-    #process.MeasurementTrackerEvent.inactivePixelDetectorLabels = cms.VInputTag("siPixelDigis","","SIMembedding")
-    #process.MeasurementTrackerEvent.inactiveStripDetectorLabels = cms.VInputTag("siStripDigis","","SIMembedding")
-    
-    #process.MeasurementTrackerEventPreSplitting.inactivePixelDetectorLabels = cms.VInputTag("siPixelDigis","","SIMembedding")
-    #process.MeasurementTrackerEventPreSplitting.inactiveStripDetectorLabels = cms.VInputTag("siStripDigis","","SIMembedding")
-    
-    #process.MeasurementTrackerEvent.switchOffPixelsIfEmpty = cms.bool(False)
-    #process.MeasurementTrackerEventPreSplitting.switchOffPixelsIfEmpty = cms.bool(False) 
-  #  process.raw2digi_step.remove(process.siPixelDigis)
-  #  process.raw2digi_step.remove(process.siStripDigis)
-    
- #   process.reconstruction_step.remove(process.MeasurementTrackerEvent)
- #   process.reconstruction_step.remove(process.MeasurementTrackerEventPreSplitting)
-    
-#    process.reconstruction_step.remove(process.siPixelClusters)
-#    process.reconstruction_step.remove(process.siStripClusters)
-#    process.reconstruction_step.remove(process.ecalRecHit)
-#    process.reconstruction_step.remove(process.ecalPreshowerRecHit)
-#    process.reconstruction_step.remove(process.hbhereco)
-#    process.reconstruction_step.remove(process.horeco)
-#    process.reconstruction_step.remove(process.dt1DRecHits)
-#    process.reconstruction_step.remove(process.csc2DRecHits)
-#    process.reconstruction_step.remove(process.rpcRecHits)
+      
+  #  for akt_manimod in to_bemanipulate:
+  #    if "CLEAN" in akt_manimod.steps:
+  #      process.reconstruction_step.remove(getattr(process, akt_manimod.module_name))
+        
     outputModulesList = [key for key,value in process.outputModules.iteritems()]
     for outputModule in outputModulesList:
         outputModule = getattr(process, outputModule)

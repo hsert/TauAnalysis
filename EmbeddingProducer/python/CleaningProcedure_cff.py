@@ -2,6 +2,12 @@ import FWCore.ParameterSet.Config as cms
 
 MuonImput = cms.InputTag("selectedMuonsForEmbedding","","")
 
+cleanedsiPixelDigis = cms.EDProducer('PixelDigiCleaner',
+    MuonCollection = MuonImput,
+    oldCollection = cms.InputTag("siPixelDigis","","")
+)
+
+
 
 cleanedsiPixelClusters = cms.EDProducer('PixelCleaner',
     MuonCollection = MuonImput,
@@ -109,8 +115,9 @@ cleaneddt1DCosmicRecHits = cms.EDProducer('DTCleaner',
 
 
 makeCleaningProcedure = cms.Sequence(
-    cleanedsiPixelClusters
-    + cleanedsiPixelClustersPreSplitting
+  #  cleanedsiPixelDigis
+     cleanedsiPixelClusters
+  #  + cleanedsiPixelClustersPreSplitting
     + cleanedsiStripClusters
     + cleanedecalRecHit
     + cleanedecalPreshowerRecHit
