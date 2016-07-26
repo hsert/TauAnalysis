@@ -13,7 +13,7 @@ from FWCore.ParameterSet.Utilities import cleanUnscheduled
 ##Third step is the SIM. The input is the externalLHEProducer, which must be produced before (At the moment we do it parallel to the CLEAN step). Again only save RAW of the SELECT and only save what is need for the MERG step
 ##Last step is the MERG step. Which is the usally reconstruction, where the input produces are replaced by merg producer, which mix the SIM and CLEAN inputs.
 
-## Some comments on this approach. All steps runs the RECO sequence until the end in the moment. It would be possible to stop after the all inputs which are needed for the MERG step are generated (which happens at a very early state of the reconstruction. But with this approach we are able to get the RECO (and PAT aka miniAOD) of all four step SELECT (orginal event), SIM, CLEAN and MERGED. Therefor one only needs to SAVE the corresponding output (in cmsDriver change output to RAW -> RAW,RECO,PAT and be modyfiy the keepSimulated() function, which drops most of the produced Collections at the moment)
+## Some comments on this approach. All steps runs the RECO sequence until the end in the moment. It would be possible to stop after the all inputs which are needed for the MERG step are generated (which happens at a very early state of the reconstruction. But with this approach we are able to get the RECO (and PAT aka miniAOD) of all four step SELECT (orginal event), SIM, CLEAN and MERGED. Therefor one only needs to SAVE the corresponding output (in cmsDriver change output to RAW -> RAW,RECO,PAT)
 
 #######################  Some basic functions ####################
 ## Helper Class, which summerizes in which step which Producer (Cleaner Merger), should be loaded. It is also usefull to define which collection should be stored for the next step
@@ -55,20 +55,6 @@ to_bemanipulate.append(module_manipulate(module_name = 'dt1DCosmicRecHits', mani
 to_bemanipulate.append(module_manipulate(module_name = 'csc2DRecHits', manipulator_name = "CSCRecHit"))
 to_bemanipulate.append(module_manipulate(module_name = 'rpcRecHits', manipulator_name = "RPCRecHit"))
 
-
-
-     
-def keepMerged(process):
-    ret_vstring = cms.untracked.vstring()
-    ret_vstring.append("drop *_*_*_CLEAN")
-    ret_vstring.append("drop *_*_*_SKIM") 
-    ret_vstring.append("drop *_*_*_SELECT") 
-    ret_vstring.append("drop *_*_*_LHEembeddingCLEAN") 
-    ret_vstring.append("drop *_*_*_SIMembedding") 
-    for akt_manimod in to_bemanipulate:
-      if "CLEAN" in akt_manimod.steps:
-	ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_"+process._Process__name) 
-    return ret_vstring
   
 def modify_outputModules(process, keep_drop_list = [], module_veto_list = [] ):
     outputModulesList = [key for key,value in process.outputModules.iteritems()]
@@ -169,8 +155,7 @@ def keepLHE():
 
 
 def keepSimulated():
-    ret_vstring = cms.untracked.vstring()
-    ret_vstring.append("drop *_*_*_SIMembedding") 
+    ret_vstring = cms.untracked.vstring() 
     for akt_manimod in to_bemanipulate:
       if "MERGE" in akt_manimod.steps:
         ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_SIMembedding")
@@ -214,7 +199,13 @@ def customiseGenerator(process, changeProcessname=True):
 def customiseMerging(process, changeProcessname=True):
     if changeProcessname:
       process._Process__name = "MERGE"
-            
+ 
+    
+    process.source.inputCommands = cms.untracked.vstring()
+    process.source.inputCommands.append("keep *_*_*_*")
+    process.source.inputCommands.append("drop *_*_*_SIMembedding") ## Need to drop SIMRAW collection which wold be prefed of the orginal RAW collection 
+    process.source.inputCommands.extend(keepSimulated())
+ 
     for akt_manimod in to_bemanipulate:
       if "MERGE" in akt_manimod.steps:
         mergCollections_in = cms.VInputTag()   
@@ -225,13 +216,6 @@ def customiseMerging(process, changeProcessname=True):
 
     return process
 
-#    outputModulesList = [key for key,value in process.outputModules.iteritems()]
-#    for outputModule in outputModulesList:
-#        outputModule = getattr(process, outputModule)
-#        outputModule.outputCommands.extend(cms.untracked.vstring(
-#            "keep LHEEventProduct_*_*_CLEANING",
-#            "keep LHERunInfoProduct_*_*_CLEANING",
-#            "keep *_*_*_GEN"
 
 
 ################################ cross Customizers ###########################
@@ -250,5 +234,4 @@ def customisoptions(process):
     except:
       process.options = cms.untracked.PSet(emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis'))
     return process
-
 
