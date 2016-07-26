@@ -34,8 +34,8 @@ to_bemanipulate = []
 
 to_bemanipulate.append(module_manipulate(module_name = 'siPixelClusters', manipulator_name = "Pixel", steps = ["SELECT","CLEAN"] ))
 to_bemanipulate.append(module_manipulate(module_name = 'siStripClusters', manipulator_name = "Strip", steps = ["SELECT","CLEAN"] ))
-#to_bemanipulate.append(module_manipulate(module_name = 'generalTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"]))
-#to_bemanipulate.append(module_manipulate(module_name = 'electronGsfTracks', manipulator_name = "electronGsfTracks", steps = ["SIM", "MERGE"]))
+to_bemanipulate.append(module_manipulate(module_name = 'generalTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"]))
+to_bemanipulate.append(module_manipulate(module_name = 'electronGsfTracks', manipulator_name = "electronGsfTracks", steps = ["SIM", "MERGE"]))
 
 
 to_bemanipulate.append(module_manipulate(module_name = 'ecalRecHit', manipulator_name = "EcalRecHit", instance= ["EcalRecHitsEB","EcalRecHitsEE"]))

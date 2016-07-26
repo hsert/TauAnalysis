@@ -31,6 +31,7 @@
 #include <iostream>
 #include <map>
 
+
 template <typename T>
 class CaloCleaner : public edm::EDProducer 
 {
