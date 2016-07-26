@@ -46,8 +46,8 @@ class TrackerCleaner : public edm::EDProducer
 
   const edm::EDGetTokenT<edm::View<pat::Muon> > mu_input_;
   typedef edmNew::DetSetVector<T> TrackClusterCollection;
-  
-  const edm::EDGetTokenT<TrackClusterCollection > trackClusterClusters_;
+   
+  std::map<std::string,  edm::EDGetTokenT<TrackClusterCollection > > inputs_;
   
   bool match_rechit_type(const TrackingRecHit &murechit);
 
@@ -56,10 +56,15 @@ class TrackerCleaner : public edm::EDProducer
 
 template <typename T>
 TrackerCleaner<T>::TrackerCleaner(const edm::ParameterSet& iConfig) :
-    mu_input_(consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
-    trackClusterClusters_(consumes< TrackClusterCollection>(iConfig.getParameter<edm::InputTag>("oldCollection"))) 
+    mu_input_(consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection")))
+  
 {
-    produces<TrackClusterCollection>();
+  std::vector<edm::InputTag> inCollections =  iConfig.getParameter<std::vector<edm::InputTag> >("oldCollection");
+  for (auto inCollection : inCollections){
+     inputs_[inCollection.instance()] = consumes<TrackClusterCollection >(inCollection);
+     produces<TrackClusterCollection>(inCollection.instance());
+  }
+    
   
 }
 
@@ -81,9 +86,10 @@ void TrackerCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
    iEvent.getByToken(mu_input_, muonHandle);
    edm::View<pat::Muon> muons = *muonHandle;
    
+  for (auto input_ : inputs_){
    
    edm::Handle<TrackClusterCollection > inputClusters;
-   iEvent.getByToken(trackClusterClusters_, inputClusters);
+   iEvent.getByToken(input_.second, inputClusters);
 
    std::vector<bool> vetodClusters;
 
@@ -114,11 +120,12 @@ void TrackerCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       typename TrackClusterCollection::FastFiller spc(*output, detIdObject);
       for (typename edmNew::DetSet<T>::const_iterator clustIt = clustSet->begin(); clustIt != clustSet->end(); ++clustIt ) { 
         idx++;  
-        if (!vetodClusters[idx-1]) continue;
+        if (vetodClusters[idx-1]) continue;
+	//if (!vetodClusters[idx-1]) continue; for inverted selction
         spc.push_back(*clustIt);
       }
     }
-  iEvent.put(output);
-  
+  iEvent.put(output,input_.first);
+  }
   
 }

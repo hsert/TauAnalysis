@@ -112,24 +112,24 @@ void CaloCleaner<T>::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
    // iEvent.getByToken(input_.second[0], recHitCollection);   
     iEvent.getByToken(input_.second, recHitCollection);  
     for ( typename RecHitCollection::const_iterator recHit = recHitCollection->begin(); recHit != recHitCollection->end(); ++recHit ) {
-  /*    if (correction_map[recHit->detid().rawId()] > 0){
+    if (correction_map[recHit->detid().rawId()] > 0){
 	float new_energy =  recHit->energy() - correction_map[recHit->detid().rawId()];
-	if (new_energy < 0) new_energy =0;
+	if (new_energy <= 0) continue; // Do not save empty Hits
 	T newRecHit(*recHit);
 	newRecHit.setEnergy(new_energy); 
 	recHitCollection_output->push_back(newRecHit);
       }
       else{
 	recHitCollection_output->push_back(*recHit);
-      }  */
-      
-      if (correction_map[recHit->detid().rawId()] > 0){
+      }  
+     /* For the inveted collection   
+     if (correction_map[recHit->detid().rawId()] > 0){
 	float new_energy =   correction_map[recHit->detid().rawId()];
 	if (new_energy < 0) new_energy =0;
 	T newRecHit(*recHit);
 	newRecHit.setEnergy(new_energy); 
 	recHitCollection_output->push_back(newRecHit);
-      }
+      }*/
 
       
       

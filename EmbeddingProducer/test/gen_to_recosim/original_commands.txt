@@ -3,6 +3,7 @@ cmsDriver.py RECO -s RAW2DIGI,L1Reco,RECO,PAT \
 --runUnscheduled --data --scenario pp --conditions 76X_dataRun2_v15 \
 --eventcontent RAWRECO --datatier RECO \
 --customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
+TauAnalysis/EmbeddingProducer/customisers.customisoptions,\
 TauAnalysis/EmbeddingProducer/customisers.customiseSelecting \
 --filein file:DoubleMuon2015DRAWPicked.root \
 --fileout RAWskimmed.root -n 30 --no_exec --python_filename=skim.py --no_exec
@@ -14,10 +15,13 @@ cmsDriver.py LHEprodandCLEAN \
 --fileout file:lhe_and_cleaned.root \
 --conditions 76X_dataRun2_v15 --era Run2_25ns \
 --eventcontent RAW --datatier RAW \
---step NONE \
---customise TauAnalysis/EmbeddingProducer/customisers.customiseLHEandCleaning \
+--step RAW2DIGI,RECO \
+--customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
+TauAnalysis/EmbeddingProducer/customisers.customisoptions,\
+TauAnalysis/EmbeddingProducer/customisers.customiseLHEandCleaning \
 --no_exec -n -1 \
 --python_filename lheprodandcleaning.py
+
 
 
 
@@ -26,38 +30,24 @@ cmsDriver.py TauAnalysis/EmbeddingProducer/python/EmbeddingPythia8Hadronizer_cfi
 --conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns \
 --eventcontent RAWRECO \
 --step GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --datatier GEN-SIM \
---customise TauAnalysis/EmbeddingProducer/customisers.customiseGenerator \
+--customise TauAnalysis/EmbeddingProducer/customisers.customiseGenerator,\
+TauAnalysis/EmbeddingProducer/customisers.customisoptions \
 --beamspot Realistic50ns13TeVCollision \
 --no_exec -n -1 \
 --python_filename generator.py
 
 
 
-cmsDriver.py MERGER \
---filein file:simulated_and_cleaned.root \
+
+cmsDriver.py RECO -s RAW2DIGI,L1Reco,RECO,PAT \
+--filein file:simulated_and_cleaned.root  \
 --fileout file:merged.root \
---conditions 76X_dataRun2_v15 --era Run2_25ns \
---eventcontent RAWRECO --datatier RECO \
---step NONE \
---customise TauAnalysis/EmbeddingProducer/customisers.customiseMerging \
---no_exec -n -1 \
---python_filename merge.py
-
-
-
-cmsDriver.py RECO -s RAW2DIGI,RECO,PAT \
---filein file:merged.root  \
 --runUnscheduled --data --scenario pp --conditions 76X_dataRun2_v15 \
 --eventcontent RECO,AOD,MINIAOD --datatier RECO,AOD,MINIAOD \
 --customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
-TauAnalysis/EmbeddingProducer/customisers.customiseReconstruction \
+TauAnalysis/EmbeddingProducer/customisers.customisoptions,\
+TauAnalysis/EmbeddingProducer/customisers.customiseMerging \
 -n -1 --no_exec --python_filename=reco_Run2015D_DoubleMuon.py --no_exec
 
 
-cmsDriver.py RECO -s RAW2DIGI,RECO \
---filein file:merged.root  --data --scenario pp --conditions 76X_dataRun2_v15 \
---eventcontent RECO --datatier RECO \
---customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
-TauAnalysis/EmbeddingProducer/customisers.customiseReconstruction \
--n -1 --no_exec --python_filename=reco_Run2015D_DoubleMuon_only_reco.py --no_exec
 

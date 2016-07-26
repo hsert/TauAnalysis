@@ -44,16 +44,20 @@ class MuonDetCleaner : public edm::EDProducer
   bool checkrecHit(const TrackingRecHit&); 
 
   const edm::EDGetTokenT<edm::View<pat::Muon> > mu_input_;
-  const edm::EDGetTokenT<RecHitCollection > RecHitinput_;
+  
+  std::map<std::string,  edm::EDGetTokenT<RecHitCollection > > inputs_;
   
 };
 
 template <typename T1, typename T2>
 MuonDetCleaner<T1,T2>::MuonDetCleaner(const edm::ParameterSet& iConfig):
-    mu_input_(consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"))),
-    RecHitinput_(consumes< RecHitCollection>(iConfig.getParameter<edm::InputTag>("oldCollection"))) 
+    mu_input_(consumes<edm::View<pat::Muon> >(iConfig.getParameter<edm::InputTag>("MuonCollection"))) 
 {
-    produces<RecHitCollection>();
+  std::vector<edm::InputTag> inCollections =  iConfig.getParameter<std::vector<edm::InputTag> >("oldCollection");
+  for (auto inCollection : inCollections){
+     inputs_[inCollection.instance()] = consumes<RecHitCollection >(inCollection);
+     produces<RecHitCollection>(inCollection.instance());
+  }
     
 }
 
@@ -94,12 +98,15 @@ void MuonDetCleaner<T1,T2>::produce(edm::Event& iEvent, const edm::EventSetup& e
    }
 
    
-   // Second read in the RecHit Colltection which is to be replaced, without the vetoRecHits
+   // Now this can also handle different instance
+   for (auto input_ : inputs_){
+    // Second read in the RecHit Colltection which is to be replaced, without the vetoRecHits   
     typedef edm::Handle<RecHitCollection> RecHitCollectionHandle;
     RecHitCollectionHandle RecHitinput;
-    iEvent.getByToken(RecHitinput_, RecHitinput);
+    iEvent.getByToken(input_.second, RecHitinput);
     for ( typename RecHitCollection::const_iterator recHit = RecHitinput->begin(); recHit != RecHitinput->end(); ++recHit ) { // loop over the basic rec hit collection (DT CSC or RPC)
-	if (find(vetoHits.begin(),vetoHits.end(),getRawDetId(*recHit)) == vetoHits.end()) continue; // If the hit is not in the  	
+	//if (find(vetoHits.begin(),vetoHits.end(),getRawDetId(*recHit)) == vetoHits.end()) continue; // For the invertec selcetion
+        if (find(vetoHits.begin(),vetoHits.end(),getRawDetId(*recHit)) != vetoHits.end()) continue; // If the hit is not in the  
 	T1 detId(getRawDetId(*recHit));
 	recHits_output[detId].push_back(*recHit);	
     }
@@ -112,7 +119,8 @@ void MuonDetCleaner<T1,T2>::produce(edm::Event& iEvent, const edm::EventSetup& e
       output->put(recHit->first, recHit->second.begin(), recHit->second.end());
     }
     output->post_insert();
-    iEvent.put(output);
+    iEvent.put(output,input_.first);
+   }
 }
 
 

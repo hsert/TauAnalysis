@@ -3,9 +3,13 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
+#include "DataFormats/GsfTrackReco/interface/GsfTrackExtraFwd.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrackFwd.h"
+
 
 typedef TrackMergeremb<reco::TrackCollection> generalTracksMerger;
-
+typedef TrackMergeremb<reco::GsfTrackCollection> electronGsfTracksMerger;
 
 
 // Here some overloaded functions, which are needed such that the right merger function is called for the indivudal Collections
@@ -23,4 +27,4 @@ typedef TrackMergeremb<reco::TrackCollection> generalTracksMerger;
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 DEFINE_FWK_MODULE(generalTracksMerger);
-
+DEFINE_FWK_MODULE(electronGsfTracksMerger);

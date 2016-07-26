@@ -7,12 +7,17 @@ from FWCore.ParameterSet.Utilities import cleanUnscheduled
 
 
 ################################ Customizer for skimming ###########################
-### In the skimming one hast to run from RAW (over RECO) to MiniAOD 
-### We need the save 
-### RAW (Since in the end we want to run over this collection again) 
-### RECO (maybe pick the muon + detinfo in futur)
-### selectedMuonsForEmbedding which are PAT muons with special requierments
+### There are four different parts. 
+##First step is the SELECT (former SKIM) part, where we identfy the events which are good for Embedding. Need to store RAWRECO [RAW is needed for the MERG and RECO for the CLEAN step]
+##Second step is the CLEAN input are PAT muons with RECO information. After this step only RAW plus some special collections needed for the MERG step must be saved
+##Third step is the SIM. The input is the externalLHEProducer, which must be produced before (At the moment we do it parallel to the CLEAN step). Again only save RAW of the SELECT and only save what is need for the MERG step
+##Last step is the MERG step. Which is the usally reconstruction, where the input produces are replaced by merg producer, which mix the SIM and CLEAN inputs.
 
+## Some comments on this approach. All steps runs the RECO sequence until the end in the moment. It would be possible to stop after the all inputs which are needed for the MERG step are generated (which happens at a very early state of the reconstruction. But with this approach we are able to get the RECO (and PAT aka miniAOD) of all four step SELECT (orginal event), SIM, CLEAN and MERGED. Therefor one only needs to SAVE the corresponding output (in cmsDriver change output to RAW -> RAW,RECO,PAT and be modyfiy the keepSimulated() function, which drops most of the produced Collections at the moment)
+
+#######################  Some basic functions ####################
+## Helper Class, which summerizes in which step which Producer (Cleaner Merger), should be loaded. It is also usefull to define which collection should be stored for the next step
+## E.g What is needed for MERGE must be produce in the CLEAN and SIM step 
 
 
 class module_manipulate():
@@ -20,17 +25,17 @@ class module_manipulate():
     self.module_name = module_name
     self.manipulator_name = manipulator_name
     self.steps = steps
-    self.steps = instance
+    self.instance = instance
     self.merger_name = manipulator_name+"Merger"
+    self.cleaner_name = manipulator_name+"Cleaner"
 
     
-
 to_bemanipulate = []
 
 to_bemanipulate.append(module_manipulate(module_name = 'siPixelClusters', manipulator_name = "Pixel", steps = ["SELECT","CLEAN"] ))
 to_bemanipulate.append(module_manipulate(module_name = 'siStripClusters', manipulator_name = "Strip", steps = ["SELECT","CLEAN"] ))
-to_bemanipulate.append(module_manipulate(module_name = 'generalTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"]))
-to_bemanipulate.append(module_manipulate(module_name = 'electronGsfTracks', manipulator_name = "electronGsfTracks", steps = ["SIM", "MERGE"]))
+#to_bemanipulate.append(module_manipulate(module_name = 'generalTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"]))
+#to_bemanipulate.append(module_manipulate(module_name = 'electronGsfTracks', manipulator_name = "electronGsfTracks", steps = ["SIM", "MERGE"]))
 
 
 to_bemanipulate.append(module_manipulate(module_name = 'ecalRecHit', manipulator_name = "EcalRecHit", instance= ["EcalRecHitsEB","EcalRecHitsEE"]))
@@ -52,6 +57,33 @@ to_bemanipulate.append(module_manipulate(module_name = 'rpcRecHits', manipulator
 
 
 
+     
+def keepMerged(process):
+    ret_vstring = cms.untracked.vstring()
+    ret_vstring.append("drop *_*_*_CLEAN")
+    ret_vstring.append("drop *_*_*_SKIM") 
+    ret_vstring.append("drop *_*_*_SELECT") 
+    ret_vstring.append("drop *_*_*_LHEembeddingCLEAN") 
+    ret_vstring.append("drop *_*_*_SIMembedding") 
+    for akt_manimod in to_bemanipulate:
+      if "CLEAN" in akt_manimod.steps:
+	ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_"+process._Process__name) 
+    return ret_vstring
+  
+def modify_outputModules(process, keep_drop_list = [], module_veto_list = [] ):
+    outputModulesList = [key for key,value in process.outputModules.iteritems()]
+    for outputModule in outputModulesList:
+	if outputModule in module_veto_list:
+	  continue
+        outputModule = getattr(process, outputModule)
+        for add_element in keep_drop_list:
+	  outputModule.outputCommands.extend(add_element)    
+    return process
+
+  
+
+################################ Customizer for Selecting ###########################
+
 def keepSelected():
    ret_vstring = cms.untracked.vstring(
              "keep *_patMuonsAfterID_*_SELECT",
@@ -65,50 +97,11 @@ def keepSelected():
              "keep *_selectedMuonsForEmbedding_*_SKIM",
              "keep recoVertexs_offlineSlimmedPrimaryVertices_*_SKIM")
    for akt_manimod in to_bemanipulate:
-      if "SELECT" in akt_manimod.steps:
+      if "CLEAN" in akt_manimod.steps:
 	ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_SELECT") 
+	ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_SKIM") 
    return ret_vstring
 
-def keepLHE(process):
-    return cms.untracked.vstring("keep *_*_*_"+process._Process__name)
-
-
-def keepSimulated():
-    ret_vstring = cms.untracked.vstring()
-    for akt_manimod in to_bemanipulate:
-      if "MERGE" in akt_manimod.steps:
-	akt_sim_name = "simulated"+akt_manimod.module_name
-        ret_vstring.append("keep *_"+akt_sim_name+"_*_SIMembedding")
-    ret_vstring.append("keep *_genParticles_*_SIMembedding") 
-    return ret_vstring
-
-def keepCleaned():
-   ret_vstring = cms.untracked.vstring()
-   for akt_manimod in to_bemanipulate:
-      if "MERGE" in akt_manimod.steps:
-	akt_clean_name = "cleaned"+akt_manimod.module_name
-        ret_vstring.append("keep *_"+akt_clean_name+"_*_LHEembeddingCLEAN")
-        ret_vstring.append("keep *_"+akt_clean_name+"_*_CLEAN")
-   return ret_vstring
-   
-
-
-  
-def keepMerged(process):
-    ret_vstring = cms.untracked.vstring()
-    for akt_manimod in to_bemanipulate:
-      if "MERGE" in akt_manimod.steps:
-	ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_"+process._Process__name) 
-    ret_vstring.append("drop *_*_*_CLEAN")
-    ret_vstring.append("drop *_*_*_SKIM") 
-    ret_vstring.append("drop *_*_*_SELECT") 
-    ret_vstring.append("drop *_*_*_LHEembeddingCLEAN") 
-    ret_vstring.append("drop *_*_*_SIMembedding") 
-    ret_vstring.append("drop *_*_*_GENembedding") 
-    
-    return ret_vstring
-
-################################ Customizer for Selecting ###########################
 
 
 def customiseSelecting(process):
@@ -126,39 +119,66 @@ def customiseSelecting(process):
         outputModule = getattr(process, outputModule)
         outputModule.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("selecting"))
         outputModule.outputCommands.extend(keepSelected())    
-    return process
+    return modify_outputModules(process,[keepSelected()])
 
 ################################ Customizer for cleaining ###########################
-## input are some RECO collections (
-## siPixelClusters,siStripClusters,ecalRecHit,ecalPreshowerRecHit,hbhereco,horeco,dt1DRecHits,csc2DRecHits,rpcRecHits)
-## which will with clenaed collections
+def keepCleaned():
+   ret_vstring = cms.untracked.vstring()
+   for akt_manimod in to_bemanipulate:
+      if "MERGE" in akt_manimod.steps:
+        ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_LHEembeddingCLEAN")
+        ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_CLEAN")
+   return ret_vstring
+
+
 
 def customiseCleaning(process, changeProcessname=True):
     if changeProcessname:
       process._Process__name = "CLEAN"
-    process.load('TauAnalysis.EmbeddingProducer.CleaningProcedure_cff')
- 
-  ## the next three StandardSequences are needed for the track assicator, 
-    process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-    process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
-    process.load('Configuration.StandardSequences.Reconstruction_cff')
-     
-    process.cleaning = cms.Path(process.makeCleaningProcedure) 
-    
-    ## Also add a copy of castor reco and hf reco. There is no need for a cleaning, but for the merging step they are needed
+    ## Needed for the Calo Cleaner, could also be put into a function wich fix the input parameters
+    from TrackingTools.TrackAssociator.default_cfi import TrackAssociatorParameterBlock
+    TrackAssociatorParameterBlock.TrackAssociatorParameters.CSCSegmentCollectionLabel = cms.InputTag("cscSegments","","SELECT")
+    TrackAssociatorParameterBlock.TrackAssociatorParameters.CaloTowerCollectionLabel = cms.InputTag("towerMaker","","SELECT")
+    TrackAssociatorParameterBlock.TrackAssociatorParameters.DTRecSegment4DCollectionLabel = cms.InputTag("dt4DSegments","","SELECT")
+    TrackAssociatorParameterBlock.TrackAssociatorParameters.EBRecHitCollectionLabel = cms.InputTag("ecalRecHit","EcalRecHitsEB","SELECT")
+    TrackAssociatorParameterBlock.TrackAssociatorParameters.EERecHitCollectionLabel = cms.InputTag("ecalRecHit","EcalRecHitsEE","SELECT")
+    TrackAssociatorParameterBlock.TrackAssociatorParameters.HBHERecHitCollectionLabel = cms.InputTag("hbhereco","","SELECT")
+    TrackAssociatorParameterBlock.TrackAssociatorParameters.HORecHitCollectionLabel = cms.InputTag("horeco","","SELECT")
 
     
-    process.schedule.insert(0,process.cleaning)
- 
-    outputModulesList = [key for key,value in process.outputModules.iteritems()]
-    for outputModule in outputModulesList:
-        outputModule = getattr(process, outputModule)
-        outputModule.outputCommands.extend(keepSelected()) #Also store the Selected muons 
-        outputModule.outputCommands.extend(keepCleaned())
-    return process
-  
+    MuonImput = cms.InputTag("selectedMuonsForEmbedding","","")  ## This are the muon
+    for akt_manimod in to_bemanipulate:
+      if "CLEAN" in akt_manimod.steps:
+        oldCollections_in = cms.VInputTag()   
+        for instance in akt_manimod.instance:
+	    oldCollections_in.append(cms.InputTag(akt_manimod.module_name,instance,"SELECT"))
+        setattr(process, akt_manimod.module_name, cms.EDProducer(akt_manimod.cleaner_name,
+                                                                 MuonCollection = MuonImput,
+                                                                 TrackAssociatorParameters = TrackAssociatorParameterBlock.TrackAssociatorParameters,
+                                                                 oldCollection = oldCollections_in))
+    process.ecalPreshowerRecHit.TrackAssociatorParameters.usePreshower = cms.bool(True)    
+    return modify_outputModules(process,[keepSelected(),keepCleaned()])
+        
   
 ################################ Customizer for simulaton ###########################
+def keepLHE():
+    ret_vstring = cms.untracked.vstring()
+    ret_vstring.append("keep *_externalLHEProducer_*_LHE")
+    ret_vstring.append("keep *_externalLHEProducer_*_LHEembeddingCLEAN")
+    return ret_vstring
+
+
+def keepSimulated():
+    ret_vstring = cms.untracked.vstring()
+    ret_vstring.append("drop *_*_*_SIMembedding") 
+    for akt_manimod in to_bemanipulate:
+      if "MERGE" in akt_manimod.steps:
+        ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_SIMembedding")
+    ret_vstring.append("keep *_genParticles_*_SIMembedding") 
+    return ret_vstring
+
+
+
 
 def customiseLHE(process, changeProcessname=True):
     if changeProcessname:
@@ -166,78 +186,52 @@ def customiseLHE(process, changeProcessname=True):
     process.load('TauAnalysis.EmbeddingProducer.EmbeddingLHEProducer_cfi')
     process.lheproduction = cms.Path(process.makeexternalLHEProducer)
     process.schedule.insert(0,process.lheproduction)
-    try:
-      process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis')## Filter out all empty lumis and runs (Otherwise pythia8 will crash)
-    except:
-      process.options = cms.untracked.PSet(emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis'))
-    outputModulesList = [key for key,value in process.outputModules.iteritems()]
-    for outputModule in outputModulesList:
-        outputModule = getattr(process, outputModule)
-        outputModule.outputCommands.extend(keepSelected()) #Also store the Selected muons 
-        outputModule.outputCommands.extend(keepLHE(process))
-    return process
+
+    return modify_outputModules(process,[keepSelected(),keepLHE()])
   
 
 def customiseGenerator(process, changeProcessname=True):
     if changeProcessname:
-      process._Process__name = "SIMembedding"
-    try:
-      process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis')
-    except:
-      process.options = cms.untracked.PSet(emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis'))
-      
+      process._Process__name = "SIMembedding"      
     #)
     ## here correct the vertex collectoin
     process.load('TauAnalysis.EmbeddingProducer.EmbeddingVertexCorrector_cfi')
     process.VtxSmeared = process.VtxCorrectedToInput.clone()
     print "Correcting Vertex in genEvent to one from input. Replaced 'VtxSmeared' with the Corrector."
     
-    ## This module runs the complete GEN-SIM-RECO step. Thefore just clone this collections
-    process.merging = cms.Path()   
-    for akt_manimod in to_bemanipulate:
-      if "SIM" in akt_manimod.steps:
-	new_sim_name = "simulated"+akt_manimod.module_name
-	cloned_module = getattr(process, akt_manimod.module_name).clone()
-	setattr(process, new_sim_name, cloned_module)
-	process.reconstruction_step *= getattr(process, new_sim_name)
-    
-    outputModulesList = [key for key,value in process.outputModules.iteritems()]
-    for outputModule in outputModulesList:
-        outputModule = getattr(process, outputModule)
-        outputModule.outputCommands.extend(keepSelected()) #Also store the Selected muons 
-        outputModule.outputCommands.extend(keepCleaned())
-	outputModule.outputCommands.extend(keepSimulated())
-	
+    process.mix.digitizers.ecal.doESNoise = cms.bool(False)
+    process.mix.digitizers.ecal.doENoise = cms.bool(False)
+    process.mix.digitizers.hcal.doNoise = cms.bool(False)
+    process.mix.digitizers.hcal.doThermalNoise = cms.bool(False)
 
+  #  process.mix.digitizers.pixel.AddNoisyPixels = cms.bool(False)    
+  #  process.mix.digitizers.pixel.AddNoise = cms.bool(False)    
+    return modify_outputModules(process,[keepSelected(),keepCleaned(),keepSimulated()])
     
-    return process
 
 ################################ Customizer for merging ###########################
 
 def customiseMerging(process, changeProcessname=True):
     if changeProcessname:
       process._Process__name = "MERGE"
- 
-    process.merging = cms.Path()   
+            
     for akt_manimod in to_bemanipulate:
-      if "CLEAN" in akt_manimod.steps: 
-	mergCollections_in = cms.VInputTag()   
+      if "MERGE" in akt_manimod.steps:
+        mergCollections_in = cms.VInputTag()   
         for instance in akt_manimod.instance:
-	  if "MERGE" in akt_manimod.steps: 
-	    mergCollections_in.append(cms.InputTag("simulated"+akt_manimod.module_name,instance,"")) ## Only merge simulated and cleaned for collection where the merging happens on the same level as cleaning (Calo and Muon Chambers). 
-      	  mergCollections_in.append(cms.InputTag("cleaned"+akt_manimod.module_name,instance,"")) ## For Tracker this means its just a clone of the cleaned collections
-        setattr(process, mod_name, cms.EDProducer(akt_manimod.merger_name,mergCollections = mergCollections_in))
-        process.merging *= getattr(process, mod_name)
-    process.schedule.insert(-1, process.merging)
-    
-    
-    outputModulesList = [key for key,value in process.outputModules.iteritems()]
-    for outputModule in outputModulesList:
-        outputModule = getattr(process, outputModule)
-        outputModule.outputCommands.extend(keepMerged(process)) #Also store the Selected muons 
- 
+          mergCollections_in.append(cms.InputTag(akt_manimod.module_name,instance,"SIMembedding"))
+          mergCollections_in.append(cms.InputTag(akt_manimod.module_name,instance,"LHEembeddingCLEAN")) ##  Mayb make some process history magic which finds out if it was CLEAN or LHEembeddingCLEAN step
+        setattr(process, akt_manimod.module_name, cms.EDProducer(akt_manimod.merger_name,mergCollections = mergCollections_in))
+
     return process
 
+#    outputModulesList = [key for key,value in process.outputModules.iteritems()]
+#    for outputModule in outputModulesList:
+#        outputModule = getattr(process, outputModule)
+#        outputModule.outputCommands.extend(cms.untracked.vstring(
+#            "keep LHEEventProduct_*_*_CLEANING",
+#            "keep LHERunInfoProduct_*_*_CLEANING",
+#            "keep *_*_*_GEN"
 
 
 ################################ cross Customizers ###########################
@@ -248,29 +242,13 @@ def customiseLHEandCleaning(process):
     process = customiseLHE(process,False)
     return process
 
+################################ additionla Customizer ###########################
 
-
-
-def customiseReconstruction(process):
+def customisoptions(process):
     try:
       process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis')
     except:
       process.options = cms.untracked.PSet(emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis'))
-      
-  #  for akt_manimod in to_bemanipulate:
-  #    if "CLEAN" in akt_manimod.steps:
-  #      process.reconstruction_step.remove(getattr(process, akt_manimod.module_name))
-        
-    outputModulesList = [key for key,value in process.outputModules.iteritems()]
-    for outputModule in outputModulesList:
-        outputModule = getattr(process, outputModule)
-        outputModule.outputCommands.extend(cms.untracked.vstring(
-            "keep LHEEventProduct_*_*_CLEANING",
-            "keep LHERunInfoProduct_*_*_CLEANING",
-            "keep *_*_*_GEN"
-        ))
     return process
-
-
 
 

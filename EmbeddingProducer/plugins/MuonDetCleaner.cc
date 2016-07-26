@@ -11,9 +11,9 @@
 #include "DataFormats/RPCRecHit/interface/RPCRecHit.h"
 
 
-typedef MuonDetCleaner<CSCDetId, CSCRecHit2D> CSCCleaner;
-typedef MuonDetCleaner<DTLayerId, DTRecHit1DPair> DTCleaner;
-typedef MuonDetCleaner<RPCDetId, RPCRecHit> RPCleaner;
+typedef MuonDetCleaner<CSCDetId, CSCRecHit2D> CSCRecHitCleaner;
+typedef MuonDetCleaner<DTLayerId, DTRecHit1DPair> DTRecHitCleaner;
+typedef MuonDetCleaner<RPCDetId, RPCRecHit> RPCRecHitCleaner;
 
 
 //-------------------------------------------------------------------------------
@@ -96,6 +96,6 @@ bool MuonDetCleaner<RPCDetId, RPCRecHit>::checkrecHit(const TrackingRecHit& recH
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-DEFINE_FWK_MODULE(CSCCleaner);
-DEFINE_FWK_MODULE(DTCleaner);
-DEFINE_FWK_MODULE(RPCleaner);
+DEFINE_FWK_MODULE(CSCRecHitCleaner);
+DEFINE_FWK_MODULE(DTRecHitCleaner);
+DEFINE_FWK_MODULE(RPCRecHitCleaner);
