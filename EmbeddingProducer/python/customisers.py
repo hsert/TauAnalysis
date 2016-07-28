@@ -21,21 +21,43 @@ from FWCore.ParameterSet.Utilities import cleanUnscheduled
 
 
 class module_manipulate():
-  def __init__(self, module_name, manipulator_name, steps = ["SELECT","CLEAN","SIM","MERGE"], instance=[""]):
+  def __init__(self, module_name, manipulator_name, steps = ["SELECT","CLEAN","SIM","MERGE"], instance=[""], do_merg_tr = False):
     self.module_name = module_name
     self.manipulator_name = manipulator_name
     self.steps = steps
     self.instance = instance
     self.merger_name = manipulator_name+"Merger"
     self.cleaner_name = manipulator_name+"Cleaner"
+    self.merge_tr = cms.untracked.bool(False)
+    if do_merg_tr:
+       self.merge_tr = cms.untracked.bool(True)
+
+    
 
     
 to_bemanipulate = []
 
+
+
+
+
 to_bemanipulate.append(module_manipulate(module_name = 'siPixelClusters', manipulator_name = "Pixel", steps = ["SELECT","CLEAN"] ))
 to_bemanipulate.append(module_manipulate(module_name = 'siStripClusters', manipulator_name = "Strip", steps = ["SELECT","CLEAN"] ))
-to_bemanipulate.append(module_manipulate(module_name = 'generalTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"]))
-to_bemanipulate.append(module_manipulate(module_name = 'electronGsfTracks', manipulator_name = "electronGsfTracks", steps = ["SIM", "MERGE"]))
+to_bemanipulate.append(module_manipulate(module_name = 'generalTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
+
+#to_bemanipulate.append(module_manipulate(module_name = 'muonSeededTracksInOut', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
+#to_bemanipulate.append(module_manipulate(module_name = 'muonSeededTracksOutIn', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
+#to_bemanipulate.append(module_manipulate(module_name = 'jetCoreRegionalStepTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
+#to_bemanipulate.append(module_manipulate(module_name = 'lowPtTripletStepTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
+#to_bemanipulate.append(module_manipulate(module_name = 'pixelPairStepTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
+#to_bemanipulate.append(module_manipulate(module_name = 'detachedTripletStepTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
+#to_bemanipulate.append(module_manipulate(module_name = 'mixedTripletStepTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
+#to_bemanipulate.append(module_manipulate(module_name = 'pixelLessStepTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
+#to_bemanipulate.append(module_manipulate(module_name = 'tobTecStepTracks', manipulator_name = "generalTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
+
+
+
+to_bemanipulate.append(module_manipulate(module_name = 'electronGsfTracks', manipulator_name = "electronGsfTracks", steps = ["SIM", "MERGE"], do_merg_tr = False))
 
 
 to_bemanipulate.append(module_manipulate(module_name = 'ecalRecHit', manipulator_name = "EcalRecHit", instance= ["EcalRecHitsEB","EcalRecHitsEE"]))
@@ -160,6 +182,7 @@ def keepSimulated():
       if "MERGE" in akt_manimod.steps:
         ret_vstring.append("keep *_"+akt_manimod.module_name+"_*_SIMembedding")
     ret_vstring.append("keep *_genParticles_*_SIMembedding") 
+    ret_vstring.append("keep *_muonSeededTrackCandidatesInOut_*_SIMembedding")
     return ret_vstring
 
 
@@ -205,6 +228,8 @@ def customiseMerging(process, changeProcessname=True):
     process.source.inputCommands.append("keep *_*_*_*")
     process.source.inputCommands.append("drop *_*_*_SIMembedding") ## Need to drop SIMRAW collection which wold be prefed of the orginal RAW collection 
     process.source.inputCommands.extend(keepSimulated())
+    
+    process.trackerDrivenElectronSeeds.TkColList = cms.VInputTag(cms.InputTag("generalTracks","","SIMembedding"))
  
     for akt_manimod in to_bemanipulate:
       if "MERGE" in akt_manimod.steps:
@@ -212,7 +237,11 @@ def customiseMerging(process, changeProcessname=True):
         for instance in akt_manimod.instance:
           mergCollections_in.append(cms.InputTag(akt_manimod.module_name,instance,"SIMembedding"))
           mergCollections_in.append(cms.InputTag(akt_manimod.module_name,instance,"LHEembeddingCLEAN")) ##  Mayb make some process history magic which finds out if it was CLEAN or LHEembeddingCLEAN step
-        setattr(process, akt_manimod.module_name, cms.EDProducer(akt_manimod.merger_name,mergCollections = mergCollections_in))
+        setattr(process, akt_manimod.module_name, cms.EDProducer(akt_manimod.merger_name,
+								 mergCollections = mergCollections_in,
+								 copyTrajectories = akt_manimod.merge_tr
+								 )
+	        )
 
     return process
 
