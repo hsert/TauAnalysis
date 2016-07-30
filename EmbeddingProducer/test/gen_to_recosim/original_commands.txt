@@ -14,7 +14,7 @@ cmsDriver.py LHEprodandCLEAN \
 --filein file:RAWskimmed.root \
 --fileout file:lhe_and_cleaned.root \
 --conditions 76X_dataRun2_v15 --era Run2_25ns \
---eventcontent RAW --datatier RAW \
+--eventcontent RAWRECO --datatier RAWRECO \
 --step RAW2DIGI,RECO \
 --customise Configuration/DataProcessing/RecoTLR.customiseDataRun2Common_25ns,\
 TauAnalysis/EmbeddingProducer/customisers.customisoptions,\
@@ -28,8 +28,8 @@ TauAnalysis/EmbeddingProducer/customisers.customiseLHEandCleaning \
 cmsDriver.py TauAnalysis/EmbeddingProducer/python/EmbeddingPythia8Hadronizer_cfi.py \
 --filein file:lhe_and_cleaned.root --fileout simulated_and_cleaned.root \
 --conditions 76X_mcRun2_asymptotic_v12 --era Run2_25ns \
---eventcontent RAW \
---step GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --datatier RAW \
+--eventcontent RAWRECO \
+--step GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --datatier RAWRECO \
 --customise TauAnalysis/EmbeddingProducer/customisers.customiseGenerator,\
 TauAnalysis/EmbeddingProducer/customisers.customisoptions \
 --beamspot Realistic50ns13TeVCollision \

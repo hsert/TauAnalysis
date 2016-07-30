@@ -5,7 +5,7 @@
 
 
 typedef TrackMergeremb<reco::Track> generalTracksMerger;
-typedef TrackMergeremb<reco::GsfTrack> electronGsfTracksMerger;
+//typedef TrackMergeremb<reco::GsfTrack> electronGsfTracksMerger;
 
 
 // Here some overloaded functions, which are needed such that the right merger function is called for the indivudal Collections
@@ -55,25 +55,25 @@ void  TrackMergeremb<reco::TrackCollection>::merg_and_put(edm::Event& iEvent, st
 
 
 
-template <>
-void  TrackMergeremb<reco::GsfTrackCollection>::willproduce(std::string instance, std::string alias)
-{
+//template <>
+//void  TrackMergeremb<reco::GsfTrackCollection>::willproduce(std::string instance, std::string alias)
+//{
    // produces<reco::TrackCollection>(instance).setBranchAlias( alias + "Tracks" );
   //  produces<reco::TrackExtraCollection>(instance).setBranchAlias( alias + "TrackExtras" );
   //  produces<TrackingRecHitCollection>(instance).setBranchAlias( alias + "RecHits" );
   //  produces< std::vector<Trajectory> >(instance).setBranchAlias( alias + "Trajectories" );
   //  produces< TrajTrackAssociationCollection >(instance).setBranchAlias( alias + "TrajectoryTrackAssociations" );
-}
+//}
 
-template <>
-void  TrackMergeremb<reco::GsfTrackCollection>::merg_and_put(edm::Event& iEvent, std::string instance,  std::vector<edm::EDGetTokenT<TrackCollectionemb> > &to_merge )
-{
+//template <>
+//void  TrackMergeremb<reco::GsfTrackCollection>::merg_and_put(edm::Event& iEvent, std::string instance,  std::vector<edm::EDGetTokenT<TrackCollectionemb> > &to_merge )
+//{
     
-}
+//}
 
 
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 DEFINE_FWK_MODULE(generalTracksMerger);
-DEFINE_FWK_MODULE(electronGsfTracksMerger);
+//DEFINE_FWK_MODULE(electronGsfTracksMerger);
